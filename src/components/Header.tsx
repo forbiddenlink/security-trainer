@@ -1,20 +1,48 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { Bell, Trophy } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useAuthStore } from '../store/authStore';
+import { Bell, Trophy, LogIn, LogOut, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { StreakIndicator } from './StreakIndicator';
 import { ThemeToggle } from './ThemeToggle';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 export const Header: React.FC = () => {
     const { xp, level, checkStreak, checkDailyChallenge } = useGameStore();
+    const { user, profile, loading, openAuthModal, signOut, initialize } = useAuthStore();
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    // Initialize auth on mount
+    useEffect(() => {
+        if (isSupabaseConfigured()) {
+            initialize();
+        }
+    }, [initialize]);
 
     // Check streak and daily challenge on mount
     useEffect(() => {
         checkStreak();
         checkDailyChallenge();
     }, [checkStreak, checkDailyChallenge]);
+
+    // Close menu on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowUserMenu(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const nextLevelXp = level * 1000;
     const progress = Math.min((xp / nextLevelXp) * 100, 100);
+
+    const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Agent';
+    const avatarInitial = displayName[0]?.toUpperCase() || 'A';
 
     return (
         <header className="h-16 bg-card/50 backdrop-blur-sm border-b border-border flex items-center justify-between px-6 sticky top-0 z-10 transition-all" role="banner">
@@ -65,11 +93,76 @@ export const Header: React.FC = () => {
                     <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border border-card" aria-hidden="true" />
                 </button>
 
-                <div
-                    className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border border-primary/20 shadow-lg shadow-primary/20"
-                    role="img"
-                    aria-label="User avatar"
-                />
+                {/* Auth Section */}
+                {isSupabaseConfigured() ? (
+                    loading ? (
+                        <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+                    ) : user ? (
+                        <div className="relative" ref={menuRef}>
+                            <button
+                                onClick={() => setShowUserMenu(!showUserMenu)}
+                                className="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-muted/50 transition-colors"
+                                aria-label="User menu"
+                                aria-expanded={showUserMenu}
+                            >
+                                {profile?.avatar_url ? (
+                                    <img
+                                        src={profile.avatar_url}
+                                        alt=""
+                                        className="w-8 h-8 rounded-full object-cover border border-primary/20"
+                                    />
+                                ) : (
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border border-primary/20 shadow-lg shadow-primary/20 flex items-center justify-center text-white text-sm font-bold">
+                                        {avatarInitial}
+                                    </div>
+                                )}
+                                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                            </button>
+
+                            <AnimatePresence>
+                                {showUserMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                        className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-lg overflow-hidden"
+                                    >
+                                        <div className="p-3 border-b border-border">
+                                            <p className="font-medium text-foreground truncate">{displayName}</p>
+                                            <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                                        </div>
+                                        <div className="p-2">
+                                            <button
+                                                onClick={() => {
+                                                    setShowUserMenu(false);
+                                                    signOut();
+                                                }}
+                                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-muted rounded-lg transition-colors"
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                Sign Out
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => openAuthModal('login')}
+                            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                        >
+                            <LogIn className="w-4 h-4" />
+                            <span className="hidden sm:inline">Sign In</span>
+                        </button>
+                    )
+                ) : (
+                    <div
+                        className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border border-primary/20 shadow-lg shadow-primary/20"
+                        role="img"
+                        aria-label="User avatar"
+                    />
+                )}
             </div>
         </header>
     );

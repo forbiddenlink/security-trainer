@@ -13,6 +13,40 @@ const DIFFICULTY_MULTIPLIERS: Record<string, number> = {
 // Streak milestones that trigger notifications
 const STREAK_MILESTONES = [3, 7, 30];
 
+// Debounce helper for cloud sync
+let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+const SYNC_DEBOUNCE_MS = 2000;
+
+// Sync progress to cloud (debounced)
+const syncToCloud = async () => {
+    // Dynamic import to avoid circular dependency
+    const { useAuthStore } = await import('./authStore');
+    const { user, syncProgressToCloud } = useAuthStore.getState();
+
+    if (!user) return;
+
+    const state = useGameStore.getState();
+    await syncProgressToCloud({
+        xp: state.xp,
+        level: state.level,
+        badges: state.badges,
+        completedModules: state.completedModules,
+        completedLessons: state.completedLessons,
+        streakDays: state.streakDays,
+        lastLoginDate: state.lastLoginDate,
+        dailyChallengeId: state.dailyChallengeId,
+        dailyChallengeDate: state.dailyChallengeDate,
+        dailyChallengeCompleted: state.dailyChallengeCompleted,
+    });
+};
+
+const debouncedSyncToCloud = () => {
+    if (syncTimeout) {
+        clearTimeout(syncTimeout);
+    }
+    syncTimeout = setTimeout(syncToCloud, SYNC_DEBOUNCE_MS);
+};
+
 interface GameStore extends UserState {
     showLevelUpToast: boolean;
     achievementQueue: AchievementNotification[];
@@ -30,6 +64,7 @@ interface GameStore extends UserState {
     getDailyChallenge: () => { lessonId: string; moduleId: string; moduleTitle: string; lessonTitle: string } | null;
     getStreakMultiplier: () => number;
     calculateXpWithMultipliers: (baseXp: number, moduleId?: string) => number;
+    syncToCloud: () => void;
 }
 
 const INITIAL_STATE: UserState = {
@@ -121,6 +156,7 @@ export const useGameStore = create<GameStore>()(
                 }
 
                 set({ xp: currentXp, level: newLevel, showLevelUpToast: shouldShowToast });
+                debouncedSyncToCloud();
             },
 
             completeModule: (moduleId) => {
@@ -141,6 +177,7 @@ export const useGameStore = create<GameStore>()(
                         completedModules: [...completedModules, moduleId],
                         achievementQueue: [...achievementQueue, notification],
                     });
+                    debouncedSyncToCloud();
                 }
             },
 
@@ -166,6 +203,7 @@ export const useGameStore = create<GameStore>()(
                             get().completeModule(moduleId);
                         }
                     }
+                    debouncedSyncToCloud();
                 }
             },
 
@@ -193,6 +231,7 @@ export const useGameStore = create<GameStore>()(
                         badges: [...badges, badgeId],
                         achievementQueue: [...achievementQueue, notification],
                     });
+                    debouncedSyncToCloud();
                 }
             },
 
@@ -232,6 +271,7 @@ export const useGameStore = create<GameStore>()(
                     lastLoginDate: today,
                     achievementQueue: [...achievementQueue, ...notifications],
                 });
+                debouncedSyncToCloud();
             },
 
             checkDailyChallenge: () => {
@@ -280,6 +320,7 @@ export const useGameStore = create<GameStore>()(
                 }
 
                 set({ xp: currentXp, level: newLevel, showLevelUpToast: shouldShowToast });
+                debouncedSyncToCloud();
             },
 
             getDailyChallenge: () => {
@@ -308,13 +349,20 @@ export const useGameStore = create<GameStore>()(
                 return null;
             },
 
-            resetProgress: () => set({ ...INITIAL_STATE }),
+            resetProgress: () => {
+                set({ ...INITIAL_STATE });
+                debouncedSyncToCloud();
+            },
 
             dismissLevelUpToast: () => set({ showLevelUpToast: false }),
 
             dismissAchievement: () => {
                 const { achievementQueue } = get();
                 set({ achievementQueue: achievementQueue.slice(1) });
+            },
+
+            syncToCloud: () => {
+                debouncedSyncToCloud();
             },
         }),
         {

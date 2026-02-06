@@ -1,12 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, User, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, BookOpen, User, ShieldAlert, ShieldCheck, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const Sidebar: React.FC = () => {
     const navItems = [
         { label: 'Dashboard', path: '/', icon: LayoutDashboard },
         { label: 'Modules', path: '/modules', icon: BookOpen },
+        { label: 'Leaderboard', path: '/leaderboard', icon: Trophy },
         { label: 'Profile', path: '/profile', icon: User },
         { label: 'Final Exam', path: '/challenge', icon: ShieldAlert },
     ];

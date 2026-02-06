@@ -6,7 +6,9 @@ import { Modules } from './pages/Modules';
 import { LessonView } from './pages/LessonView';
 import { Profile } from './pages/Profile';
 import { Challenge } from './pages/Challenge';
+import { Leaderboard } from './pages/Leaderboard';
 import { useThemeStore } from './store/themeStore';
+import { AuthModal } from './components/AuthModal';
 
 function App() {
   const { initializeTheme } = useThemeStore();
@@ -30,10 +32,12 @@ function App() {
           <Route path="/modules/:moduleId" element={<LessonView />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/challenge" element={<Challenge />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
+      <AuthModal />
     </BrowserRouter>
   );
 }

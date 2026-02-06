@@ -41,11 +41,18 @@ describe('Sidebar', () => {
             expect(examLink).toHaveAttribute('href', '/challenge');
         });
 
-        it('renders all four navigation items', () => {
+        it('has a link to Leaderboard', () => {
+            renderWithRouter(<Sidebar />);
+
+            const leaderboardLink = screen.getByRole('link', { name: /leaderboard/i });
+            expect(leaderboardLink).toHaveAttribute('href', '/leaderboard');
+        });
+
+        it('renders all five navigation items', () => {
             renderWithRouter(<Sidebar />);
 
             const navLinks = screen.getAllByRole('link');
-            expect(navLinks).toHaveLength(4);
+            expect(navLinks).toHaveLength(5);
         });
     });
 
@@ -66,6 +73,12 @@ describe('Sidebar', () => {
             renderWithRouter(<Sidebar />);
 
             expect(screen.getByText('Profile')).toBeInTheDocument();
+        });
+
+        it('shows Leaderboard label', () => {
+            renderWithRouter(<Sidebar />);
+
+            expect(screen.getByText('Leaderboard')).toBeInTheDocument();
         });
 
         it('shows Final Exam label', () => {
