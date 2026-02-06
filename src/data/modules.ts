@@ -1340,5 +1340,286 @@ function parseUserXml(xmlInput) {
                 }
             }
         ]
+    },
+    {
+        id: 'insecure-deserialization',
+        title: 'Insecure Deserialization',
+        description: 'Master the detection and prevention of deserialization attacks that can lead to remote code and system compromise.',
+        difficulty: 'Advanced',
+        xpReward: 450,
+        locked: false,
+        lessons: [
+            {
+                id: 'deser-theory',
+                title: 'Understanding Deserialization Attacks',
+                type: 'theory',
+                content: `
+# Insecure Deserialization
+
+Insecure deserialization is a critical vulnerability that occurs when untrusted data is used to abuse the logic of an application, inflict a denial of service (DoS), or invoke arbitrary code. It consistently ranks among the most dangerous web vulnerabilities in the OWASP Top 10.
+
+## Mission Briefing: What is Serialization?
+
+Before understanding the attack, we need to understand serialization itself.
+
+### Serialization
+
+**Serialization** is the process of converting an object or data structure into a format that can be stored or transmitted. Think of it as "packaging" data for transport.
+
+\`\`\`javascript
+// JavaScript object
+const user = { id: 1, name: "Agent007", role: "admin" };
+
+// Serialized to JSON string
+const serialized = JSON.stringify(user);
+// Result: '{"id":1,"name":"Agent007","role":"admin"}'
+\`\`\`
+
+### Deserialization
+
+**Deserialization** is the reverse—reconstructing the object from the serialized format:
+
+\`\`\`javascript
+// Deserialize JSON back to object
+const user = JSON.parse(serialized);
+// Result: { id: 1, name: "Agent007", role: "admin" }
+\`\`\`
+
+### The Problem: Native Serialization Formats
+
+While JSON is relatively safe (it only supports basic data types), many languages have **native serialization formats** that can serialize *entire objects*, including their methods and internal state:
+
+- **Java:** ObjectInputStream / ObjectOutputStream
+- **PHP:** serialize() / unserialize()
+- **Python:** pickle / cPickle
+- **Ruby:** Marshal
+- **.NET:** BinaryFormatter, SoapFormatter
+
+These formats can reconstruct *callable objects*, not just data—and that is where the danger lies.
+
+## Attack Vectors
+
+### 1. Object Injection (PHP)
+
+PHP's unserialize() can instantiate arbitrary classes and trigger magic methods. Attackers craft serialized payloads that set properties to malicious values, and when magic methods like __destruct() or __wakeup() run, they perform unintended actions.
+
+### 2. Remote Code via Gadget Chains (Java)
+
+Java deserialization attacks use "gadget chains"—sequences of existing classes that, when combined, lead to code invocation.
+
+The most famous example involves **Apache Commons Collections**. The attacker never needs to upload code—they abuse classes *already in your classpath* to form a chain that invokes commands.
+
+### 3. Type Confusion Attacks
+
+Attackers manipulate the type information in serialized data to trigger unexpected code paths.
+
+## Case Files: Real-World Breaches
+
+### Equifax Breach (2017)
+**Impact:** 147 million Americans' personal data exposed
+
+The Equifax breach exploited a deserialization vulnerability in **Apache Struts** (CVE-2017-5638). The vulnerability allowed attackers to:
+1. Send a crafted Content-Type header containing a serialized payload
+2. The Struts framework deserialized the malicious object
+3. This triggered remote code on Equifax servers
+4. Attackers gained persistent access and exfiltrated data for months
+
+The patch had been available for two months before the breach.
+
+### Apache Commons Collections (2015)
+**Impact:** Affected thousands of Java applications worldwide
+
+Security researchers Gabriel Lawrence and Chris Frohoff published the "gadget chain" technique using Apache Commons Collections. This affected:
+- WebLogic, WebSphere, JBoss (enterprise application servers)
+- Jenkins (CI/CD)
+- OpenNMS, Atlassian products
+- Any Java application using the vulnerable library
+
+### PayPal RCE (2015)
+**Impact:** Full server compromise via Java deserialization
+
+Researcher Mark Litchfield discovered that PayPal's Manager application was vulnerable to Java deserialization attacks.
+
+## Understanding Gadget Chains
+
+A **gadget chain** is a sequence of method calls triggered by deserialization that ultimately leads to a dangerous operation (usually code invocation).
+
+Attackers do not need to introduce new code—they **chain together existing classes** in your application or libraries.
+
+## Defense Strategies
+
+### 1. Never Deserialize Untrusted Data
+
+The safest approach is to avoid native serialization entirely for untrusted input. Use JSON instead.
+
+### 2. Use Safe Data Formats
+
+Prefer simple data-interchange formats:
+- **JSON** (no callable code)
+- **XML** (configure parser securely, see XXE module)
+- **Protocol Buffers** (schema-defined, no arbitrary objects)
+- **MessagePack** (binary JSON-like format)
+
+### 3. Implement Type Allowlists
+
+If you must use native serialization, restrict which classes can be deserialized.
+
+### 4. Validate Before Deserializing
+
+Check integrity and authenticity before processing using HMAC signatures.
+
+### 5. Monitor and Patch Dependencies
+
+Use tools to detect vulnerable libraries:
+- **ysoserial** - Generate deserialization payloads for testing
+- **OWASP Dependency-Check** - Scan for known vulnerabilities
+- **Snyk** - Continuous vulnerability monitoring
+
+## Key Takeaways
+
+1. **Native serialization formats can invoke code** during deserialization
+2. **Gadget chains** exploit existing classes—attackers need no code upload
+3. **JSON is safer** because it only supports primitive data types
+4. **Allowlisting classes** is essential if native serialization is unavoidable
+5. **Sign and verify** serialized data to prevent tampering
+6. **The Equifax breach** was a direct result of insecure deserialization
+                `
+            },
+            {
+                id: 'deser-quiz-1',
+                title: 'Deserialization Fundamentals',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "What makes native serialization formats (like Java's ObjectInputStream or Python's pickle) more dangerous than JSON?",
+                    options: [
+                        "They are slower to parse, allowing timing attacks",
+                        "They can serialize and deserialize objects with methods, not just data",
+                        "They do not support encryption",
+                        "They are not compatible with web browsers"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "Native serialization formats can serialize entire objects including their methods and state. During deserialization, this can trigger code through magic methods (__destruct in PHP, __reduce__ in Python) or gadget chains. JSON only supports primitive data types (strings, numbers, arrays, objects) and cannot invoke code."
+                }
+            },
+            {
+                id: 'deser-quiz-2',
+                title: 'Gadget Chain Analysis',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "What is a 'gadget chain' in the context of deserialization attacks?",
+                    options: [
+                        "A hardware device used to intercept network traffic",
+                        "A sequence of existing classes that, when combined during deserialization, leads to code invocation",
+                        "A cryptographic key chain for encrypting serialized data",
+                        "A debugging tool for tracing object creation"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "A gadget chain is a sequence of method calls triggered during deserialization that chains together existing classes (gadgets) in the application or its libraries. Attackers craft serialized payloads that, when deserialized, trigger this chain of calls ultimately leading to dangerous operations like invoking system commands."
+                }
+            },
+            {
+                id: 'deser-quiz-3',
+                title: 'Real-World Breach Analysis',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "The 2017 Equifax breach, which exposed 147 million Americans' data, was caused by:",
+                    options: [
+                        "SQL injection in the customer portal",
+                        "An unpatched deserialization vulnerability in Apache Struts",
+                        "Weak password policies for administrator accounts",
+                        "A misconfigured firewall rule"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "The Equifax breach exploited CVE-2017-5638, a deserialization vulnerability in Apache Struts. Attackers sent crafted Content-Type headers containing malicious serialized payloads, achieving remote code access. The patch had been available for two months before the breach occurred."
+                }
+            },
+            {
+                id: 'deser-quiz-4',
+                title: 'Defense Strategy Evaluation',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "Which defense strategy provides the STRONGEST protection against insecure deserialization?",
+                    options: [
+                        "Encrypting serialized data before transmission",
+                        "Avoiding native serialization entirely and using JSON for untrusted data",
+                        "Compressing serialized data to hide the payload structure",
+                        "Using HTTPS for all data transmission"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "The safest approach is to avoid native serialization formats entirely for untrusted data. JSON cannot invoke code during parsing—it only supports primitive data types. Encryption does not prevent deserialization attacks (the server must decrypt before deserializing). HTTPS protects data in transit but not against malicious payloads."
+                }
+            },
+            {
+                id: 'deser-quiz-5',
+                title: 'Attack Vector Recognition',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "A PHP application uses unserialize() on user-provided cookie data. An attacker could exploit this by:",
+                    options: [
+                        "Injecting SQL commands into the cookie value",
+                        "Crafting a serialized payload that instantiates existing classes with malicious property values, triggering magic methods like __destruct() or __wakeup()",
+                        "Overflowing the cookie buffer to inject shellcode",
+                        "Using XSS to modify the cookie in the browser"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "PHP's unserialize() will instantiate objects defined in the serialized string. If the application has classes with dangerous magic methods (__destruct, __wakeup, __toString), attackers can craft payloads that set properties to malicious values. When these magic methods run, they perform unintended actions like file deletion, SQL queries, or command injection."
+                }
+            },
+            {
+                id: 'deser-lab',
+                title: 'Implement Safe Deserialization',
+                type: 'lab',
+                content: 'The function below deserializes user session data using an unsafe method. Your mission: Replace the dangerous deserialization with a safe approach using JSON, type validation, and HMAC signature verification.',
+                lab: {
+                    initialCode: `
+function loadSession(serializedData) {
+  // VULNERABLE: Direct object construction from string
+  // This could allow arbitrary code!
+  const session = Function('return ' + serializedData)();
+
+  return session;
+}
+                    `,
+                    solutionCode: `
+function loadSession(serializedData, signature, secretKey) {
+  // SECURE: Verify HMAC signature first
+  const expectedSignature = crypto
+    .createHmac('sha256', secretKey)
+    .update(serializedData)
+    .digest('hex');
+
+  if (signature !== expectedSignature) {
+    throw new Error('Invalid signature');
+  }
+
+  // SECURE: Use JSON.parse instead of Function constructor
+  const session = JSON.parse(serializedData);
+
+  // SECURE: Validate expected types
+  if (typeof session.userId !== 'string') {
+    throw new Error('Invalid session format');
+  }
+  if (typeof session.role !== 'string') {
+    throw new Error('Invalid session format');
+  }
+
+  // SECURE: Allowlist valid roles
+  const allowedRoles = ['user', 'admin', 'moderator'];
+  if (!allowedRoles.includes(session.role)) {
+    throw new Error('Invalid role');
+  }
+
+  return session;
+}
+                    `,
+                    instructions: "Secure the deserialization:\n1. Add signature and secretKey parameters to the function\n2. Verify HMAC signature using crypto.createHmac('sha256', secretKey) before parsing\n3. Throw 'Invalid signature' if verification fails\n4. Replace Function constructor with JSON.parse\n5. Validate that session.userId and session.role are strings (throw 'Invalid session format')\n6. Create an allowedRoles array with ['user', 'admin', 'moderator']\n7. Validate session.role is in allowedRoles (throw 'Invalid role')"
+                }
+            }
+        ]
     }
 ];

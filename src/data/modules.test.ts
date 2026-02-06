@@ -651,3 +651,178 @@ function parseUserXml(xmlInput) {
         expect(verifyLabSubmission('xxe-lab', partialFixMissingOptions)).toBe(false);
     });
 });
+
+describe('Insecure Deserialization Module', () => {
+    const deserModule = MODULES.find(m => m.id === 'insecure-deserialization');
+
+    it('exists in the modules list', () => {
+        expect(deserModule).toBeDefined();
+    });
+
+    it('has correct structure', () => {
+        expect(deserModule!.title).toBe('Insecure Deserialization');
+        expect(deserModule!.difficulty).toBe('Advanced');
+        expect(deserModule!.xpReward).toBe(450);
+        expect(deserModule!.locked).toBe(false);
+    });
+
+    it('has theory, quiz, and lab lessons', () => {
+        const lessonTypes = deserModule!.lessons.map(l => l.type);
+        expect(lessonTypes).toContain('theory');
+        expect(lessonTypes).toContain('quiz');
+        expect(lessonTypes).toContain('lab');
+    });
+
+    it('has exactly 7 lessons (1 theory, 5 quizzes, 1 lab)', () => {
+        expect(deserModule!.lessons.length).toBe(7);
+        expect(deserModule!.lessons.filter(l => l.type === 'theory').length).toBe(1);
+        expect(deserModule!.lessons.filter(l => l.type === 'quiz').length).toBe(5);
+        expect(deserModule!.lessons.filter(l => l.type === 'lab').length).toBe(1);
+    });
+
+    it('has a registered lab verifier', () => {
+        expect(labVerifiers['deser-lab']).toBeDefined();
+    });
+
+    it('theory covers real-world breaches (Equifax)', () => {
+        const theoryLesson = deserModule!.lessons.find(l => l.id === 'deser-theory');
+        expect(theoryLesson!.content).toContain('Equifax');
+        expect(theoryLesson!.content).toContain('2017');
+    });
+
+    it('theory covers Apache Commons Collections', () => {
+        const theoryLesson = deserModule!.lessons.find(l => l.id === 'deser-theory');
+        expect(theoryLesson!.content).toContain('Apache Commons Collections');
+    });
+
+    it('theory covers gadget chains', () => {
+        const theoryLesson = deserModule!.lessons.find(l => l.id === 'deser-theory');
+        expect(theoryLesson!.content).toContain('gadget chain');
+    });
+
+    it('theory explains serialization basics', () => {
+        const theoryLesson = deserModule!.lessons.find(l => l.id === 'deser-theory');
+        expect(theoryLesson!.content).toContain('Serialization');
+        expect(theoryLesson!.content).toContain('Deserialization');
+        expect(theoryLesson!.content).toContain('JSON.stringify');
+    });
+});
+
+describe('Insecure Deserialization Lab Verifier', () => {
+    const vulnerableCode = `
+function loadSession(serializedData) {
+  const session = Function('return ' + serializedData)();
+  return session;
+}
+    `;
+
+    const secureCode = `
+function loadSession(serializedData, signature, secretKey) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secretKey)
+    .update(serializedData)
+    .digest('hex');
+
+  if (signature !== expectedSignature) {
+    throw new Error('Invalid signature');
+  }
+
+  const session = JSON.parse(serializedData);
+
+  if (typeof session.userId !== 'string') {
+    throw new Error('Invalid session format');
+  }
+  if (typeof session.role !== 'string') {
+    throw new Error('Invalid session format');
+  }
+
+  const allowedRoles = ['user', 'admin', 'moderator'];
+  if (!allowedRoles.includes(session.role)) {
+    throw new Error('Invalid role');
+  }
+
+  return session;
+}
+    `;
+
+    const partialFixNoSignature = `
+function loadSession(serializedData) {
+  const session = JSON.parse(serializedData);
+
+  if (typeof session.userId !== 'string') {
+    throw new Error('Invalid session format');
+  }
+  if (typeof session.role !== 'string') {
+    throw new Error('Invalid session format');
+  }
+
+  const allowedRoles = ['user', 'admin', 'moderator'];
+  if (!allowedRoles.includes(session.role)) {
+    throw new Error('Invalid role');
+  }
+
+  return session;
+}
+    `;
+
+    const partialFixNoTypeValidation = `
+function loadSession(serializedData, signature, secretKey) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secretKey)
+    .update(serializedData)
+    .digest('hex');
+
+  if (signature !== expectedSignature) {
+    throw new Error('Invalid signature');
+  }
+
+  const session = JSON.parse(serializedData);
+
+  return session;
+}
+    `;
+
+    const partialFixNoRoleAllowlist = `
+function loadSession(serializedData, signature, secretKey) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secretKey)
+    .update(serializedData)
+    .digest('hex');
+
+  if (signature !== expectedSignature) {
+    throw new Error('Invalid signature');
+  }
+
+  const session = JSON.parse(serializedData);
+
+  if (typeof session.userId !== 'string') {
+    throw new Error('Invalid session format');
+  }
+  if (typeof session.role !== 'string') {
+    throw new Error('Invalid session format');
+  }
+
+  return session;
+}
+    `;
+
+    it('rejects vulnerable code using Function constructor', () => {
+        expect(verifyLabSubmission('deser-lab', vulnerableCode)).toBe(false);
+    });
+
+    it('accepts properly secured code with all protections', () => {
+        expect(verifyLabSubmission('deser-lab', secureCode)).toBe(true);
+    });
+
+    it('rejects partial fix missing signature verification', () => {
+        expect(verifyLabSubmission('deser-lab', partialFixNoSignature)).toBe(false);
+    });
+
+    it('rejects partial fix missing type validation', () => {
+        expect(verifyLabSubmission('deser-lab', partialFixNoTypeValidation)).toBe(false);
+    });
+
+    it('rejects partial fix missing role allowlist', () => {
+        expect(verifyLabSubmission('deser-lab', partialFixNoRoleAllowlist)).toBe(false);
+    });
+});

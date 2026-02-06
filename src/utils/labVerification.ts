@@ -59,6 +59,18 @@ const PATTERNS = {
     XXE_RESOLVE_EXTERNAL_FALSE: 'resolveExternalEntities: false',
     XXE_PROCESS_ENTITIES_FALSE: 'processEntities: false',
     XXE_EXPAND_ENTITY_FALSE: 'expandEntityReferences: false',
+
+    // Insecure Deserialization patterns
+    DESER_HMAC_VERIFY: 'createHmac',
+    DESER_SHA256: 'sha256',
+    DESER_INVALID_SIGNATURE: 'Invalid signature',
+    DESER_JSON_PARSE: 'JSON.parse',
+    DESER_FUNCTION_CONSTRUCTOR: "Function('return '",
+    DESER_TYPE_CHECK_USERID: "typeof session.userId",
+    DESER_TYPE_CHECK_ROLE: "typeof session.role",
+    DESER_INVALID_FORMAT: 'Invalid session format',
+    DESER_ALLOWED_ROLES: 'allowedRoles',
+    DESER_INVALID_ROLE: 'Invalid role',
 };
 
 /**
@@ -177,6 +189,38 @@ export const labVerifiers: Record<string, VerificationFn> = {
                disablesExternalEntities &&
                disablesProcessEntities &&
                disablesExpandEntity;
+    },
+
+    // Insecure Deserialization Lab: Check for safe deserialization practices
+    'deser-lab': (code: string) => {
+        // Must use HMAC for signature verification
+        const usesHmac = code.includes(PATTERNS.DESER_HMAC_VERIFY);
+        const usesSha256 = code.includes(PATTERNS.DESER_SHA256);
+        const hasInvalidSignatureError = code.includes(PATTERNS.DESER_INVALID_SIGNATURE);
+
+        // Must use JSON.parse instead of Function constructor
+        const usesJsonParse = code.includes(PATTERNS.DESER_JSON_PARSE);
+        const noFunctionConstructor = !code.includes(PATTERNS.DESER_FUNCTION_CONSTRUCTOR);
+
+        // Must validate types
+        const checksUserIdType = code.includes(PATTERNS.DESER_TYPE_CHECK_USERID);
+        const checksRoleType = code.includes(PATTERNS.DESER_TYPE_CHECK_ROLE);
+        const hasInvalidFormatError = code.includes(PATTERNS.DESER_INVALID_FORMAT);
+
+        // Must have role allowlist
+        const hasAllowedRoles = code.includes(PATTERNS.DESER_ALLOWED_ROLES);
+        const hasInvalidRoleError = code.includes(PATTERNS.DESER_INVALID_ROLE);
+
+        return usesHmac &&
+               usesSha256 &&
+               hasInvalidSignatureError &&
+               usesJsonParse &&
+               noFunctionConstructor &&
+               checksUserIdType &&
+               checksRoleType &&
+               hasInvalidFormatError &&
+               hasAllowedRoles &&
+               hasInvalidRoleError;
     },
 };
 
