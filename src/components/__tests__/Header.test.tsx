@@ -51,14 +51,28 @@ describe('Header', () => {
         });
     });
 
-    describe('streak/energy display', () => {
-        it('shows energy based on XP', () => {
-            setupGameStore({ xp: 350 });
+    describe('streak display', () => {
+        it('shows streak indicator when streak is active', () => {
+            setupGameStore({ streakDays: 3, lastLoginDate: new Date().toISOString().split('T')[0] });
 
             renderWithRouter(<Header />);
 
-            // Energy is Math.floor(xp / 100)
+            // Streak days should be displayed
             expect(screen.getByText('3')).toBeInTheDocument();
+            // Bonus percentage should be shown (+10% per day, max 7)
+            expect(screen.getByText('+30%')).toBeInTheDocument();
+        });
+
+        it('shows streak count of 1 for first day login', () => {
+            // When a user logs in for the first time or after losing streak,
+            // checkStreak() sets streakDays to 1
+            setupGameStore({ streakDays: 0, lastLoginDate: null });
+
+            renderWithRouter(<Header />);
+
+            // checkStreak runs on mount and sets streak to 1
+            expect(screen.getByText('1')).toBeInTheDocument();
+            expect(screen.getByText('+10%')).toBeInTheDocument();
         });
     });
 

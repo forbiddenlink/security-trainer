@@ -1,18 +1,21 @@
 import React, { useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { BadgeList } from '../components/BadgeList';
+import { DailyChallenge } from '../components/DailyChallenge';
 import { MODULES } from '../data/modules';
-import { ArrowRight, Activity, BookOpen, CheckCircle } from 'lucide-react';
+import { ArrowRight, Activity, BookOpen, CheckCircle, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Dashboard: React.FC = () => {
-    const { xp, level, completedModules, currentModuleId } = useGameStore();
+    const { xp, level, completedModules, currentModuleId, streakDays, getStreakMultiplier } = useGameStore();
     const currentModule = useMemo(
         () => MODULES.find(m => m.id === currentModuleId),
         [currentModuleId]
     );
     const nextLevelXp = level * 1000;
     const progress = Math.min((xp / nextLevelXp) * 100, 100);
+    const streakMultiplier = getStreakMultiplier();
+    const bonusPercent = Math.round((streakMultiplier - 1) * 100);
 
     return (
         <div className="space-y-8 max-w-6xl mx-auto animate-in fade-in duration-500" role="main">
@@ -42,7 +45,7 @@ export const Dashboard: React.FC = () => {
             </section>
 
             {/* Stats Grid */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6" aria-label="Statistics">
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Statistics">
                 <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:border-primary/50 transition-colors">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="p-3 bg-blue-500/10 text-blue-500 rounded-lg" aria-hidden="true">
@@ -90,6 +93,29 @@ export const Dashboard: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:border-orange-500/50 transition-colors">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-orange-500/10 text-orange-500 rounded-lg" aria-hidden="true">
+                            <Flame className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground font-medium" id="streak-label">Current Streak</p>
+                            <h3 className="text-2xl font-bold" aria-labelledby="streak-label">
+                                {streakDays} day{streakDays !== 1 ? 's' : ''}
+                                {bonusPercent > 0 && (
+                                    <span className="text-sm text-orange-500 ml-2">+{bonusPercent}% XP</span>
+                                )}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Daily Challenge Section */}
+            <section aria-labelledby="daily-challenge-heading">
+                <h2 id="daily-challenge-heading" className="text-2xl font-bold mb-4">Daily Challenge</h2>
+                <DailyChallenge />
             </section>
 
             {/* Badges Section */}

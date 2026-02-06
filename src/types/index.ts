@@ -42,8 +42,20 @@ export interface UserState {
     xp: number;
     level: number;
     completedModules: string[];
+    completedLessons: string[];
     badges: string[];
     currentModuleId: string | null;
     streakDays: number;
     lastLoginDate: string | null;
+    // Daily Challenge
+    dailyChallengeId: string | null;
+    dailyChallengeDate: string | null;
+    dailyChallengeCompleted: boolean;
+}
+
+export interface AchievementNotification {
+    id: string;
+    type: 'badge' | 'streak' | 'module_complete' | 'daily_challenge';
+    title: string;
+    message: string;
 }

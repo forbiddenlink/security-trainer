@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { Bell, Trophy, Zap } from 'lucide-react';
+import { Bell, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { StreakIndicator } from './StreakIndicator';
 
 export const Header: React.FC = () => {
-    const { xp, level } = useGameStore();
+    const { xp, level, checkStreak, checkDailyChallenge } = useGameStore();
+
+    // Check streak and daily challenge on mount
+    useEffect(() => {
+        checkStreak();
+        checkDailyChallenge();
+    }, [checkStreak, checkDailyChallenge]);
     const nextLevelXp = level * 1000;
     const progress = Math.min((xp / nextLevelXp) * 100, 100);
 
@@ -43,11 +50,8 @@ export const Header: React.FC = () => {
                     <span className="sr-only">{xp} of {nextLevelXp} XP to next level</span>
                 </div>
 
-                {/* Streak / Energy (Optional gamification element) */}
-                <div className="flex items-center gap-1 text-amber-400 font-bold" aria-label={`Energy: ${Math.floor(xp / 100)}`}>
-                    <Zap className="w-5 h-5 fill-current" aria-hidden="true" />
-                    <span aria-hidden="true">{Math.floor(xp / 100)}</span>
-                </div>
+                {/* Streak Indicator */}
+                <StreakIndicator />
 
                 <button
                     className="relative p-2 rounded-full hover:bg-muted/50 transition-colors"

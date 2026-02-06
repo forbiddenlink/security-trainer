@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const LessonView: React.FC = () => {
     const { moduleId } = useParams<{ moduleId: string }>();
     const navigate = useNavigate();
-    const { completeModule, addXp } = useGameStore();
+    const { completeModule, completeLesson, addXp } = useGameStore();
 
     const module = MODULES.find(m => m.id === moduleId);
     const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -48,9 +48,13 @@ export const LessonView: React.FC = () => {
     if (!module || !currentLesson) return <div>Module not found</div>;
 
     const handleNext = () => {
+        // Mark current lesson as complete
+        completeLesson(currentLesson.id, module.id);
+
         if (isLastLesson) {
             completeModule(module.id);
-            addXp(module.xpReward);
+            // Pass moduleId to apply difficulty multiplier
+            addXp(module.xpReward, module.id);
             import('canvas-confetti')
                 .then((confetti) => {
                     confetti.default({

@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
 import { LevelUpToast } from '../components/LevelUpToast';
+import { AchievementToast } from '../components/AchievementToast';
 
 export const MainLayout: React.FC = () => {
     return (
@@ -15,6 +16,7 @@ export const MainLayout: React.FC = () => {
                     <Outlet />
                 </main>
                 <LevelUpToast />
+                <AchievementToast />
             </div>
         </div>
     );
