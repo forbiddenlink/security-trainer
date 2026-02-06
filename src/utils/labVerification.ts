@@ -50,6 +50,15 @@ const PATTERNS = {
     SSRF_LOOPBACK_CHECK: '127.0.0.1',
     SSRF_METADATA_CHECK: '169.254.169.254',
     SSRF_INTERNAL_BLOCKED: 'Internal IPs are blocked',
+
+    // XXE patterns
+    XXE_DOCTYPE_CHECK: '<!DOCTYPE',
+    XXE_ENTITY_CHECK: '<!ENTITY',
+    XXE_INPUT_VALIDATION_ERROR: 'DTD and entities are not allowed',
+    XXE_ALLOW_DTD_FALSE: 'allowDtd: false',
+    XXE_RESOLVE_EXTERNAL_FALSE: 'resolveExternalEntities: false',
+    XXE_PROCESS_ENTITIES_FALSE: 'processEntities: false',
+    XXE_EXPAND_ENTITY_FALSE: 'expandEntityReferences: false',
 };
 
 /**
@@ -146,6 +155,28 @@ export const labVerifiers: Record<string, VerificationFn> = {
                blocksLoopback &&
                blocksMetadata &&
                hasInternalBlockedError;
+    },
+
+    // XXE Lab: Check for secure XML parser configuration
+    'xxe-lab': (code: string) => {
+        // Must validate input for DOCTYPE and ENTITY declarations
+        const checksDoctypeInInput = code.includes(PATTERNS.XXE_DOCTYPE_CHECK);
+        const checksEntityInInput = code.includes(PATTERNS.XXE_ENTITY_CHECK);
+        const hasInputValidationError = code.includes(PATTERNS.XXE_INPUT_VALIDATION_ERROR);
+
+        // Must configure parser with security options
+        const disablesDtd = code.includes(PATTERNS.XXE_ALLOW_DTD_FALSE);
+        const disablesExternalEntities = code.includes(PATTERNS.XXE_RESOLVE_EXTERNAL_FALSE);
+        const disablesProcessEntities = code.includes(PATTERNS.XXE_PROCESS_ENTITIES_FALSE);
+        const disablesExpandEntity = code.includes(PATTERNS.XXE_EXPAND_ENTITY_FALSE);
+
+        return checksDoctypeInInput &&
+               checksEntityInInput &&
+               hasInputValidationError &&
+               disablesDtd &&
+               disablesExternalEntities &&
+               disablesProcessEntities &&
+               disablesExpandEntity;
     },
 };
 
