@@ -307,3 +307,199 @@ const serverConfig = {
         expect(verifyLabSubmission('misconfig-lab', partialFixDefaultPassword)).toBe(false);
     });
 });
+
+describe('SSRF Module', () => {
+    const ssrfModule = MODULES.find(m => m.id === 'ssrf-attacks');
+
+    it('exists in the modules list', () => {
+        expect(ssrfModule).toBeDefined();
+    });
+
+    it('has correct structure', () => {
+        expect(ssrfModule!.title).toBe('Server-Side Request Forgery (SSRF)');
+        expect(ssrfModule!.difficulty).toBe('Advanced');
+        expect(ssrfModule!.xpReward).toBe(400);
+        expect(ssrfModule!.locked).toBe(false);
+    });
+
+    it('has theory, quiz, and lab lessons', () => {
+        const lessonTypes = ssrfModule!.lessons.map(l => l.type);
+        expect(lessonTypes).toContain('theory');
+        expect(lessonTypes).toContain('quiz');
+        expect(lessonTypes).toContain('lab');
+    });
+
+    it('has exactly 7 lessons (1 theory, 5 quizzes, 1 lab)', () => {
+        expect(ssrfModule!.lessons.length).toBe(7);
+        expect(ssrfModule!.lessons.filter(l => l.type === 'theory').length).toBe(1);
+        expect(ssrfModule!.lessons.filter(l => l.type === 'quiz').length).toBe(5);
+        expect(ssrfModule!.lessons.filter(l => l.type === 'lab').length).toBe(1);
+    });
+
+    it('has a registered lab verifier', () => {
+        expect(labVerifiers['ssrf-lab']).toBeDefined();
+    });
+
+    it('theory covers real-world breaches (Capital One)', () => {
+        const theoryLesson = ssrfModule!.lessons.find(l => l.id === 'ssrf-theory');
+        expect(theoryLesson!.content).toContain('Capital One');
+        expect(theoryLesson!.content).toContain('169.254.169.254');
+    });
+
+    it('theory covers cloud metadata endpoints', () => {
+        const theoryLesson = ssrfModule!.lessons.find(l => l.id === 'ssrf-theory');
+        expect(theoryLesson!.content).toContain('AWS');
+        expect(theoryLesson!.content).toContain('metadata');
+        expect(theoryLesson!.content).toContain('IAM');
+    });
+});
+
+describe('SSRF Lab Verifier', () => {
+    const vulnerableCode = `
+async function fetchUrl(userUrl) {
+  const response = await fetch(userUrl);
+  return response.text();
+}
+    `;
+
+    const secureCode = `
+async function fetchUrl(userUrl) {
+  const url = new URL(userUrl);
+
+  if (url.protocol !== 'https:') {
+    throw new Error('Only HTTPS URLs are allowed');
+  }
+
+  const allowedDomains = ['api.trusted.com', 'cdn.example.com'];
+  if (!allowedDomains.includes(url.hostname)) {
+    throw new Error('Domain not in allowlist');
+  }
+
+  const ip = url.hostname;
+  if (isPrivateIP(ip)) {
+    throw new Error('Internal IPs are blocked');
+  }
+
+  const response = await fetch(userUrl);
+  return response.text();
+}
+
+function isPrivateIP(hostname) {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return true;
+  }
+  if (hostname === '169.254.169.254') {
+    return true;
+  }
+  if (hostname.startsWith('10.') || hostname.startsWith('192.168.')) {
+    return true;
+  }
+  return false;
+}
+    `;
+
+    const partialFixNoProtocolCheck = `
+async function fetchUrl(userUrl) {
+  const url = new URL(userUrl);
+
+  const allowedDomains = ['api.trusted.com', 'cdn.example.com'];
+  if (!allowedDomains.includes(url.hostname)) {
+    throw new Error('Domain not in allowlist');
+  }
+
+  if (isPrivateIP(url.hostname)) {
+    throw new Error('Internal IPs are blocked');
+  }
+
+  const response = await fetch(userUrl);
+  return response.text();
+}
+
+function isPrivateIP(hostname) {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return true;
+  }
+  if (hostname === '169.254.169.254') {
+    return true;
+  }
+  return false;
+}
+    `;
+
+    const partialFixNoMetadataBlock = `
+async function fetchUrl(userUrl) {
+  const url = new URL(userUrl);
+
+  if (url.protocol !== 'https:') {
+    throw new Error('Only HTTPS URLs are allowed');
+  }
+
+  const allowedDomains = ['api.trusted.com', 'cdn.example.com'];
+  if (!allowedDomains.includes(url.hostname)) {
+    throw new Error('Domain not in allowlist');
+  }
+
+  if (isPrivateIP(url.hostname)) {
+    throw new Error('Internal IPs are blocked');
+  }
+
+  const response = await fetch(userUrl);
+  return response.text();
+}
+
+function isPrivateIP(hostname) {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return true;
+  }
+  // Missing metadata endpoint check!
+  return false;
+}
+    `;
+
+    const partialFixNoAllowlist = `
+async function fetchUrl(userUrl) {
+  const url = new URL(userUrl);
+
+  if (url.protocol !== 'https:') {
+    throw new Error('Only HTTPS URLs are allowed');
+  }
+
+  if (isPrivateIP(url.hostname)) {
+    throw new Error('Internal IPs are blocked');
+  }
+
+  const response = await fetch(userUrl);
+  return response.text();
+}
+
+function isPrivateIP(hostname) {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return true;
+  }
+  if (hostname === '169.254.169.254') {
+    return true;
+  }
+  return false;
+}
+    `;
+
+    it('rejects vulnerable code without any validation', () => {
+        expect(verifyLabSubmission('ssrf-lab', vulnerableCode)).toBe(false);
+    });
+
+    it('accepts properly secured code with all protections', () => {
+        expect(verifyLabSubmission('ssrf-lab', secureCode)).toBe(true);
+    });
+
+    it('rejects partial fix missing protocol check', () => {
+        expect(verifyLabSubmission('ssrf-lab', partialFixNoProtocolCheck)).toBe(false);
+    });
+
+    it('rejects partial fix missing metadata endpoint block', () => {
+        expect(verifyLabSubmission('ssrf-lab', partialFixNoMetadataBlock)).toBe(false);
+    });
+
+    it('rejects partial fix missing domain allowlist', () => {
+        expect(verifyLabSubmission('ssrf-lab', partialFixNoAllowlist)).toBe(false);
+    });
+});

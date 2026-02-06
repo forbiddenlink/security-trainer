@@ -686,5 +686,318 @@ module.exports = serverConfig;
                 }
             }
         ]
+    },
+    {
+        id: 'ssrf-attacks',
+        title: 'Server-Side Request Forgery (SSRF)',
+        description: 'Master the art of detecting and preventing attacks where servers are tricked into making unauthorized requests.',
+        difficulty: 'Advanced',
+        xpReward: 400,
+        locked: false,
+        lessons: [
+            {
+                id: 'ssrf-theory',
+                title: 'Understanding SSRF Attacks',
+                type: 'theory',
+                content: `
+# Server-Side Request Forgery (SSRF)
+
+Server-Side Request Forgery (SSRF) is a critical web security vulnerability that allows an attacker to induce the server-side application to make HTTP requests to an arbitrary domain of the attacker's choosing.
+
+## Mission Briefing: The Attack Vector
+
+In a typical SSRF attack, the attacker abuses functionality on the server to read or update internal resources. The attacker can supply or modify a URL which the code running on the server will read or submit data to.
+
+Unlike client-side attacks (like XSS), SSRF exploits the **trust** that internal networks and cloud services place in requests originating from an application server.
+
+## The Kill Chain
+
+\`\`\`
+1. Application accepts URL as input (e.g., "fetch this image")
+2. Server makes request to attacker-controlled URL
+3. Attacker points URL to internal resource (localhost, internal IPs)
+4. Server returns sensitive internal data to attacker
+\`\`\`
+
+## Critical Target: Cloud Metadata Endpoints
+
+Modern cloud infrastructure exposes metadata services at well-known IP addresses. These are the crown jewels for attackers:
+
+### AWS Instance Metadata Service (IMDS)
+\`\`\`
+http://169.254.169.254/latest/meta-data/
+http://169.254.169.254/latest/meta-data/iam/security-credentials/[role-name]
+\`\`\`
+
+### Google Cloud Metadata
+\`\`\`
+http://metadata.google.internal/computeMetadata/v1/
+\`\`\`
+
+### Azure Instance Metadata
+\`\`\`
+http://169.254.169.254/metadata/instance
+\`\`\`
+
+These endpoints can expose:
+- IAM credentials with cloud API access
+- API tokens and secrets
+- Instance identity information
+- User data scripts (often containing secrets)
+
+## Case Files: Real-World Breaches
+
+### Capital One Breach (2019)
+**Impact:** 100+ million customer records exposed
+
+A former AWS employee exploited an SSRF vulnerability in Capital One's web application firewall. The attacker:
+1. Sent a crafted request that caused the server to query the AWS metadata service
+2. Retrieved IAM role credentials from \`169.254.169.254\`
+3. Used those credentials to access S3 buckets containing customer data
+
+The breach resulted in an $80 million fine and compromised:
+- 140,000 Social Security numbers
+- 80,000 bank account numbers
+- Credit card applications spanning 14 years
+
+### Microsoft Exchange ProxyLogon (2021)
+**Impact:** Tens of thousands of organizations worldwide
+
+A chain of vulnerabilities including SSRF allowed attackers to:
+1. Bypass authentication via SSRF to internal Exchange services
+2. Write arbitrary files to the server
+3. Execute code as SYSTEM
+
+Nation-state actors exploited these flaws before patches were available.
+
+### Shopify (2015)
+**Impact:** Internal network reconnaissance
+
+A bug bounty researcher discovered that Shopify's image processing feature could be abused to scan internal networks and access internal services not exposed to the internet.
+
+## SSRF Attack Variants
+
+### Basic SSRF
+Direct request to internal resources:
+\`\`\`javascript
+// Vulnerable endpoint
+app.get('/fetch', (req, res) => {
+  const url = req.query.url;
+  fetch(url).then(response => response.text())
+    .then(data => res.send(data));
+});
+
+// Attack: ?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/
+\`\`\`
+
+### Blind SSRF
+Server makes request but doesn't return response to attacker. Detected via:
+- Out-of-band callbacks (DNS, HTTP to attacker server)
+- Timing differences
+- Error message variations
+
+### SSRF via URL Parsers
+Exploiting differences in how URLs are parsed:
+\`\`\`
+http://evil.com#@internal-server
+http://internal-server:password@evil.com
+http://127.0.0.1:80@evil.com
+\`\`\`
+
+### Protocol Smuggling
+Using non-HTTP protocols:
+\`\`\`
+file:///etc/passwd
+gopher://internal-server:6379/_*1%0d%0a$8%0d%0aFLUSHALL
+dict://internal-server:11211/stats
+\`\`\`
+
+## Defense Strategies
+
+### 1. Allowlist Validation
+Only permit requests to known, trusted domains:
+\`\`\`javascript
+const ALLOWED_DOMAINS = ['api.trusted.com', 'cdn.myapp.com'];
+
+function isAllowedUrl(url) {
+  const parsed = new URL(url);
+  return ALLOWED_DOMAINS.includes(parsed.hostname);
+}
+\`\`\`
+
+### 2. Block Internal IP Ranges
+Deny requests to:
+- \`127.0.0.0/8\` (localhost)
+- \`10.0.0.0/8\` (private)
+- \`172.16.0.0/12\` (private)
+- \`192.168.0.0/16\` (private)
+- \`169.254.0.0/16\` (link-local, includes cloud metadata)
+
+### 3. Disable Unnecessary Protocols
+Only allow \`http://\` and \`https://\`:
+\`\`\`javascript
+if (!url.startsWith('http://') && !url.startsWith('https://')) {
+  throw new Error('Invalid protocol');
+}
+\`\`\`
+
+### 4. Use Network Segmentation
+Deploy applications in network segments that cannot reach sensitive internal services.
+
+### 5. AWS IMDSv2
+Use token-based metadata service that requires a PUT request first:
+\`\`\`bash
+# IMDSv2 requires a session token
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" \\
+  -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+curl -H "X-aws-ec2-metadata-token: $TOKEN" \\
+  "http://169.254.169.254/latest/meta-data/"
+\`\`\`
+                `
+            },
+            {
+                id: 'ssrf-quiz-1',
+                title: 'SSRF Fundamentals',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "What makes SSRF particularly dangerous in cloud environments?",
+                    options: [
+                        "Cloud servers are slower at processing requests",
+                        "Cloud metadata endpoints expose IAM credentials and secrets to any server that can reach 169.254.169.254",
+                        "Cloud providers do not support HTTPS",
+                        "Cloud firewalls are easier to bypass"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "Cloud metadata services (like AWS's 169.254.169.254) are accessible from any application running on the instance. SSRF allows attackers to make requests to these endpoints and steal IAM credentials, giving them access to cloud resources. This was the core of the Capital One breach."
+                }
+            },
+            {
+                id: 'ssrf-quiz-2',
+                title: 'Attack Pattern Recognition',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "An application has an 'Import from URL' feature that fetches images. Which input would indicate an SSRF attack attempt?",
+                    options: [
+                        "https://imgur.com/gallery/abc123",
+                        "http://169.254.169.254/latest/meta-data/",
+                        "https://example.com/logo.png",
+                        "https://cdn.mysite.com/images/header.jpg"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "The IP 169.254.169.254 is the AWS metadata endpoint. An attacker requesting this URL is attempting SSRF to steal cloud credentials. Legitimate image URLs would point to actual image hosting services."
+                }
+            },
+            {
+                id: 'ssrf-quiz-3',
+                title: 'Defense Strategy Assessment',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "Which defense provides the STRONGEST protection against SSRF attacks?",
+                    options: [
+                        "Blocking the IP 169.254.169.254 specifically",
+                        "Using HTTPS for all outbound requests",
+                        "Allowlisting specific trusted domains and blocking all internal/private IP ranges",
+                        "Validating that the URL ends with a valid image extension"
+                    ],
+                    correctAnswer: 2,
+                    explanation: "A combination of domain allowlisting AND blocking internal IP ranges provides defense in depth. Blocking only the metadata IP misses other internal services. HTTPS doesn't prevent SSRF. Extension validation is trivially bypassed."
+                }
+            },
+            {
+                id: 'ssrf-quiz-4',
+                title: 'Bypass Technique Analysis',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "An application blocks 'localhost' and '127.0.0.1'. Which URL could bypass this protection?",
+                    options: [
+                        "http://LOCALHOST/admin",
+                        "http://0.0.0.0/admin",
+                        "http://[::1]/admin (IPv6 localhost)",
+                        "All of the above could potentially bypass the filter"
+                    ],
+                    correctAnswer: 3,
+                    explanation: "SSRF filters are often bypassed using: case variations (LOCALHOST), alternative representations (0.0.0.0, 0177.0.0.1, 2130706433), IPv6 (::1, [::1]), or DNS rebinding. Robust protection requires blocking ALL private/internal ranges and using proper URL parsing."
+                }
+            },
+            {
+                id: 'ssrf-quiz-5',
+                title: 'Real-World Breach Analysis',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "In the 2019 Capital One breach, what did the attacker retrieve using SSRF?",
+                    options: [
+                        "Database passwords stored in environment variables",
+                        "IAM role credentials from the AWS metadata service",
+                        "SSH keys from the /etc/ssh directory",
+                        "API keys from the application's configuration file"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "The attacker used SSRF to query http://169.254.169.254/latest/meta-data/iam/security-credentials/ and obtained temporary AWS credentials assigned to the server's IAM role. These credentials allowed access to S3 buckets containing customer data."
+                }
+            },
+            {
+                id: 'ssrf-lab',
+                title: 'Implement SSRF Protection',
+                type: 'lab',
+                content: 'The function below fetches content from a user-provided URL without any validation. Your mission: Implement URL validation to prevent SSRF attacks by allowlisting domains and blocking internal IP addresses.',
+                lab: {
+                    initialCode: `
+async function fetchUrl(userUrl) {
+  // VULNERABLE: No URL validation
+  const response = await fetch(userUrl);
+  return response.text();
+}
+                    `,
+                    solutionCode: `
+async function fetchUrl(userUrl) {
+  // SECURE: Validate URL before fetching
+  const url = new URL(userUrl);
+
+  // Only allow HTTPS protocol
+  if (url.protocol !== 'https:') {
+    throw new Error('Only HTTPS URLs are allowed');
+  }
+
+  // Allowlist of trusted domains
+  const allowedDomains = ['api.trusted.com', 'cdn.example.com'];
+  if (!allowedDomains.includes(url.hostname)) {
+    throw new Error('Domain not in allowlist');
+  }
+
+  // Block internal/private IP ranges
+  const ip = url.hostname;
+  if (isPrivateIP(ip)) {
+    throw new Error('Internal IPs are blocked');
+  }
+
+  const response = await fetch(userUrl);
+  return response.text();
+}
+
+function isPrivateIP(hostname) {
+  // Block localhost variations
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return true;
+  }
+  // Block metadata endpoint
+  if (hostname === '169.254.169.254') {
+    return true;
+  }
+  // Block private ranges (simplified check)
+  if (hostname.startsWith('10.') || hostname.startsWith('192.168.')) {
+    return true;
+  }
+  return false;
+}
+                    `,
+                    instructions: "Implement SSRF protection with these requirements:\n1. Parse the URL using new URL()\n2. Check protocol is 'https:' (throw 'Only HTTPS URLs are allowed')\n3. Validate hostname against an allowedDomains array (throw 'Domain not in allowlist')\n4. Create an isPrivateIP() function that blocks localhost, 127.0.0.1, 169.254.169.254, and private ranges (10.x, 192.168.x)\n5. Throw 'Internal IPs are blocked' for private IPs"
+                }
+            }
+        ]
     }
 ];

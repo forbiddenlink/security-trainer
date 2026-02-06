@@ -39,6 +39,17 @@ const PATTERNS = {
     X_CONTENT_TYPE_OPTIONS: 'X-Content-Type-Options',
     X_FRAME_OPTIONS: 'X-Frame-Options',
     X_POWERED_BY: 'X-Powered-By',
+
+    // SSRF patterns
+    SSRF_URL_PARSE: 'new URL(',
+    SSRF_PROTOCOL_CHECK: "protocol !== 'https:'",
+    SSRF_ALLOWED_DOMAINS: 'allowedDomains',
+    SSRF_DOMAIN_NOT_ALLOWED: 'Domain not in allowlist',
+    SSRF_PRIVATE_IP_CHECK: 'isPrivateIP',
+    SSRF_LOCALHOST_CHECK: 'localhost',
+    SSRF_LOOPBACK_CHECK: '127.0.0.1',
+    SSRF_METADATA_CHECK: '169.254.169.254',
+    SSRF_INTERNAL_BLOCKED: 'Internal IPs are blocked',
 };
 
 /**
@@ -101,6 +112,40 @@ export const labVerifiers: Record<string, VerificationFn> = {
                hasContentTypeOptions &&
                hasFrameOptions &&
                noPoweredBy;
+    },
+
+    // SSRF Lab: Check for proper URL validation
+    'ssrf-lab': (code: string) => {
+        // Must parse the URL properly
+        const parsesUrl = code.includes(PATTERNS.SSRF_URL_PARSE);
+
+        // Must check for HTTPS protocol
+        const checksProtocol = code.includes(PATTERNS.SSRF_PROTOCOL_CHECK);
+
+        // Must have domain allowlist
+        const hasAllowedDomains = code.includes(PATTERNS.SSRF_ALLOWED_DOMAINS);
+        const hasDomainError = code.includes(PATTERNS.SSRF_DOMAIN_NOT_ALLOWED);
+
+        // Must have private IP detection function
+        const hasPrivateIpCheck = code.includes(PATTERNS.SSRF_PRIVATE_IP_CHECK);
+
+        // Must block critical internal IPs
+        const blocksLocalhost = code.includes(PATTERNS.SSRF_LOCALHOST_CHECK);
+        const blocksLoopback = code.includes(PATTERNS.SSRF_LOOPBACK_CHECK);
+        const blocksMetadata = code.includes(PATTERNS.SSRF_METADATA_CHECK);
+
+        // Must have proper error message
+        const hasInternalBlockedError = code.includes(PATTERNS.SSRF_INTERNAL_BLOCKED);
+
+        return parsesUrl &&
+               checksProtocol &&
+               hasAllowedDomains &&
+               hasDomainError &&
+               hasPrivateIpCheck &&
+               blocksLocalhost &&
+               blocksLoopback &&
+               blocksMetadata &&
+               hasInternalBlockedError;
     },
 };
 
