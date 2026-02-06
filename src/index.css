@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3b82f6; 
+  --color-primary-foreground: #ffffff;
+  
+  --color-secondary: #0f172a;
+  --color-secondary-foreground: #f8fafc;
+  
+  --color-accent: #10b981;
+  --color-accent-foreground: #ffffff;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  --color-background: #020617; /* Slate 950 - Dark standard background */
+  --color-foreground: #f8fafc; /* Slate 50 */
+  
+  --color-card: #1e293b;
+  --color-card-foreground: #f8fafc;
+  
+  --color-popover: #0f172a;
+  --color-popover-foreground: #f8fafc;
+  
+  --color-border: #334155;
+  --color-input: #1e293b;
+  --color-ring: #3b82f6;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-background text-foreground;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
