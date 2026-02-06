@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Timer, AlertTriangle, Skull, CheckCircle } from 'lucide-react';
@@ -53,7 +53,7 @@ export const Challenge: React.FC = () => {
         return () => clearInterval(timer);
     }, [gameStarted, gameOver, userWon]);
 
-    const handleAnswer = (optionIndex: number) => {
+    const handleAnswer = useCallback((optionIndex: number) => {
         const currentQuestion = questions[currentIndex];
 
         if (optionIndex !== currentQuestion.correctAnswer) {
@@ -74,12 +74,20 @@ export const Challenge: React.FC = () => {
                 setCurrentIndex(prev => prev + 1);
             }
         }
-    };
+    }, [questions, currentIndex, addXp, unlockBadge]);
+
+    // Keyboard handler for answer options
+    const handleKeyDown = useCallback((e: React.KeyboardEvent, idx: number) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleAnswer(idx);
+        }
+    }, [handleAnswer]);
 
     if (!gameStarted) {
         return (
-            <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center space-y-8 animate-in fade-in zoom-in duration-500">
-                <div className="p-8 rounded-full bg-red-500/10 border-4 border-red-500/50 animate-pulse">
+            <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center space-y-8 animate-in fade-in zoom-in duration-500" role="region" aria-label="Final exam start screen">
+                <div className="p-8 rounded-full bg-red-500/10 border-4 border-red-500/50 animate-pulse" aria-hidden="true">
                     <AlertTriangle className="w-24 h-24 text-red-500" />
                 </div>
                 <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
@@ -92,6 +100,7 @@ export const Challenge: React.FC = () => {
                 <button
                     onClick={() => setGameStarted(true)}
                     className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-lg transition-all transform hover:scale-105 shadow-lg shadow-red-900/20"
+                    aria-label="Start the final exam"
                 >
                     INITIATE PROTOCOL
                 </button>
@@ -101,13 +110,14 @@ export const Challenge: React.FC = () => {
 
     if (gameOver) {
         return (
-            <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-                <Skull className="w-32 h-32 text-red-600" />
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-6" role="alert" aria-live="assertive">
+                <Skull className="w-32 h-32 text-red-600" aria-hidden="true" />
                 <h1 className="text-4xl font-bold text-red-500">MISSION FAILED</h1>
                 <p className="text-muted-foreground">The vulnerability remains unpatched.</p>
                 <button
                     onClick={() => navigate('/')}
                     className="px-6 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
+                    aria-label="Return to dashboard"
                 >
                     Return to Base
                 </button>
@@ -117,13 +127,14 @@ export const Challenge: React.FC = () => {
 
     if (userWon) {
         return (
-            <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-                <CheckCircle className="w-32 h-32 text-emerald-500" />
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-6" role="alert" aria-live="polite">
+                <CheckCircle className="w-32 h-32 text-emerald-500" aria-hidden="true" />
                 <h1 className="text-4xl font-bold text-emerald-400">MISSION ACCOMPLISHED</h1>
                 <p className="text-xl">You have earned the <span className="font-bold text-yellow-400">Elite Hacker</span> Status.</p>
                 <button
                     onClick={() => navigate('/profile')}
                     className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                    aria-label="View your profile and achievements"
                 >
                     View Status
                 </button>
@@ -142,15 +153,16 @@ export const Challenge: React.FC = () => {
     }
 
     return (
-        <div className="max-w-3xl mx-auto h-full flex flex-col justify-center">
+        <div className="max-w-3xl mx-auto h-full flex flex-col justify-center" role="main" aria-label="Final exam quiz">
             {/* HUD */}
             <div className="flex justify-between items-center mb-8 bg-card border border-border p-4 rounded-xl">
-                <div className="flex items-center gap-2 text-2xl font-mono font-bold text-red-500">
-                    <Timer className="w-8 h-8" />
-                    {timeLeft}s
+                <div className="flex items-center gap-2 text-2xl font-mono font-bold text-red-500" aria-live="polite" aria-atomic="true">
+                    <Timer className="w-8 h-8" aria-hidden="true" />
+                    <span aria-label={`${timeLeft} seconds remaining`}>{timeLeft}s</span>
+                    <span className="sr-only">Time remaining: {timeLeft} seconds</span>
                 </div>
-                <div className="text-muted-foreground">
-                    Question {currentIndex + 1} / {questions.length}
+                <div className="text-muted-foreground" aria-live="polite">
+                    Question {currentIndex + 1} of {questions.length}
                 </div>
             </div>
 
@@ -160,16 +172,23 @@ export const Challenge: React.FC = () => {
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="bg-card border border-border p-8 rounded-2xl shadow-xl"
+                role="form"
+                aria-labelledby="challenge-question"
             >
-                <h2 className="text-2xl font-bold mb-8">{question.question}</h2>
-                <div className="space-y-4">
+                <h2 id="challenge-question" className="text-2xl font-bold mb-8">{question.question}</h2>
+                <div className="space-y-4" role="radiogroup" aria-label="Answer options">
                     {question.options.map((option, idx) => (
                         <button
                             key={idx}
                             onClick={() => handleAnswer(idx)}
+                            onKeyDown={(e) => handleKeyDown(e, idx)}
+                            role="radio"
+                            aria-checked={false}
+                            tabIndex={0}
                             className="w-full text-left p-4 rounded-lg bg-muted/50 hover:bg-primary/20 border-2 border-transparent hover:border-primary transition-all group"
+                            aria-label={`Option ${String.fromCharCode(65 + idx)}: ${option}`}
                         >
-                            <span className="font-mono text-primary mr-4 opacity-50 group-hover:opacity-100">{String.fromCharCode(65 + idx)}.</span>
+                            <span className="font-mono text-primary mr-4 opacity-50 group-hover:opacity-100" aria-hidden="true">{String.fromCharCode(65 + idx)}.</span>
                             {option}
                         </button>
                     ))}

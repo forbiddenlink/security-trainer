@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
-import { renderWithRouter, resetGameStore, userEvent, setupGameStore } from '../../test/testUtils';
+import { renderWithRouter, resetGameStore, userEvent } from '../../test/testUtils';
 import { LessonView } from '../LessonView';
 import { useGameStore } from '../../store/gameStore';
 
@@ -87,14 +87,14 @@ describe('LessonView', () => {
         it('has a disabled Back button on first lesson', () => {
             renderWithRouter(<LessonView />);
 
-            const backButton = screen.getByRole('button', { name: /back/i });
+            const backButton = screen.getByRole('button', { name: /go to previous lesson/i });
             expect(backButton).toBeDisabled();
         });
 
         it('has enabled Next Step button on theory lesson', () => {
             renderWithRouter(<LessonView />);
 
-            const nextButton = screen.getByRole('button', { name: /next step/i });
+            const nextButton = screen.getByRole('button', { name: /go to next lesson step/i });
             expect(nextButton).toBeEnabled();
         });
     });
@@ -104,7 +104,7 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            const nextButton = screen.getByRole('button', { name: /next step/i });
+            const nextButton = screen.getByRole('button', { name: /go to next lesson step/i });
             await user.click(nextButton);
 
             // Should now be on the quiz lesson
@@ -122,7 +122,7 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
             expect(screen.getByText('What does OWASP stand for?')).toBeInTheDocument();
         });
@@ -131,7 +131,7 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
             expect(screen.getByText(/Open Web Application Security Project/)).toBeInTheDocument();
             expect(screen.getByText(/Online Website Assessment/i)).toBeInTheDocument();
@@ -143,9 +143,9 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
-            const submitButton = screen.getByRole('button', { name: /submit answer/i });
+            const submitButton = screen.getByRole('button', { name: /submit your selected answer/i });
             expect(submitButton).toBeDisabled();
         });
 
@@ -153,15 +153,13 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
-            // Click an option
-            const options = screen.getAllByRole('button').filter(
-                btn => btn.textContent?.includes('Open Web Application Security Project')
-            );
+            // Click an option (now using role="radio")
+            const options = screen.getAllByRole('radio');
             await user.click(options[0]);
 
-            const submitButton = screen.getByRole('button', { name: /submit answer/i });
+            const submitButton = screen.getByRole('button', { name: /submit your selected answer/i });
             expect(submitButton).toBeEnabled();
         });
 
@@ -169,16 +167,14 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
-            // Select the correct answer (first option)
-            const correctOption = screen.getByRole('button', {
-                name: /Open Web Application Security Project/i
-            });
-            await user.click(correctOption);
+            // Select the correct answer (first option, using role="radio")
+            const options = screen.getAllByRole('radio');
+            await user.click(options[0]);
 
             // Submit
-            await user.click(screen.getByRole('button', { name: /submit answer/i }));
+            await user.click(screen.getByRole('button', { name: /submit your selected answer/i }));
 
             // Should show "Correct!" feedback
             expect(screen.getByText('Correct!')).toBeInTheDocument();
@@ -189,16 +185,14 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
-            // Select the wrong answer (second option)
-            const wrongOption = screen.getByRole('button', {
-                name: /Online Website Assessment/i
-            });
-            await user.click(wrongOption);
+            // Select the wrong answer (second option, using role="radio")
+            const options = screen.getAllByRole('radio');
+            await user.click(options[1]);
 
             // Submit
-            await user.click(screen.getByRole('button', { name: /submit answer/i }));
+            await user.click(screen.getByRole('button', { name: /submit your selected answer/i }));
 
             // Should show "Incorrect" feedback
             expect(screen.getByText('Incorrect')).toBeInTheDocument();
@@ -208,10 +202,10 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
             // Next button should be disabled before submitting
-            const nextButton = screen.getByRole('button', { name: /complete mission/i });
+            const nextButton = screen.getByRole('button', { name: /complete this mission and return to modules/i });
             expect(nextButton).toBeDisabled();
         });
 
@@ -219,14 +213,15 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
             // Select and submit an answer
-            await user.click(screen.getByRole('button', { name: /Open Web Application Security Project/i }));
-            await user.click(screen.getByRole('button', { name: /submit answer/i }));
+            const options = screen.getAllByRole('radio');
+            await user.click(options[0]);
+            await user.click(screen.getByRole('button', { name: /submit your selected answer/i }));
 
             // Next button should now be enabled
-            const nextButton = screen.getByRole('button', { name: /complete mission/i });
+            const nextButton = screen.getByRole('button', { name: /complete this mission and return to modules/i });
             expect(nextButton).toBeEnabled();
         });
     });
@@ -241,7 +236,7 @@ describe('LessonView', () => {
             renderWithRouter(<LessonView />);
 
             // Navigate to lab lesson (second lesson in sql-injection module)
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
             expect(screen.getByText('lab')).toBeInTheDocument();
             expect(screen.getByText('Mission Objective')).toBeInTheDocument();
@@ -252,19 +247,19 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
-            expect(screen.getByRole('button', { name: /deploy patch/i })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /deploy patch and verify your code fix/i })).toBeInTheDocument();
         });
 
         it('shows error when submitting vulnerable code', async () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
             // Click Deploy Patch with the initial vulnerable code
-            await user.click(screen.getByRole('button', { name: /deploy patch/i }));
+            await user.click(screen.getByRole('button', { name: /deploy patch and verify your code fix/i }));
 
             expect(screen.getByText('Vulnerability Detected')).toBeInTheDocument();
             expect(screen.getByText(/vulnerability still present/i)).toBeInTheDocument();
@@ -274,9 +269,9 @@ describe('LessonView', () => {
             const user = userEvent.setup();
             renderWithRouter(<LessonView />);
 
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
-            const nextButton = screen.getByRole('button', { name: /complete mission/i });
+            const nextButton = screen.getByRole('button', { name: /complete this mission and return to modules/i });
             expect(nextButton).toBeDisabled();
         });
     });
@@ -288,14 +283,15 @@ describe('LessonView', () => {
             renderWithRouter(<LessonView />);
 
             // Go to quiz
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
-            // Answer quiz
-            await user.click(screen.getByRole('button', { name: /Open Web Application Security Project/i }));
-            await user.click(screen.getByRole('button', { name: /submit answer/i }));
+            // Answer quiz (using role="radio")
+            const options = screen.getAllByRole('radio');
+            await user.click(options[0]);
+            await user.click(screen.getByRole('button', { name: /submit your selected answer/i }));
 
             // Complete module
-            await user.click(screen.getByRole('button', { name: /complete mission/i }));
+            await user.click(screen.getByRole('button', { name: /complete this mission and return to modules/i }));
 
             // Check store was updated
             await waitFor(() => {
@@ -313,10 +309,10 @@ describe('LessonView', () => {
             renderWithRouter(<LessonView />);
 
             // Go to second lesson
-            await user.click(screen.getByRole('button', { name: /next step/i }));
+            await user.click(screen.getByRole('button', { name: /go to next lesson step/i }));
 
             // Go back
-            await user.click(screen.getByRole('button', { name: /back/i }));
+            await user.click(screen.getByRole('button', { name: /go to previous lesson/i }));
 
             // Should be on first lesson again
             expect(screen.getByText('Step 1 of 2')).toBeInTheDocument();

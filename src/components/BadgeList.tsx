@@ -30,11 +30,11 @@ export const BadgeList: React.FC = () => {
     const { badges } = useGameStore();
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <ul className="grid grid-cols-2 md:grid-cols-4 gap-4" role="list" aria-label="Achievement badges">
             {ALL_BADGES.map((badge) => {
                 const isUnlocked = badges.includes(badge.id);
                 return (
-                    <div
+                    <li
                         key={badge.id}
                         className={clsx(
                             "relative group p-4 rounded-xl border transition-all duration-300",
@@ -42,22 +42,27 @@ export const BadgeList: React.FC = () => {
                                 ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]"
                                 : "bg-muted/20 border-border opacity-60"
                         )}
+                        aria-label={`${badge.name}: ${isUnlocked ? 'Unlocked' : 'Locked'} - ${badge.description}`}
                     >
                         <div className="flex flex-col items-center text-center gap-3">
-                            <div className={clsx(
-                                "p-3 rounded-full lg:mb-2 transition-transform group-hover:scale-110",
-                                isUnlocked ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-                            )}>
+                            <div
+                                className={clsx(
+                                    "p-3 rounded-full lg:mb-2 transition-transform group-hover:scale-110",
+                                    isUnlocked ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                                )}
+                                aria-hidden="true"
+                            >
                                 {isUnlocked ? <Award className="w-8 h-8" /> : <Lock className="w-8 h-8" />}
                             </div>
                             <div>
                                 <h3 className="font-bold text-sm tracking-wide mb-1">{badge.name}</h3>
                                 <p className="text-xs text-muted-foreground">{badge.description}</p>
+                                <span className="sr-only">{isUnlocked ? 'Unlocked' : `Locked - ${badge.condition}`}</span>
                             </div>
                         </div>
-                    </div>
+                    </li>
                 );
             })}
-        </div>
+        </ul>
     )
 }

@@ -12,15 +12,15 @@ export const Sidebar: React.FC = () => {
     ];
 
     return (
-        <aside className="w-64 bg-card border-r border-border min-h-screen flex flex-col">
+        <aside className="w-64 bg-card border-r border-border min-h-screen flex flex-col" aria-label="Main navigation">
             <div className="p-6 flex items-center gap-2 border-b border-border">
-                <ShieldCheck className="w-8 h-8 text-primary" />
+                <ShieldCheck className="w-8 h-8 text-primary" aria-hidden="true" />
                 <span className="font-bold text-xl tracking-tight text-foreground">
                     SecTrainer
                 </span>
             </div>
 
-            <nav className="flex-1 p-4 space-y-2">
+            <nav className="flex-1 p-4 space-y-2" aria-label="Primary">
                 {navItems.map((item) => (
                     <NavLink
                         key={item.path}
@@ -34,13 +34,18 @@ export const Sidebar: React.FC = () => {
                             )
                         }
                     >
-                        <item.icon className="w-5 h-5" />
-                        <span className="font-medium">{item.label}</span>
+                        {({ isActive }) => (
+                            <>
+                                <item.icon className="w-5 h-5" aria-hidden="true" />
+                                <span className="font-medium">{item.label}</span>
+                                {isActive && <span className="sr-only">(current page)</span>}
+                            </>
+                        )}
                     </NavLink>
                 ))}
             </nav>
 
-            <div className="p-4 m-4 bg-muted/30 rounded-lg text-xs text-muted-foreground border border-border">
+            <div className="p-4 m-4 bg-muted/30 rounded-lg text-xs text-muted-foreground border border-border" aria-label="System information">
                 <p>Security Clearance: <span className="text-primary font-bold">Classified</span></p>
                 <p className="mt-1">System v1.0.0</p>
             </div>

@@ -61,7 +61,7 @@ describe('Challenge', () => {
         it('shows the start button', () => {
             renderChallenge();
 
-            expect(screen.getByRole('button', { name: /initiate protocol/i })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /start the final exam/i })).toBeInTheDocument();
         });
     });
 
@@ -70,32 +70,27 @@ describe('Challenge', () => {
             const user = userEvent.setup();
             renderChallenge();
 
-            const startButton = screen.getByRole('button', { name: /initiate protocol/i });
+            const startButton = screen.getByRole('button', { name: /start the final exam/i });
             await user.click(startButton);
 
             // Should show the timer and question
             expect(screen.getByText('60s')).toBeInTheDocument();
-            expect(screen.getByText(/Question 1 \/ 5/)).toBeInTheDocument();
+            expect(screen.getByText(/Question 1 of 5/)).toBeInTheDocument();
         });
 
         it('displays quiz question after starting', async () => {
             const user = userEvent.setup();
             renderChallenge();
 
-            await user.click(screen.getByRole('button', { name: /initiate protocol/i }));
+            await user.click(screen.getByRole('button', { name: /start the final exam/i }));
 
             // Wait for the question to appear
             await waitFor(() => {
-                expect(screen.getByText(/Question 1 \/ 5/)).toBeInTheDocument();
+                expect(screen.getByText(/Question 1 of 5/)).toBeInTheDocument();
             });
 
-            // Should have 4 answer options
-            const optionButtons = screen.getAllByRole('button').filter(btn =>
-                btn.textContent?.includes('A.') ||
-                btn.textContent?.includes('B.') ||
-                btn.textContent?.includes('C.') ||
-                btn.textContent?.includes('D.')
-            );
+            // Should have 4 answer options (now using role="radio")
+            const optionButtons = screen.getAllByRole('radio');
             expect(optionButtons).toHaveLength(4);
         });
     });
@@ -113,7 +108,7 @@ describe('Challenge', () => {
             renderChallenge();
 
             // Start the game
-            const startButton = screen.getByRole('button', { name: /initiate protocol/i });
+            const startButton = screen.getByRole('button', { name: /start the final exam/i });
             await act(async () => {
                 startButton.click();
             });
@@ -133,7 +128,7 @@ describe('Challenge', () => {
 
             // Start the game
             await act(async () => {
-                screen.getByRole('button', { name: /initiate protocol/i }).click();
+                screen.getByRole('button', { name: /start the final exam/i }).click();
             });
 
             // Advance time past 60 seconds
@@ -159,7 +154,7 @@ describe('Challenge', () => {
 
             // Start the game
             await act(async () => {
-                screen.getByRole('button', { name: /initiate protocol/i }).click();
+                screen.getByRole('button', { name: /start the final exam/i }).click();
             });
 
             // Force game over by advancing timer
@@ -170,7 +165,7 @@ describe('Challenge', () => {
             expect(screen.getByText('MISSION FAILED')).toBeInTheDocument();
             expect(screen.getByText(/vulnerability remains unpatched/i)).toBeInTheDocument();
 
-            const returnButton = screen.getByRole('button', { name: /return to base/i });
+            const returnButton = screen.getByRole('button', { name: /return to dashboard/i });
             await act(async () => {
                 returnButton.click();
             });
@@ -184,20 +179,15 @@ describe('Challenge', () => {
             const user = userEvent.setup();
             renderChallenge();
 
-            await user.click(screen.getByRole('button', { name: /initiate protocol/i }));
+            await user.click(screen.getByRole('button', { name: /start the final exam/i }));
 
             // Wait for the question to appear
             await waitFor(() => {
-                expect(screen.getByText(/Question 1 \/ 5/)).toBeInTheDocument();
+                expect(screen.getByText(/Question 1 of 5/)).toBeInTheDocument();
             });
 
-            // Get answer buttons (they have letters A., B., C., D.)
-            const answerButtons = screen.getAllByRole('button').filter(btn =>
-                btn.textContent?.includes('A.') ||
-                btn.textContent?.includes('B.') ||
-                btn.textContent?.includes('C.') ||
-                btn.textContent?.includes('D.')
-            );
+            // Get answer options (now using role="radio")
+            const answerButtons = screen.getAllByRole('radio');
 
             expect(answerButtons).toHaveLength(4);
         });
@@ -206,19 +196,14 @@ describe('Challenge', () => {
             const user = userEvent.setup();
             renderChallenge();
 
-            await user.click(screen.getByRole('button', { name: /initiate protocol/i }));
+            await user.click(screen.getByRole('button', { name: /start the final exam/i }));
 
             await waitFor(() => {
-                expect(screen.getByText(/Question 1 \/ 5/)).toBeInTheDocument();
+                expect(screen.getByText(/Question 1 of 5/)).toBeInTheDocument();
             });
 
-            // All answer buttons should be enabled
-            const answerButtons = screen.getAllByRole('button').filter(btn =>
-                btn.textContent?.includes('A.') ||
-                btn.textContent?.includes('B.') ||
-                btn.textContent?.includes('C.') ||
-                btn.textContent?.includes('D.')
-            );
+            // All answer options should be enabled (now using role="radio")
+            const answerButtons = screen.getAllByRole('radio');
 
             answerButtons.forEach(btn => {
                 expect(btn).not.toBeDisabled();
@@ -275,7 +260,7 @@ describe('Challenge', () => {
 
             // Start and force game over
             await act(async () => {
-                screen.getByRole('button', { name: /initiate protocol/i }).click();
+                screen.getByRole('button', { name: /start the final exam/i }).click();
             });
 
             await act(async () => {
@@ -283,7 +268,7 @@ describe('Challenge', () => {
             });
 
             await act(async () => {
-                screen.getByRole('button', { name: /return to base/i }).click();
+                screen.getByRole('button', { name: /return to dashboard/i }).click();
             });
 
             expect(mockNavigate).toHaveBeenCalledWith('/');
