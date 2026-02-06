@@ -226,7 +226,7 @@ const serverConfig = {
 
   admin: {
     username: 'sysop_7x9k2',
-    password: 'K#9xL$mP2@vN8qR!'
+    password: 'EXAMPLE_Str0ng_P@ss!'
   },
 
   headers: {
@@ -262,7 +262,7 @@ const serverConfig = {
 
   admin: {
     username: 'secure_admin',
-    password: 'StrongP@ss123!'
+    password: 'EXAMPLE_Str0ng_P@ss!'
   },
 
   headers: {}

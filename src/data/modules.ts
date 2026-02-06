@@ -669,7 +669,7 @@ const serverConfig = {
   // Admin credentials
   admin: {
     username: 'sysop_7x9k2',
-    password: 'K#9xL$mP2@vN8qR!'  // SECURE: Strong, unique credentials
+    password: 'EXAMPLE_Str0ng_P@ss!'  // SECURE: Strong, unique credentials (example only)
   },
 
   // Response headers
@@ -1659,7 +1659,7 @@ Storing sensitive data in plaintext is like leaving classified documents on a pa
 // VULNERABLE: Plaintext password storage
 const user = {
   email: "agent@hq.gov",
-  password: "TopSecret123!"  // Readable by anyone with DB access
+  password: "EXAMPLE_plaintext!"  // Readable by anyone with DB access
 };
 
 db.users.insert(user);
