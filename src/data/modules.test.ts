@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { MODULES } from './modules';
-import { labVerifiers } from '../utils/labVerification';
+import { labVerifiers, verifyLabSubmission } from '../utils/labVerification';
 
 describe('MODULES data', () => {
     it('has at least 5 training modules', () => {
@@ -73,5 +73,96 @@ describe('MODULES data', () => {
         for (const module of MODULES) {
             expect(module.xpReward).toBeGreaterThan(0);
         }
+    });
+});
+
+describe('CSRF Module', () => {
+    const csrfModule = MODULES.find(m => m.id === 'csrf-attacks');
+
+    it('exists in the modules list', () => {
+        expect(csrfModule).toBeDefined();
+    });
+
+    it('has correct structure', () => {
+        expect(csrfModule!.title).toBe('Cross-Site Request Forgery (CSRF)');
+        expect(csrfModule!.difficulty).toBe('Intermediate');
+        expect(csrfModule!.xpReward).toBe(350);
+        expect(csrfModule!.locked).toBe(false);
+    });
+
+    it('has theory, quiz, and lab lessons', () => {
+        const lessonTypes = csrfModule!.lessons.map(l => l.type);
+        expect(lessonTypes).toContain('theory');
+        expect(lessonTypes).toContain('quiz');
+        expect(lessonTypes).toContain('lab');
+    });
+
+    it('has exactly 6 lessons (1 theory, 4 quizzes, 1 lab)', () => {
+        expect(csrfModule!.lessons.length).toBe(6);
+        expect(csrfModule!.lessons.filter(l => l.type === 'theory').length).toBe(1);
+        expect(csrfModule!.lessons.filter(l => l.type === 'quiz').length).toBe(4);
+        expect(csrfModule!.lessons.filter(l => l.type === 'lab').length).toBe(1);
+    });
+
+    it('has a registered lab verifier', () => {
+        expect(labVerifiers['csrf-lab']).toBeDefined();
+    });
+});
+
+describe('CSRF Lab Verifier', () => {
+    const vulnerableCode = `
+function handleTransfer(req, res) {
+  const { to, amount } = req.body;
+
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  const result = transferFunds(req.session.userId, to, amount);
+  return res.json({ success: true, result });
+}
+    `;
+
+    const secureCode = `
+function handleTransfer(req, res) {
+  const { to, amount, csrfToken } = req.body;
+
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  if (!csrfToken || csrfToken !== req.session.csrfToken) {
+    return res.status(403).json({ error: "Invalid CSRF token" });
+  }
+
+  const result = transferFunds(req.session.userId, to, amount);
+  return res.json({ success: true, result });
+}
+    `;
+
+    const partialFix = `
+function handleTransfer(req, res) {
+  const { to, amount, csrfToken } = req.body;
+
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  // Missing actual validation logic
+  const result = transferFunds(req.session.userId, to, amount);
+  return res.json({ success: true, result });
+}
+    `;
+
+    it('rejects vulnerable code without CSRF protection', () => {
+        expect(verifyLabSubmission('csrf-lab', vulnerableCode)).toBe(false);
+    });
+
+    it('accepts properly secured code with CSRF token validation', () => {
+        expect(verifyLabSubmission('csrf-lab', secureCode)).toBe(true);
+    });
+
+    it('rejects partial fix that only extracts token but does not validate', () => {
+        expect(verifyLabSubmission('csrf-lab', partialFix)).toBe(false);
     });
 });

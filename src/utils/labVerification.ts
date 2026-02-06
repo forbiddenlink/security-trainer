@@ -25,6 +25,11 @@ const PATTERNS = {
     OWNER_ID_CHECK: 'doc.ownerId',
     USER_ID_CHECK: 'user.id',
     UNAUTHORIZED_ERROR: 'Unauthorized',
+
+    // CSRF patterns
+    CSRF_TOKEN_EXTRACT: 'csrfToken',
+    CSRF_SESSION_CHECK: 'req.session.csrfToken',
+    CSRF_INVALID_ERROR: 'Invalid CSRF token',
 };
 
 /**
@@ -53,6 +58,14 @@ export const labVerifiers: Record<string, VerificationFn> = {
         const checksUserId = code.includes(PATTERNS.USER_ID_CHECK);
         const returnsUnauthorized = code.includes(PATTERNS.UNAUTHORIZED_ERROR);
         return checksOwnerId && checksUserId && returnsUnauthorized;
+    },
+
+    // CSRF Lab: Check for CSRF token validation
+    'csrf-lab': (code: string) => {
+        const extractsCsrfToken = code.includes(PATTERNS.CSRF_TOKEN_EXTRACT);
+        const checksSessionToken = code.includes(PATTERNS.CSRF_SESSION_CHECK);
+        const returnsInvalidError = code.includes(PATTERNS.CSRF_INVALID_ERROR);
+        return extractsCsrfToken && checksSessionToken && returnsInvalidError;
     },
 };
 
