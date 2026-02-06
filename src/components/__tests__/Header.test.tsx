@@ -7,7 +7,10 @@ import { Header } from '../Header';
 vi.mock('framer-motion', () => ({
     motion: {
         div: ({ children, ...props }: { children?: React.ReactNode }) => <div {...props}>{children}</div>,
+        span: ({ children, ...props }: { children?: React.ReactNode }) => <span {...props}>{children}</span>,
+        button: ({ children, ...props }: { children?: React.ReactNode }) => <button {...props}>{children}</button>,
     },
+    AnimatePresence: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
 }));
 
 describe('Header', () => {

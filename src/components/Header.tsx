@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { Bell, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { StreakIndicator } from './StreakIndicator';
+import { ThemeToggle } from './ThemeToggle';
 
 export const Header: React.FC = () => {
     const { xp, level, checkStreak, checkDailyChallenge } = useGameStore();
@@ -52,6 +53,9 @@ export const Header: React.FC = () => {
 
                 {/* Streak Indicator */}
                 <StreakIndicator />
+
+                {/* Theme Toggle */}
+                <ThemeToggle />
 
                 <button
                     className="relative p-2 rounded-full hover:bg-muted/50 transition-colors"
