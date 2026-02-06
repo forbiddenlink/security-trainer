@@ -23,7 +23,7 @@ const ALL_BADGES: Badge[] = [
         icon: 'Skull',
         condition: 'Perfect score in Challenge Mode'
     },
-    { id: 'master-hacker', name: 'Elite Hacker', description: 'Reached Level 5', icon: 'Crown', condition: 'Reach Level 5' },
+    { id: 'master-hacker', name: 'Master Operator', description: 'Reached Level 5', icon: 'Crown', condition: 'Reach Level 5' },
 ];
 
 export const BadgeList: React.FC = () => {

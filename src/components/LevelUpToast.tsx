@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, X } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 
 export const LevelUpToast: React.FC = () => {
-    const { level } = useGameStore();
-    const [prevLevel, setPrevLevel] = useState(level);
-    const [show, setShow] = useState(false);
+    const { level, showLevelUpToast, dismissLevelUpToast } = useGameStore();
 
+    // Auto-dismiss toast after 5 seconds
     useEffect(() => {
-        if (level > prevLevel) {
-            setShow(true);
-            const timer = setTimeout(() => setShow(false), 5000);
-            setPrevLevel(level);
-            return () => clearTimeout(timer);
-        }
-    }, [level, prevLevel]);
+        if (!showLevelUpToast) return;
+
+        const timer = setTimeout(() => {
+            dismissLevelUpToast();
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, [showLevelUpToast, dismissLevelUpToast]);
 
     return (
         <AnimatePresence>
-            {show && (
+            {showLevelUpToast && (
                 <motion.div
                     initial={{ opacity: 0, y: 50, scale: 0.8 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -28,7 +28,7 @@ export const LevelUpToast: React.FC = () => {
                 >
                     <div className="bg-background rounded-lg p-6 flex flex-col items-center gap-2 min-w-[300px]">
                         <button
-                            onClick={() => setShow(false)}
+                            onClick={dismissLevelUpToast}
                             className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
                         >
                             <X className="w-4 h-4" />

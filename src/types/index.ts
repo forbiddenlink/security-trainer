@@ -26,9 +26,8 @@ export interface QuizQuestion {
 
 export interface LabConfig {
     initialCode: string;
-    solutionCode: string; // Or a validation regex/function signature
+    solutionCode: string;
     instructions: string;
-    verificationFunction?: string; // Stringified function to run for verification
 }
 
 export interface Badge {

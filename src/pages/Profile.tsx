@@ -10,7 +10,8 @@ export const Profile: React.FC = () => {
 
     useEffect(() => {
         checkStreak();
-    }, [checkStreak]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Run only on mount
 
     const nextLevelXp = level * 1000;
     const progress = Math.min((xp / nextLevelXp) * 100, 100);

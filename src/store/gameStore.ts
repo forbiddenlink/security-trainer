@@ -3,12 +3,14 @@ import { persist } from 'zustand/middleware';
 import type { UserState } from '../types';
 
 interface GameStore extends UserState {
+    showLevelUpToast: boolean;
     addXp: (amount: number) => void;
     completeModule: (moduleId: string) => void;
     unlockBadge: (badgeId: string) => void;
     setCurrentModule: (moduleId: string | null) => void;
     checkStreak: () => void;
     resetProgress: () => void;
+    dismissLevelUpToast: () => void;
 }
 
 const INITIAL_STATE: UserState = {
@@ -25,19 +27,22 @@ export const useGameStore = create<GameStore>()(
     persist(
         (set, get) => ({
             ...INITIAL_STATE,
+            showLevelUpToast: false,
 
             addXp: (amount) => {
                 const { xp, level } = get();
-                const newXp = xp + amount;
-                // Simple leveling curve: Level * 1000 XP needed for next level
-                const nextLevelThreshold = level * 1000;
+                let currentXp = xp + amount;
                 let newLevel = level;
+                let shouldShowToast = false;
 
-                if (newXp >= nextLevelThreshold) {
-                    newLevel = level + 1;
+                // Handle multiple level-ups if XP gain is large enough
+                while (currentXp >= newLevel * 1000) {
+                    currentXp -= newLevel * 1000;
+                    newLevel++;
+                    shouldShowToast = true;
                 }
 
-                set({ xp: newXp, level: newLevel });
+                set({ xp: currentXp, level: newLevel, showLevelUpToast: shouldShowToast });
             },
 
             completeModule: (moduleId) => {
@@ -75,9 +80,21 @@ export const useGameStore = create<GameStore>()(
             },
 
             resetProgress: () => set({ ...INITIAL_STATE }),
+
+            dismissLevelUpToast: () => set({ showLevelUpToast: false }),
         }),
         {
             name: 'security-trainer-storage',
+            partialize: (state) => ({
+                // Don't persist toast state
+                xp: state.xp,
+                level: state.level,
+                completedModules: state.completedModules,
+                badges: state.badges,
+                currentModuleId: state.currentModuleId,
+                streakDays: state.streakDays,
+                lastLoginDate: state.lastLoginDate,
+            }),
         }
     )
 );

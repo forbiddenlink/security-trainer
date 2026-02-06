@@ -92,8 +92,7 @@ function getUser(username) {
   return db.execute(query, [username]);
 }
             `,
-                    instructions: "Modify the code to use a parameterized query with '?' placeholder instead of string concatenation.",
-                    verificationFunction: "(code) => code.includes('username = ?') && code.includes(', [username]') && !code.includes(\"' + username + '\")"
+                    instructions: "Modify the code to use a parameterized query with '?' placeholder instead of string concatenation."
                 }
             }
         ]
@@ -179,8 +178,7 @@ function Comment({ userComment }) {
   );
 }
                     `,
-                    instructions: "Remove the usage of dangerouslySetInnerHTML and render the comment as a standard child of the div tag.",
-                    verificationFunction: "(code) => !code.includes('dangerouslySetInnerHTML') && code.includes('{userComment}')"
+                    instructions: "Remove the unsafe HTML rendering and render the comment as a standard child of the div tag."
                 }
             }
         ]
@@ -263,8 +261,7 @@ function getDocument(user, docId) {
   return doc;
 }
                     `,
-                    instructions: "Add a check to ensure `doc.ownerId` matches `user.id`. Return `{ error: 'Unauthorized' }` if they don't match.",
-                    verificationFunction: "(code) => code.includes('doc.ownerId') && code.includes('user.id') && code.includes('Unauthorized')"
+                    instructions: "Add a check to ensure `doc.ownerId` matches `user.id`. Return `{ error: 'Unauthorized' }` if they don't match."
                 }
             }
         ]

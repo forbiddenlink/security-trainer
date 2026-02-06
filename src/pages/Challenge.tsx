@@ -27,8 +27,12 @@ export const Challenge: React.FC = () => {
             });
         });
 
-        // Shuffle and pick 5
-        const shuffled = pool.sort(() => 0.5 - Math.random());
+        // Fisher-Yates shuffle for proper randomization
+        const shuffled = [...pool];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
         setQuestions(shuffled.slice(0, 5));
     }, []);
 
@@ -59,9 +63,13 @@ export const Challenge: React.FC = () => {
                 setUserWon(true);
                 addXp(1000);
                 unlockBadge('badge-elite');
-                import('canvas-confetti').then((confetti) => {
-                    confetti.default({ particleCount: 200, spread: 100 });
-                });
+                import('canvas-confetti')
+                    .then((confetti) => {
+                        confetti.default({ particleCount: 200, spread: 100 });
+                    })
+                    .catch(() => {
+                        // Confetti animation failed to load - not critical
+                    });
             } else {
                 setCurrentIndex(prev => prev + 1);
             }
@@ -124,6 +132,14 @@ export const Challenge: React.FC = () => {
     }
 
     const question = questions[currentIndex];
+
+    if (!question) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <p className="text-muted-foreground">Loading questions...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-3xl mx-auto h-full flex flex-col justify-center">

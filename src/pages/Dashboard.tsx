@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { BadgeList } from '../components/BadgeList';
+import { MODULES } from '../data/modules';
 import { ArrowRight, Activity, BookOpen, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Dashboard: React.FC = () => {
-    const { xp, level, completedModules } = useGameStore();
+    const { xp, level, completedModules, currentModuleId } = useGameStore();
+    const currentModule = useMemo(
+        () => MODULES.find(m => m.id === currentModuleId),
+        [currentModuleId]
+    );
     const nextLevelXp = level * 1000;
     const progress = Math.min((xp / nextLevelXp) * 100, 100);
 
@@ -43,7 +48,7 @@ export const Dashboard: React.FC = () => {
                             <Activity className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm text-muted-foreground font-medium">Create Score</p>
+                            <p className="text-sm text-muted-foreground font-medium">Current Score</p>
                             <h3 className="text-2xl font-bold">{xp} XP</h3>
                         </div>
                     </div>
@@ -73,7 +78,7 @@ export const Dashboard: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground font-medium">Active Mission</p>
-                            <h3 className="text-lg font-bold truncate">SQL Injection</h3>
+                            <h3 className="text-lg font-bold truncate">{currentModule?.title || 'No Active Mission'}</h3>
                         </div>
                     </div>
                 </div>

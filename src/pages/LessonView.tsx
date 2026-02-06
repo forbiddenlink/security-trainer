@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MODULES } from '../data/modules';
 import { CodeEditor } from '../components/CodeEditor';
 import { useGameStore } from '../store/gameStore';
+import { verifyLabSubmission } from '../utils/labVerification';
 import { ChevronRight, ChevronLeft, CheckCircle, XCircle, Play, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,13 +42,17 @@ export const LessonView: React.FC = () => {
         if (isLastLesson) {
             completeModule(module.id);
             addXp(module.xpReward);
-            import('canvas-confetti').then((confetti) => {
-                confetti.default({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
+            import('canvas-confetti')
+                .then((confetti) => {
+                    confetti.default({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                })
+                .catch(() => {
+                    // Confetti animation failed to load - not critical
                 });
-            });
             setTimeout(() => navigate('/modules'), 1000);
         } else {
             setCurrentLessonIndex(prev => prev + 1);
@@ -61,13 +66,11 @@ export const LessonView: React.FC = () => {
     };
 
     const handleVerifyLab = () => {
-        if (!currentLesson.lab || !currentLesson.lab.verificationFunction) return;
+        if (!currentLesson.lab) return;
 
         try {
-            // Unsafe eval for demo purposes - in prod use a safe sandbox
-            // We use the stringified function from data
-            const verifyFn = eval(currentLesson.lab.verificationFunction);
-            const isCorrect = verifyFn(code);
+            // Use the secure verification registry instead of eval
+            const isCorrect = verifyLabSubmission(currentLesson.id, code);
 
             if (isCorrect) {
                 setLabOutput({ type: 'success', message: 'Vulnerability Patched! Excellent work.' });
@@ -233,7 +236,7 @@ export const LessonView: React.FC = () => {
 
                 <button
                     onClick={handleNext}
-                    disabled={currentLesson.type === 'quiz' && !quizSubmitted || (currentLesson.type === 'lab' && labOutput?.type !== 'success')}
+                    disabled={(currentLesson.type === 'quiz' && !quizSubmitted) || (currentLesson.type === 'lab' && labOutput?.type !== 'success')}
                     className={clsx(
                         "flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed",
                         isLastLesson ? "bg-emerald-500 text-white hover:bg-emerald-600" : "bg-primary text-primary-foreground hover:bg-primary/90"
