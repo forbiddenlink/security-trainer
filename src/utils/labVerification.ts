@@ -30,6 +30,15 @@ const PATTERNS = {
     CSRF_TOKEN_EXTRACT: 'csrfToken',
     CSRF_SESSION_CHECK: 'req.session.csrfToken',
     CSRF_INVALID_ERROR: 'Invalid CSRF token',
+
+    // Security Misconfiguration patterns
+    DEBUG_DISABLED: 'debug: false',
+    DEFAULT_ADMIN_USER: "username: 'admin'",
+    DEFAULT_ADMIN_PASS: "password: 'admin'",
+    DEFAULT_PASSWORD: "password: 'password'",
+    X_CONTENT_TYPE_OPTIONS: 'X-Content-Type-Options',
+    X_FRAME_OPTIONS: 'X-Frame-Options',
+    X_POWERED_BY: 'X-Powered-By',
 };
 
 /**
@@ -66,6 +75,32 @@ export const labVerifiers: Record<string, VerificationFn> = {
         const checksSessionToken = code.includes(PATTERNS.CSRF_SESSION_CHECK);
         const returnsInvalidError = code.includes(PATTERNS.CSRF_INVALID_ERROR);
         return extractsCsrfToken && checksSessionToken && returnsInvalidError;
+    },
+
+    // Security Misconfiguration Lab: Check for hardened configuration
+    'misconfig-lab': (code: string) => {
+        // Debug mode must be disabled
+        const debugDisabled = code.includes(PATTERNS.DEBUG_DISABLED);
+
+        // Default credentials must be changed
+        const noDefaultAdminUser = !code.includes(PATTERNS.DEFAULT_ADMIN_USER);
+        const noDefaultAdminPass = !code.includes(PATTERNS.DEFAULT_ADMIN_PASS);
+        const noDefaultPassword = !code.includes(PATTERNS.DEFAULT_PASSWORD);
+
+        // Security headers must be present
+        const hasContentTypeOptions = code.includes(PATTERNS.X_CONTENT_TYPE_OPTIONS);
+        const hasFrameOptions = code.includes(PATTERNS.X_FRAME_OPTIONS);
+
+        // X-Powered-By should be removed (information disclosure)
+        const noPoweredBy = !code.includes(PATTERNS.X_POWERED_BY);
+
+        return debugDisabled &&
+               noDefaultAdminUser &&
+               noDefaultAdminPass &&
+               noDefaultPassword &&
+               hasContentTypeOptions &&
+               hasFrameOptions &&
+               noPoweredBy;
     },
 };
 

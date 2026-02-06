@@ -166,3 +166,144 @@ function handleTransfer(req, res) {
         expect(verifyLabSubmission('csrf-lab', partialFix)).toBe(false);
     });
 });
+
+describe('Security Misconfiguration Module', () => {
+    const misconfigModule = MODULES.find(m => m.id === 'security-misconfig');
+
+    it('exists in the modules list', () => {
+        expect(misconfigModule).toBeDefined();
+    });
+
+    it('has correct structure', () => {
+        expect(misconfigModule!.title).toBe('Security Misconfiguration');
+        expect(misconfigModule!.difficulty).toBe('Intermediate');
+        expect(misconfigModule!.xpReward).toBe(350);
+        expect(misconfigModule!.locked).toBe(false);
+    });
+
+    it('has theory, quiz, and lab lessons', () => {
+        const lessonTypes = misconfigModule!.lessons.map(l => l.type);
+        expect(lessonTypes).toContain('theory');
+        expect(lessonTypes).toContain('quiz');
+        expect(lessonTypes).toContain('lab');
+    });
+
+    it('has exactly 7 lessons (1 theory, 5 quizzes, 1 lab)', () => {
+        expect(misconfigModule!.lessons.length).toBe(7);
+        expect(misconfigModule!.lessons.filter(l => l.type === 'theory').length).toBe(1);
+        expect(misconfigModule!.lessons.filter(l => l.type === 'quiz').length).toBe(5);
+        expect(misconfigModule!.lessons.filter(l => l.type === 'lab').length).toBe(1);
+    });
+
+    it('has a registered lab verifier', () => {
+        expect(labVerifiers['misconfig-lab']).toBeDefined();
+    });
+});
+
+describe('Security Misconfiguration Lab Verifier', () => {
+    const vulnerableConfig = `
+const serverConfig = {
+  port: 3000,
+  environment: 'production',
+  debug: true,
+
+  admin: {
+    username: 'admin',
+    password: 'admin'
+  },
+
+  headers: {
+    'X-Powered-By': 'Express'
+  }
+};
+    `;
+
+    const secureConfig = `
+const serverConfig = {
+  port: 3000,
+  environment: 'production',
+  debug: false,
+
+  admin: {
+    username: 'sysop_7x9k2',
+    password: 'K#9xL$mP2@vN8qR!'
+  },
+
+  headers: {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+  }
+};
+    `;
+
+    const partialFixDebugOnly = `
+const serverConfig = {
+  port: 3000,
+  environment: 'production',
+  debug: false,
+
+  admin: {
+    username: 'admin',
+    password: 'admin'
+  },
+
+  headers: {
+    'X-Powered-By': 'Express'
+  }
+};
+    `;
+
+    const partialFixMissingHeaders = `
+const serverConfig = {
+  port: 3000,
+  environment: 'production',
+  debug: false,
+
+  admin: {
+    username: 'secure_admin',
+    password: 'StrongP@ss123!'
+  },
+
+  headers: {}
+};
+    `;
+
+    const partialFixDefaultPassword = `
+const serverConfig = {
+  port: 3000,
+  environment: 'production',
+  debug: false,
+
+  admin: {
+    username: 'secure_admin',
+    password: 'password'
+  },
+
+  headers: {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY'
+  }
+};
+    `;
+
+    it('rejects vulnerable configuration with all issues', () => {
+        expect(verifyLabSubmission('misconfig-lab', vulnerableConfig)).toBe(false);
+    });
+
+    it('accepts properly secured configuration', () => {
+        expect(verifyLabSubmission('misconfig-lab', secureConfig)).toBe(true);
+    });
+
+    it('rejects partial fix that only disables debug', () => {
+        expect(verifyLabSubmission('misconfig-lab', partialFixDebugOnly)).toBe(false);
+    });
+
+    it('rejects partial fix missing security headers', () => {
+        expect(verifyLabSubmission('misconfig-lab', partialFixMissingHeaders)).toBe(false);
+    });
+
+    it('rejects config with common default password', () => {
+        expect(verifyLabSubmission('misconfig-lab', partialFixDefaultPassword)).toBe(false);
+    });
+});
