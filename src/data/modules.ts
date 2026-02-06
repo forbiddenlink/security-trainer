@@ -1621,5 +1621,367 @@ function loadSession(serializedData, signature, secretKey) {
                 }
             }
         ]
+    },
+    {
+        id: 'sensitive-data-exposure',
+        title: 'Sensitive Data Exposure',
+        description: 'Learn how to protect passwords, PII, and secrets from exposure through proper encryption, hashing, and secure handling practices.',
+        difficulty: 'Intermediate',
+        xpReward: 350,
+        locked: false,
+        lessons: [
+            {
+                id: 'data-exposure-theory',
+                title: 'The Art of Data Protection',
+                type: 'theory',
+                content: `
+# Sensitive Data Exposure
+
+Sensitive Data Exposure occurs when applications fail to adequately protect sensitive information such as financial data, healthcare records, credentials, and personally identifiable information (PII). This vulnerability consistently ranks among the most critical risks in the OWASP Top 10.
+
+## Mission Briefing: What's at Stake
+
+As a security operative, your mission is to protect three categories of classified data:
+
+1. **Credentials** - Passwords, API keys, tokens, and secrets
+2. **PII (Personally Identifiable Information)** - Names, SSNs, passport numbers, addresses
+3. **Financial Data** - Credit card numbers, bank accounts, transaction records
+
+When this data falls into enemy hands, the consequences are severe: identity theft, financial fraud, regulatory fines, and destroyed reputations.
+
+## The Threat Landscape
+
+### 1. Unencrypted Storage
+
+Storing sensitive data in plaintext is like leaving classified documents on a park bench.
+
+\`\`\`javascript
+// VULNERABLE: Plaintext password storage
+const user = {
+  email: "agent@hq.gov",
+  password: "TopSecret123!"  // Readable by anyone with DB access
+};
+
+db.users.insert(user);
+\`\`\`
+
+### 2. Weak Password Hashing
+
+Using outdated hashing algorithms (MD5, SHA-1) or hashing without salt is nearly as bad as plaintext.
+
+\`\`\`javascript
+// VULNERABLE: MD5 is easily cracked
+const hash = crypto.createHash('md5').update(password).digest('hex');
+
+// VULNERABLE: No salt means identical passwords produce identical hashes
+const hash = crypto.createHash('sha256').update(password).digest('hex');
+\`\`\`
+
+### 3. Exposed API Keys and Secrets
+
+Hardcoded secrets in source code or configuration files committed to version control.
+
+\`\`\`javascript
+// VULNERABLE: Secret exposed in code
+const API_KEY = "sk_live_abc123def456";  // Now in git history forever
+
+// VULNERABLE: .env file committed to repository
+// .env contents: DATABASE_URL=postgres://admin:password@prod-db:5432
+\`\`\`
+
+### 4. Logging Sensitive Data
+
+Debug logs that capture passwords, credit cards, or personal information.
+
+\`\`\`javascript
+// VULNERABLE: Logging sensitive data
+console.log("Login attempt:", { email, password });  // Password in logs!
+
+// VULNERABLE: Request logging with PII
+logger.info("Processing payment", { cardNumber, cvv, amount });
+\`\`\`
+
+### 5. Missing TLS/Encryption in Transit
+
+Transmitting sensitive data over unencrypted connections allows interception.
+
+\`\`\`javascript
+// VULNERABLE: HTTP instead of HTTPS
+fetch('http://api.example.com/auth', {
+  body: JSON.stringify({ username, password })
+});
+\`\`\`
+
+## Case Files: Real-World Breaches
+
+### Marriott International (2018)
+**Impact:** 500 million guest records exposed
+
+Attackers accessed the Starwood reservation database for four years. The breach exposed:
+- **Unencrypted passport numbers** for 5.25 million guests
+- Credit card numbers (encrypted, but keys were also stolen)
+- Names, addresses, phone numbers, email addresses
+
+**Root Cause:** Sensitive PII stored without encryption. Passport numbers were in plaintext.
+
+### Adobe Systems (2013)
+**Impact:** 153 million user records
+
+Adobe stored passwords using weak encryption (3DES in ECB mode with a single key for all users).
+
+- Identical passwords produced identical ciphertexts
+- Password hints stored in plaintext (revealed passwords like "my dog's name")
+- The same encryption key was used for years
+
+**Root Cause:** Encryption without proper password hashing; password hints exposed secrets.
+
+### GitHub Secret Scanning (Ongoing)
+**Impact:** Thousands of exposed credentials daily
+
+GitHub's secret scanning detects millions of exposed credentials per year:
+- AWS access keys
+- Stripe API keys
+- Database connection strings
+- OAuth tokens
+
+**Root Cause:** Developers accidentally commit secrets to public repositories.
+
+## Defense Strategies
+
+### 1. Hash Passwords with bcrypt or Argon2
+
+\`\`\`javascript
+// SECURE: bcrypt with automatic salting
+const bcrypt = require('bcrypt');
+
+async function hashPassword(password) {
+  const saltRounds = 12;
+  return bcrypt.hash(password, saltRounds);
+}
+
+async function verifyPassword(password, hash) {
+  return bcrypt.compare(password, hash);
+}
+\`\`\`
+
+### 2. Encrypt PII at Rest
+
+\`\`\`javascript
+// SECURE: AES-256-GCM encryption for PII
+const crypto = require('crypto');
+
+function encryptPII(data, key) {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+
+  let encrypted = cipher.update(data, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+
+  const authTag = cipher.getAuthTag();
+
+  return { encrypted, iv: iv.toString('hex'), authTag: authTag.toString('hex') };
+}
+\`\`\`
+
+### 3. Use Environment Variables for Secrets
+
+\`\`\`javascript
+// SECURE: Secrets from environment
+const apiKey = process.env.API_KEY;
+const dbPassword = process.env.DATABASE_PASSWORD;
+
+// .gitignore must include .env files!
+\`\`\`
+
+### 4. Sanitize Logs
+
+\`\`\`javascript
+// SECURE: Redact sensitive fields before logging
+function sanitizeForLogging(data) {
+  const sanitized = { ...data };
+
+  const sensitiveFields = ['password', 'ssn', 'cardNumber', 'cvv', 'apiKey'];
+
+  for (const field of sensitiveFields) {
+    if (sensitized[field]) {
+      sanitized[field] = '[REDACTED]';
+    }
+  }
+
+  return sanitized;
+}
+
+logger.info("User login", sanitizeForLogging({ email, password }));
+// Output: { email: "user@example.com", password: "[REDACTED]" }
+\`\`\`
+
+### 5. Enforce HTTPS Everywhere
+
+\`\`\`javascript
+// SECURE: HTTPS enforcement in Express
+app.use((req, res, next) => {
+  if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect(\`https://\${req.headers.host}\${req.url}\`);
+  }
+  next();
+});
+
+// Add HSTS header
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+\`\`\`
+
+## Key Takeaways
+
+1. **Never store passwords in plaintext** - Use bcrypt or Argon2 with proper salt rounds
+2. **Encrypt PII at rest** - Use AES-256-GCM for data like SSNs and passport numbers
+3. **Keep secrets out of code** - Use environment variables and secret managers
+4. **Sanitize all logs** - Remove sensitive data before logging
+5. **Enforce TLS everywhere** - HTTPS for all data in transit
+6. **Assume breach** - Encrypt data so it's useless when stolen
+                `
+            },
+            {
+                id: 'data-exposure-quiz-1',
+                title: 'Password Storage Assessment',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "Which password storage method provides the STRONGEST protection against offline attacks?",
+                    options: [
+                        "MD5 hashing",
+                        "SHA-256 hashing without salt",
+                        "AES-256 encryption with a server key",
+                        "bcrypt with a work factor of 12"
+                    ],
+                    correctAnswer: 3,
+                    explanation: "bcrypt is specifically designed for password hashing. It automatically handles salting, and the work factor (cost) makes brute-force attacks computationally expensive. MD5 and unsalted SHA-256 are fast to compute, making them vulnerable to rainbow tables and brute-force. AES encryption requires key management and is reversible, unlike proper hashing."
+                }
+            },
+            {
+                id: 'data-exposure-quiz-2',
+                title: 'Breach Analysis: Marriott',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "In the 2018 Marriott breach, what critical mistake led to 5.25 million passport numbers being exposed in readable form?",
+                    options: [
+                        "The passport numbers were encrypted but attackers stole the decryption key",
+                        "The passport numbers were stored in plaintext without encryption",
+                        "The database used weak password protection",
+                        "The passport images were accessible via direct URL"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "Marriott stored passport numbers in plaintext without any encryption. While credit card numbers were encrypted (though attackers may have obtained the keys), passport numbers had no cryptographic protection at all. This is a textbook case of sensitive data exposure through lack of encryption at rest."
+                }
+            },
+            {
+                id: 'data-exposure-quiz-3',
+                title: 'Breach Analysis: Adobe',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "Adobe's 2013 breach exposed 153 million passwords. What was the fundamental flaw in their password storage that allowed attackers to crack many passwords?",
+                    options: [
+                        "They stored passwords in plaintext",
+                        "They used encryption (not hashing) with a single key, so identical passwords produced identical ciphertexts",
+                        "They used MD5 without salt",
+                        "They stored passwords in a spreadsheet"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "Adobe used 3DES encryption in ECB mode with a single key for ALL users. This meant identical passwords produced identical ciphertexts. Attackers could identify common passwords by frequency analysis. Additionally, password hints were stored in plaintext, often revealing the actual passwords. The correct approach is to use a proper password hashing algorithm (bcrypt/Argon2) which produces unique hashes even for identical passwords."
+                }
+            },
+            {
+                id: 'data-exposure-quiz-4',
+                title: 'Secret Management',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "A developer accidentally commits an AWS access key to a public GitHub repository. What is the FIRST action they should take?",
+                    options: [
+                        "Delete the commit from the repository history",
+                        "Make the repository private",
+                        "Rotate (revoke and regenerate) the exposed credentials immediately",
+                        "Contact AWS support to report the exposure"
+                    ],
+                    correctAnswer: 2,
+                    explanation: "The FIRST priority is to rotate (revoke) the exposed credentials immediately. Automated scanners continuously scan GitHub for exposed secrets and can exploit them within minutes. Deleting from git history does not help because the secret was already pushed and may have been cached or cloned. Making the repo private does not revoke existing credentials. Always assume a committed secret has been compromised."
+                }
+            },
+            {
+                id: 'data-exposure-quiz-5',
+                title: 'Logging Best Practices',
+                type: 'quiz',
+                content: '',
+                quiz: {
+                    question: "Which of the following logging statements creates the MOST serious security risk?",
+                    options: [
+                        "logger.info('User logged in', { userId: user.id, timestamp: Date.now() })",
+                        "logger.error('Login failed', { email: req.body.email, password: req.body.password })",
+                        "logger.debug('Request received', { path: req.path, method: req.method })",
+                        "logger.warn('Rate limit exceeded', { ip: req.ip, endpoint: req.path })"
+                    ],
+                    correctAnswer: 1,
+                    explanation: "Logging the password creates a severe security risk. Passwords in logs can be exposed through log aggregation services, log files on disk, error reporting tools, or team members with log access. Even if hashed before storage, logging the raw password defeats the purpose of hashing. Sensitive data like passwords, credit cards, and SSNs should NEVER appear in logs."
+                }
+            },
+            {
+                id: 'data-exposure-lab',
+                title: 'Secure the User Data Handler',
+                type: 'lab',
+                content: 'The code below handles user registration but has multiple sensitive data exposure vulnerabilities: plaintext password storage, logging sensitive data, and unprotected PII. Your mission: Fix all vulnerabilities by implementing proper password hashing, log sanitization, and PII encryption.',
+                lab: {
+                    initialCode: `
+async function registerUser(userData) {
+  const { email, password, ssn, name } = userData;
+
+  // VULNERABLE: Logging sensitive data
+  console.log("Registering user:", { email, password, ssn });
+
+  // VULNERABLE: Storing password in plaintext
+  const user = {
+    email,
+    password: password,  // Plaintext!
+    ssn: ssn,            // Unencrypted PII!
+    name
+  };
+
+  await db.users.insert(user);
+
+  return { success: true, userId: user.id };
+}
+                    `,
+                    solutionCode: `
+async function registerUser(userData) {
+  const { email, password, ssn, name } = userData;
+
+  // SECURE: Sanitize logs - remove sensitive data
+  console.log("Registering user:", { email, password: '[REDACTED]', ssn: '[REDACTED]' });
+
+  // SECURE: Hash password with bcrypt
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  // SECURE: Encrypt PII with AES-256
+  const encryptedSSN = encrypt(ssn, process.env.ENCRYPTION_KEY);
+
+  const user = {
+    email,
+    password: hashedPassword,
+    ssn: encryptedSSN,
+    name
+  };
+
+  await db.users.insert(user);
+
+  return { success: true, userId: user.id };
+}
+                    `,
+                    instructions: "Fix the sensitive data exposure vulnerabilities:\n1. Sanitize the log statement by replacing password and ssn values with '[REDACTED]'\n2. Hash the password using bcrypt.hash(password, 12) and store as hashedPassword\n3. Encrypt the SSN using encrypt(ssn, process.env.ENCRYPTION_KEY) and store as encryptedSSN\n4. Update the user object to use hashedPassword and encryptedSSN instead of plaintext values"
+                }
+            }
+        ]
     }
 ];

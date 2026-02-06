@@ -71,6 +71,16 @@ const PATTERNS = {
     DESER_INVALID_FORMAT: 'Invalid session format',
     DESER_ALLOWED_ROLES: 'allowedRoles',
     DESER_INVALID_ROLE: 'Invalid role',
+
+    // Sensitive Data Exposure patterns
+    DATA_EXPOSURE_BCRYPT_HASH: 'bcrypt.hash',
+    DATA_EXPOSURE_HASHED_PASSWORD: 'hashedPassword',
+    DATA_EXPOSURE_ENCRYPT_CALL: 'encrypt(',
+    DATA_EXPOSURE_ENCRYPTION_KEY: 'process.env.ENCRYPTION_KEY',
+    DATA_EXPOSURE_ENCRYPTED_SSN: 'encryptedSSN',
+    DATA_EXPOSURE_REDACTED: '[REDACTED]',
+    DATA_EXPOSURE_PLAINTEXT_PASSWORD: 'password: password',
+    DATA_EXPOSURE_PLAINTEXT_SSN: 'ssn: ssn',
 };
 
 /**
@@ -221,6 +231,34 @@ export const labVerifiers: Record<string, VerificationFn> = {
                hasInvalidFormatError &&
                hasAllowedRoles &&
                hasInvalidRoleError;
+    },
+
+    // Sensitive Data Exposure Lab: Check for proper data protection practices
+    'data-exposure-lab': (code: string) => {
+        // Must hash passwords with bcrypt
+        const usesBcryptHash = code.includes(PATTERNS.DATA_EXPOSURE_BCRYPT_HASH);
+        const usesHashedPassword = code.includes(PATTERNS.DATA_EXPOSURE_HASHED_PASSWORD);
+
+        // Must encrypt PII
+        const usesEncryptCall = code.includes(PATTERNS.DATA_EXPOSURE_ENCRYPT_CALL);
+        const usesEncryptionKey = code.includes(PATTERNS.DATA_EXPOSURE_ENCRYPTION_KEY);
+        const usesEncryptedSSN = code.includes(PATTERNS.DATA_EXPOSURE_ENCRYPTED_SSN);
+
+        // Must sanitize logs with [REDACTED]
+        const hasRedacted = code.includes(PATTERNS.DATA_EXPOSURE_REDACTED);
+
+        // Must NOT have plaintext sensitive data in user object
+        const noPlaintextPassword = !code.includes(PATTERNS.DATA_EXPOSURE_PLAINTEXT_PASSWORD);
+        const noPlaintextSSN = !code.includes(PATTERNS.DATA_EXPOSURE_PLAINTEXT_SSN);
+
+        return usesBcryptHash &&
+               usesHashedPassword &&
+               usesEncryptCall &&
+               usesEncryptionKey &&
+               usesEncryptedSSN &&
+               hasRedacted &&
+               noPlaintextPassword &&
+               noPlaintextSSN;
     },
 };
 

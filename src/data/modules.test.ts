@@ -826,3 +826,226 @@ function loadSession(serializedData, signature, secretKey) {
         expect(verifyLabSubmission('deser-lab', partialFixNoRoleAllowlist)).toBe(false);
     });
 });
+
+describe('Sensitive Data Exposure Module', () => {
+    const dataExposureModule = MODULES.find(m => m.id === 'sensitive-data-exposure');
+
+    it('exists in the modules list', () => {
+        expect(dataExposureModule).toBeDefined();
+    });
+
+    it('has correct structure', () => {
+        expect(dataExposureModule!.title).toBe('Sensitive Data Exposure');
+        expect(dataExposureModule!.difficulty).toBe('Intermediate');
+        expect(dataExposureModule!.xpReward).toBe(350);
+        expect(dataExposureModule!.locked).toBe(false);
+    });
+
+    it('has theory, quiz, and lab lessons', () => {
+        const lessonTypes = dataExposureModule!.lessons.map(l => l.type);
+        expect(lessonTypes).toContain('theory');
+        expect(lessonTypes).toContain('quiz');
+        expect(lessonTypes).toContain('lab');
+    });
+
+    it('has exactly 7 lessons (1 theory, 5 quizzes, 1 lab)', () => {
+        expect(dataExposureModule!.lessons.length).toBe(7);
+        expect(dataExposureModule!.lessons.filter(l => l.type === 'theory').length).toBe(1);
+        expect(dataExposureModule!.lessons.filter(l => l.type === 'quiz').length).toBe(5);
+        expect(dataExposureModule!.lessons.filter(l => l.type === 'lab').length).toBe(1);
+    });
+
+    it('has a registered lab verifier', () => {
+        expect(labVerifiers['data-exposure-lab']).toBeDefined();
+    });
+
+    it('theory covers real-world breaches (Marriott)', () => {
+        const theoryLesson = dataExposureModule!.lessons.find(l => l.id === 'data-exposure-theory');
+        expect(theoryLesson!.content).toContain('Marriott');
+        expect(theoryLesson!.content).toContain('passport');
+        expect(theoryLesson!.content).toContain('plaintext');
+    });
+
+    it('theory covers Adobe breach and weak encryption', () => {
+        const theoryLesson = dataExposureModule!.lessons.find(l => l.id === 'data-exposure-theory');
+        expect(theoryLesson!.content).toContain('Adobe');
+        expect(theoryLesson!.content).toContain('3DES');
+        expect(theoryLesson!.content).toContain('identical passwords');
+    });
+
+    it('theory covers API key exposure in git', () => {
+        const theoryLesson = dataExposureModule!.lessons.find(l => l.id === 'data-exposure-theory');
+        expect(theoryLesson!.content).toContain('GitHub');
+        expect(theoryLesson!.content).toContain('API');
+        expect(theoryLesson!.content).toContain('git');
+    });
+
+    it('theory explains bcrypt for password hashing', () => {
+        const theoryLesson = dataExposureModule!.lessons.find(l => l.id === 'data-exposure-theory');
+        expect(theoryLesson!.content).toContain('bcrypt');
+        expect(theoryLesson!.content).toContain('hash');
+        expect(theoryLesson!.content).toContain('salt');
+    });
+
+    it('theory covers PII encryption', () => {
+        const theoryLesson = dataExposureModule!.lessons.find(l => l.id === 'data-exposure-theory');
+        expect(theoryLesson!.content).toContain('AES-256');
+        expect(theoryLesson!.content).toContain('encrypt');
+        expect(theoryLesson!.content).toContain('PII');
+    });
+
+    it('theory covers log sanitization', () => {
+        const theoryLesson = dataExposureModule!.lessons.find(l => l.id === 'data-exposure-theory');
+        expect(theoryLesson!.content).toContain('Sanitize');
+        expect(theoryLesson!.content).toContain('REDACTED');
+        expect(theoryLesson!.content).toContain('logging');
+    });
+});
+
+describe('Sensitive Data Exposure Lab Verifier', () => {
+    const vulnerableCode = `
+async function registerUser(userData) {
+  const { email, password, ssn, name } = userData;
+
+  console.log("Registering user:", { email, password, ssn });
+
+  const user = {
+    email,
+    password: password,
+    ssn: ssn,
+    name
+  };
+
+  await db.users.insert(user);
+  return { success: true, userId: user.id };
+}
+    `;
+
+    const secureCode = `
+async function registerUser(userData) {
+  const { email, password, ssn, name } = userData;
+
+  console.log("Registering user:", { email, password: '[REDACTED]', ssn: '[REDACTED]' });
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+  const encryptedSSN = encrypt(ssn, process.env.ENCRYPTION_KEY);
+
+  const user = {
+    email,
+    password: hashedPassword,
+    ssn: encryptedSSN,
+    name
+  };
+
+  await db.users.insert(user);
+  return { success: true, userId: user.id };
+}
+    `;
+
+    const partialFixNoPasswordHashing = `
+async function registerUser(userData) {
+  const { email, password, ssn, name } = userData;
+
+  console.log("Registering user:", { email, password: '[REDACTED]', ssn: '[REDACTED]' });
+
+  const encryptedSSN = encrypt(ssn, process.env.ENCRYPTION_KEY);
+
+  const user = {
+    email,
+    password: password,
+    ssn: encryptedSSN,
+    name
+  };
+
+  await db.users.insert(user);
+  return { success: true, userId: user.id };
+}
+    `;
+
+    const partialFixNoEncryption = `
+async function registerUser(userData) {
+  const { email, password, ssn, name } = userData;
+
+  console.log("Registering user:", { email, password: '[REDACTED]', ssn: '[REDACTED]' });
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  const user = {
+    email,
+    password: hashedPassword,
+    ssn: ssn,
+    name
+  };
+
+  await db.users.insert(user);
+  return { success: true, userId: user.id };
+}
+    `;
+
+    const partialFixNoLogSanitization = `
+async function registerUser(userData) {
+  const { email, password, ssn, name } = userData;
+
+  console.log("Registering user:", { email, password, ssn });
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+  const encryptedSSN = encrypt(ssn, process.env.ENCRYPTION_KEY);
+
+  const user = {
+    email,
+    password: hashedPassword,
+    ssn: encryptedSSN,
+    name
+  };
+
+  await db.users.insert(user);
+  return { success: true, userId: user.id };
+}
+    `;
+
+    const partialFixPlaintextInUserObject = `
+async function registerUser(userData) {
+  const { email, password, ssn, name } = userData;
+
+  console.log("Registering user:", { email, password: '[REDACTED]', ssn: '[REDACTED]' });
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+  const encryptedSSN = encrypt(ssn, process.env.ENCRYPTION_KEY);
+
+  // Still using plaintext values in user object!
+  const user = {
+    email,
+    password: password,
+    ssn: ssn,
+    name
+  };
+
+  await db.users.insert(user);
+  return { success: true, userId: user.id };
+}
+    `;
+
+    it('rejects vulnerable code with all exposure issues', () => {
+        expect(verifyLabSubmission('data-exposure-lab', vulnerableCode)).toBe(false);
+    });
+
+    it('accepts properly secured code with all protections', () => {
+        expect(verifyLabSubmission('data-exposure-lab', secureCode)).toBe(true);
+    });
+
+    it('rejects partial fix missing password hashing', () => {
+        expect(verifyLabSubmission('data-exposure-lab', partialFixNoPasswordHashing)).toBe(false);
+    });
+
+    it('rejects partial fix missing PII encryption', () => {
+        expect(verifyLabSubmission('data-exposure-lab', partialFixNoEncryption)).toBe(false);
+    });
+
+    it('rejects partial fix missing log sanitization', () => {
+        expect(verifyLabSubmission('data-exposure-lab', partialFixNoLogSanitization)).toBe(false);
+    });
+
+    it('rejects code with plaintext values in user object', () => {
+        expect(verifyLabSubmission('data-exposure-lab', partialFixPlaintextInUserObject)).toBe(false);
+    });
+});
