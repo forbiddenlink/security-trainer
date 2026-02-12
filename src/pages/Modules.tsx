@@ -24,36 +24,44 @@ export const Modules: React.FC = () => {
                         <div
                             key={module.id}
                             className={clsx(
-                                "group relative overflow-hidden rounded-xl border p-6 transition-all hover:shadow-lg",
-                                isLocked ? "bg-muted/10 border-border opacity-70" : "bg-card border-border hover:border-primary/50"
+                                "group relative overflow-hidden rounded-xl border p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1",
+                                isLocked 
+                                    ? "bg-muted/10 border-border opacity-70" 
+                                    : "bg-card border-border hover:border-primary/50"
                             )}
                         >
+                            {/* Card Glow Effect */}
+                            {!isLocked && (
+                                <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                            )}
+
                             <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative z-10">
                                 <div className="flex gap-4">
                                     <div className={clsx(
-                                        "p-4 rounded-xl",
-                                        isCompleted ? "bg-emerald-500/10 text-emerald-500" : "bg-blue-500/10 text-blue-500"
+                                        "p-4 rounded-xl relative overflow-hidden",
+                                        isCompleted ? "bg-emerald-500/10 text-emerald-500" : "bg-primary/10 text-primary"
                                     )}>
-                                        <Shield className="w-8 h-8" />
+                                        <div className="absolute inset-0 bg-current opacity-0 group-hover:opacity-10 transition-opacity" />
+                                        <Shield className="w-8 h-8 relative z-10" />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="text-xl font-bold">{module.title}</h3>
+                                            <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{module.title}</h3>
                                             {isCompleted && (
-                                                <span className="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                                                <span className="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                                                     <CheckCircle className="w-3 h-3" /> Completed
                                                 </span>
                                             )}
                                             <span className={clsx(
-                                                "text-xs px-2 py-0.5 rounded-full border",
-                                                module.difficulty === 'Beginner' ? "border-green-500/30 text-green-500" :
-                                                    module.difficulty === 'Intermediate' ? "border-yellow-500/30 text-yellow-500" :
-                                                        "border-red-500/30 text-red-500"
+                                                "text-xs px-2 py-0.5 rounded-full border font-mono",
+                                                module.difficulty === 'Beginner' ? "border-green-500/30 text-green-500 bg-green-500/5" :
+                                                    module.difficulty === 'Intermediate' ? "border-yellow-500/30 text-yellow-500 bg-yellow-500/5" :
+                                                        "border-red-500/30 text-red-500 bg-red-500/5"
                                             )}>
                                                 {module.difficulty}
                                             </span>
                                         </div>
-                                        <p className="text-muted-foreground max-w-xl">{module.description}</p>
+                                        <p className="text-muted-foreground max-w-xl group-hover:text-foreground/80 transition-colors">{module.description}</p>
                                     </div>
                                 </div>
 
@@ -64,20 +72,20 @@ export const Modules: React.FC = () => {
                                     </div>
 
                                     {isLocked ? (
-                                        <button disabled className="flex items-center gap-2 px-6 py-3 rounded-lg bg-muted text-muted-foreground font-bold cursor-not-allowed">
+                                        <button disabled className="flex items-center gap-2 px-6 py-3 rounded-lg bg-muted text-muted-foreground font-bold cursor-not-allowed border border-transparent">
                                             <Lock className="w-4 h-4" /> Locked
                                         </button>
                                     ) : (
                                         <Link
                                             to={`/modules/${module.id}`}
                                             className={clsx(
-                                                "flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all",
+                                                "flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all relative overflow-hidden",
                                                 isCompleted
-                                                    ? "bg-muted hover:bg-muted/80 text-foreground"
-                                                    : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                                                    ? "bg-muted hover:bg-muted/80 text-foreground border border-border hover:border-primary/30"
+                                                    : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 hover:shadow-primary/40"
                                             )}
                                         >
-                                            {isCompleted ? 'Review' : 'Start Mission'}
+                                            <span className="relative z-10">{isCompleted ? 'Review' : 'Start Mission'}</span>
                                         </Link>
                                     )}
                                 </div>

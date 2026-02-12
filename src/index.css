@@ -34,35 +34,35 @@
   color-scheme: light;
 }
 
-/* Dark theme colors - spy/agent theme */
+/* Dark theme colors - Cyber Security / Hacker Theme */
 .dark {
-  --color-primary: #3b82f6;
-  --color-primary-foreground: #ffffff;
+  --color-primary: #00ff9d; /* Neon Green */
+  --color-primary-foreground: #000000;
 
-  --color-secondary: #0f172a;
-  --color-secondary-foreground: #f8fafc;
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #94a3b8;
 
-  --color-accent: #10b981;
+  --color-accent: #3b82f6; /* Neon Blue */
   --color-accent-foreground: #ffffff;
 
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
 
-  --color-background: #020617;
-  --color-foreground: #f8fafc;
+  --color-background: #0a0a0a; /* Deep Black */
+  --color-foreground: #e2e8f0;
 
-  --color-card: #1e293b;
-  --color-card-foreground: #f8fafc;
+  --color-card: #111111;
+  --color-card-foreground: #e2e8f0;
 
-  --color-popover: #0f172a;
-  --color-popover-foreground: #f8fafc;
+  --color-popover: #111111;
+  --color-popover-foreground: #e2e8f0;
 
-  --color-muted: #334155;
-  --color-muted-foreground: #94a3b8;
+  --color-muted: #262626;
+  --color-muted-foreground: #a1a1aa;
 
-  --color-border: #334155;
-  --color-input: #1e293b;
-  --color-ring: #3b82f6;
+  --color-border: #262626;
+  --color-input: #171717;
+  --color-ring: #00ff9d;
 
   color-scheme: dark;
 }
@@ -137,9 +137,42 @@ html.no-transitions * {
 :focus-visible {
   outline: 2px solid var(--color-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 255, 157, 0.2);
 }
 
 /* Remove focus outline for mouse users, keep for keyboard */
 :focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Custom Utilities */
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.2)
+  );
+  background-size: 100% 4px;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0.1;
+}
+
+.terminal-text {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
