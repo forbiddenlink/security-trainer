@@ -1,37 +1,15 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
+import { BADGES } from '../data/badges';
 import { Award, Lock } from 'lucide-react';
 import { clsx } from 'clsx';
-import type { Badge } from '../types';
-
-// Mock data for badges - in a real app this might come from a central config
-const ALL_BADGES: Badge[] = [
-    { id: 'recruit', name: 'Recruit', description: 'Joined the agency', icon: 'Award', condition: 'Start your first session' },
-    { id: 'sql-slayer', name: 'SQL Slayer', description: 'Defeated the SQL Injection beast', icon: 'Database', condition: 'Complete SQL Injection Module' },
-    { id: 'xss-terminator', name: 'XSS Terminator', description: 'Cleaned up the scripts', icon: 'Code', condition: 'Complete XSS Module' },
-    {
-        id: 'badge-completion',
-        name: 'Mission Complete',
-        description: 'Finished your first training module.',
-        icon: 'Flag',
-        condition: 'Complete 1 module'
-    },
-    {
-        id: 'badge-elite',
-        name: 'Elite Hacker',
-        description: 'Passed the Final Exam with 100% accuracy.',
-        icon: 'Skull',
-        condition: 'Perfect score in Challenge Mode'
-    },
-    { id: 'master-hacker', name: 'Master Operator', description: 'Reached Level 5', icon: 'Crown', condition: 'Reach Level 5' },
-];
 
 export const BadgeList: React.FC = () => {
     const { badges } = useGameStore();
 
     return (
         <ul className="grid grid-cols-2 md:grid-cols-4 gap-4" role="list" aria-label="Achievement badges">
-            {ALL_BADGES.map((badge) => {
+            {BADGES.map((badge) => {
                 const isUnlocked = badges.includes(badge.id);
                 return (
                     <li
