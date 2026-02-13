@@ -5,7 +5,7 @@ import { MODULES } from '../data/modules';
 import { CodeEditor } from '../components/CodeEditor';
 import { useGameStore } from '../store/gameStore';
 import { verifyLabSubmission } from '../utils/labVerification';
-import { ChevronRight, ChevronLeft, CheckCircle, XCircle, Play, AlertTriangle } from 'lucide-react';
+import { ChevronRight, ChevronLeft, CheckCircle, XCircle, Play, AlertTriangle, ChevronDown, BookOpen, Code, HelpCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,6 +25,7 @@ export const LessonView: React.FC = () => {
     const [labOutput, setLabOutput] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
     const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
     const [quizSubmitted, setQuizSubmitted] = useState(false);
+    const [showLessonMenu, setShowLessonMenu] = useState(false);
 
     const currentLesson = module?.lessons[currentLessonIndex];
     const isFirstLesson = currentLessonIndex === 0;
@@ -52,6 +53,20 @@ export const LessonView: React.FC = () => {
     }, [quizSubmitted]);
 
     if (!module || !currentLesson) return <div>Module not found</div>;
+
+    const getLessonIcon = (type: string) => {
+        switch (type) {
+            case 'theory': return BookOpen;
+            case 'lab': return Code;
+            case 'quiz': return HelpCircle;
+            default: return BookOpen;
+        }
+    };
+
+    const jumpToLesson = (index: number) => {
+        setCurrentLessonIndex(index);
+        setShowLessonMenu(false);
+    };
 
     const handleNext = () => {
         // Mark current lesson as complete
@@ -114,10 +129,59 @@ export const LessonView: React.FC = () => {
                         </span>
                     </h2>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-muted-foreground" aria-live="polite">
-                        Step {currentLessonIndex + 1} of {module.lessons.length}
-                    </span>
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowLessonMenu(!showLessonMenu)}
+                            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted"
+                            aria-expanded={showLessonMenu}
+                            aria-haspopup="true"
+                            aria-label={`Step ${currentLessonIndex + 1} of ${module.lessons.length}. Click to see all lessons.`}
+                        >
+                            Step {currentLessonIndex + 1} of {module.lessons.length}
+                            <ChevronDown className={clsx("w-4 h-4 transition-transform", showLessonMenu && "rotate-180")} aria-hidden="true" />
+                        </button>
+                        {showLessonMenu && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-40"
+                                    onClick={() => setShowLessonMenu(false)}
+                                    aria-hidden="true"
+                                />
+                                <div
+                                    className="absolute right-0 top-full mt-2 w-72 bg-card border border-border rounded-lg shadow-lg z-50 py-2 max-h-80 overflow-auto"
+                                    role="menu"
+                                    aria-label="Lesson navigation"
+                                >
+                                    {module.lessons.map((lesson, idx) => {
+                                        const Icon = getLessonIcon(lesson.type);
+                                        const isCurrent = idx === currentLessonIndex;
+                                        return (
+                                            <button
+                                                key={lesson.id}
+                                                onClick={() => jumpToLesson(idx)}
+                                                role="menuitem"
+                                                className={clsx(
+                                                    "w-full text-left px-4 py-2 flex items-center gap-3 hover:bg-muted transition-colors",
+                                                    isCurrent && "bg-primary/10 text-primary"
+                                                )}
+                                            >
+                                                <span className={clsx(
+                                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
+                                                    isCurrent ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                                                )}>
+                                                    {idx + 1}
+                                                </span>
+                                                <Icon className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                                                <span className="flex-1 truncate text-sm">{lesson.title}</span>
+                                                <span className="text-xs text-muted-foreground capitalize">{lesson.type}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </>
+                        )}
+                    </div>
                     <div
                         className="w-32 h-2 bg-muted rounded-full overflow-hidden"
                         role="progressbar"
