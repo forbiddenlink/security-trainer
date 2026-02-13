@@ -3,11 +3,13 @@ import { toPng } from 'html-to-image';
 import download from 'downloadjs';
 import { Shield, Award, CheckCircle } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
+import { useAuthStore } from '../store/authStore';
 
 export const Certificate: React.FC = () => {
     const ref = useRef<HTMLDivElement>(null);
     const { level } = useGameStore();
-    const name = "Agent Zero"; // In a real app, this would be the user's name
+    const { profile } = useAuthStore();
+    const name = profile?.display_name || 'Agent';
     const date = new Date().toLocaleDateString();
 
     const handleDownload = useCallback(() => {

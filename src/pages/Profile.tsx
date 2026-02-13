@@ -1,12 +1,16 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { useAuthStore } from '../store/authStore';
 import { BadgeList } from '../components/BadgeList';
-import { User, Shield, Zap, Calendar, Award } from 'lucide-react';
+import { MODULES } from '../data/modules';
+import { User, Shield, Trophy, Target, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Certificate } from '../components/Certificate';
 
 export const Profile: React.FC = () => {
     const { xp, level, streakDays, completedModules, checkStreak } = useGameStore();
+    const { profile } = useAuthStore();
+    const displayName = profile?.display_name || 'Agent';
 
     useEffect(() => {
         checkStreak();
@@ -27,7 +31,7 @@ export const Profile: React.FC = () => {
                         </div>
                     </div>
                     <div className="text-center">
-                        <h2 className="text-2xl font-bold">Agent Zero</h2>
+                        <h2 className="text-2xl font-bold">{displayName}</h2>
                         <p className="text-primary font-mono text-sm uppercase tracking-widest mt-1">Level {level} Operator</p>
                     </div>
                     <div className="w-full h-px bg-border my-2" />
@@ -72,20 +76,20 @@ export const Profile: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="bg-card border border-border p-6 rounded-xl flex items-center gap-4">
                             <div className="p-3 bg-amber-500/10 text-amber-500 rounded-lg">
-                                <Zap className="w-6 h-6" />
+                                <Trophy className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-lg font-bold">High/Low</p>
-                                <p className="text-sm text-muted-foreground">Activity Rate</p>
+                                <p className="text-lg font-bold">{xp.toLocaleString()}</p>
+                                <p className="text-sm text-muted-foreground">Total XP</p>
                             </div>
                         </div>
                         <div className="bg-card border border-border p-6 rounded-xl flex items-center gap-4">
                             <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-lg">
-                                <Calendar className="w-6 h-6" />
+                                <Target className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-lg font-bold">Active</p>
-                                <p className="text-sm text-muted-foreground">Status</p>
+                                <p className="text-lg font-bold">{Math.round((completedModules.length / MODULES.length) * 100)}%</p>
+                                <p className="text-sm text-muted-foreground">Training Complete</p>
                             </div>
                         </div>
                     </div>

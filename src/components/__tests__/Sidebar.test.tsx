@@ -89,10 +89,10 @@ describe('Sidebar', () => {
     });
 
     describe('footer information', () => {
-        it('displays Security Clearance label', () => {
+        it('displays Clearance label', () => {
             renderWithRouter(<Sidebar />);
 
-            expect(screen.getByText(/Security Clearance:/i)).toBeInTheDocument();
+            expect(screen.getByText(/Clearance:/i)).toBeInTheDocument();
         });
 
         it('displays Classified status', () => {
@@ -104,7 +104,7 @@ describe('Sidebar', () => {
         it('displays system version', () => {
             renderWithRouter(<Sidebar />);
 
-            expect(screen.getByText('System v1.0.0')).toBeInTheDocument();
+            expect(screen.getByText('v1.0.0')).toBeInTheDocument();
         });
     });
 

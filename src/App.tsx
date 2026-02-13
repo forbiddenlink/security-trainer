@@ -30,6 +30,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/modules" element={<Modules />} />
           <Route path="/modules/:moduleId" element={<LessonView />} />
+          <Route path="/modules/:moduleId/:lessonId" element={<LessonView />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/challenge" element={<Challenge />} />
           <Route path="/leaderboard" element={<Leaderboard />} />

@@ -63,7 +63,9 @@ describe('LessonView', () => {
             renderWithRouter(<LessonView />);
 
             expect(screen.getByText('Introduction to OWASP')).toBeInTheDocument();
-            expect(screen.getByText('What is OWASP?')).toBeInTheDocument();
+            // Lesson title appears in header and as markdown h1, so use getAllByText
+            const lessonTitles = screen.getAllByText('What is OWASP?');
+            expect(lessonTitles.length).toBeGreaterThanOrEqual(1);
         });
 
         it('shows lesson type badge', () => {

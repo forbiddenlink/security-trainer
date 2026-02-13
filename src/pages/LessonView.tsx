@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { MODULES } from '../data/modules';
 import { CodeEditor } from '../components/CodeEditor';
 import { useGameStore } from '../store/gameStore';
@@ -9,12 +10,17 @@ import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const LessonView: React.FC = () => {
-    const { moduleId } = useParams<{ moduleId: string }>();
+    const { moduleId, lessonId } = useParams<{ moduleId: string; lessonId?: string }>();
     const navigate = useNavigate();
     const { completeModule, completeLesson, addXp } = useGameStore();
 
     const module = MODULES.find(m => m.id === moduleId);
-    const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
+
+    // Find initial lesson index from URL param, or default to 0
+    const initialLessonIndex = lessonId && module
+        ? Math.max(0, module.lessons.findIndex(l => l.id === lessonId))
+        : 0;
+    const [currentLessonIndex, setCurrentLessonIndex] = useState(initialLessonIndex);
     const [code, setCode] = useState('');
     const [labOutput, setLabOutput] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
     const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
@@ -141,10 +147,8 @@ export const LessonView: React.FC = () => {
                     >
                         {/* THEORY VIEW */}
                         {currentLesson.type === 'theory' && (
-                            <div className="max-w-3xl mx-auto prose prose-invert">
-                                <div className="whitespace-pre-wrap font-sans text-lg leading-relaxed">
-                                    {currentLesson.content}
-                                </div>
+                            <div className="max-w-3xl mx-auto prose prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-a:text-primary prose-li:text-foreground">
+                                <ReactMarkdown>{currentLesson.content || ''}</ReactMarkdown>
                             </div>
                         )}
 
