@@ -1,14 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
-import { Dashboard } from './pages/Dashboard';
-import { Modules } from './pages/Modules';
-import { LessonView } from './pages/LessonView';
-import { Profile } from './pages/Profile';
-import { Challenge } from './pages/Challenge';
-import { Leaderboard } from './pages/Leaderboard';
 import { useThemeStore } from './store/themeStore';
 import { AuthModal } from './components/AuthModal';
+
+// Lazy load pages for code splitting
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const Modules = lazy(() => import('./pages/Modules').then(m => ({ default: m.Modules })));
+const LessonView = lazy(() => import('./pages/LessonView').then(m => ({ default: m.LessonView })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const Challenge = lazy(() => import('./pages/Challenge').then(m => ({ default: m.Challenge })));
+const Leaderboard = lazy(() => import('./pages/Leaderboard').then(m => ({ default: m.Leaderboard })));
+
+// Simple loading fallback
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-64">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
 
 function App() {
   const { initializeTheme } = useThemeStore();
@@ -25,19 +34,21 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/modules" element={<Modules />} />
-          <Route path="/modules/:moduleId" element={<LessonView />} />
-          <Route path="/modules/:moduleId/:lessonId" element={<LessonView />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/challenge" element={<Challenge />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/modules" element={<Modules />} />
+            <Route path="/modules/:moduleId" element={<LessonView />} />
+            <Route path="/modules/:moduleId/:lessonId" element={<LessonView />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/challenge" element={<Challenge />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </Suspense>
       <AuthModal />
     </BrowserRouter>
   );
