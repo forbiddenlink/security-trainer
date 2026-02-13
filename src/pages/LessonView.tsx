@@ -22,7 +22,7 @@ export const LessonView: React.FC = () => {
         : 0;
     const [currentLessonIndex, setCurrentLessonIndex] = useState(initialLessonIndex);
     const [code, setCode] = useState('');
-    const [labOutput, setLabOutput] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+    const [labOutput, setLabOutput] = useState<{ type: 'success' | 'error' | 'info'; message: string; hints?: string[] } | null>(null);
     const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
     const [quizSubmitted, setQuizSubmitted] = useState(false);
     const [showLessonMenu, setShowLessonMenu] = useState(false);
@@ -104,12 +104,16 @@ export const LessonView: React.FC = () => {
 
         try {
             // Use the secure verification registry instead of eval
-            const isCorrect = verifyLabSubmission(currentLesson.id, code);
+            const result = verifyLabSubmission(currentLesson.id, code);
 
-            if (isCorrect) {
+            if (result.passed) {
                 setLabOutput({ type: 'success', message: 'Vulnerability Patched! Excellent work.' });
             } else {
-                setLabOutput({ type: 'error', message: 'Vulnerability still present. Review the code.' });
+                setLabOutput({
+                    type: 'error',
+                    message: 'Vulnerability still present. Review the hints below.',
+                    hints: result.hints
+                });
             }
         } catch {
             setLabOutput({ type: 'error', message: 'Syntax Error or Runtime Exception' });
@@ -309,6 +313,16 @@ export const LessonView: React.FC = () => {
                                                     {labOutput.type === 'success' ? 'System Secured' : 'Vulnerability Detected'}
                                                 </div>
                                                 <p className="text-sm mt-1">{labOutput.message}</p>
+                                                {labOutput.hints && labOutput.hints.length > 0 && (
+                                                    <ul className="mt-3 space-y-1 text-sm text-foreground/80">
+                                                        {labOutput.hints.map((hint, idx) => (
+                                                            <li key={idx} className="flex items-start gap-2">
+                                                                <span className="text-yellow-500 mt-0.5">→</span>
+                                                                {hint}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
                                             </div>
                                         )}
                                     </div>

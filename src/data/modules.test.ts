@@ -155,15 +155,15 @@ function handleTransfer(req, res) {
     `;
 
     it('rejects vulnerable code without CSRF protection', () => {
-        expect(verifyLabSubmission('csrf-lab', vulnerableCode)).toBe(false);
+        expect(verifyLabSubmission('csrf-lab', vulnerableCode).passed).toBe(false);
     });
 
     it('accepts properly secured code with CSRF token validation', () => {
-        expect(verifyLabSubmission('csrf-lab', secureCode)).toBe(true);
+        expect(verifyLabSubmission('csrf-lab', secureCode).passed).toBe(true);
     });
 
     it('rejects partial fix that only extracts token but does not validate', () => {
-        expect(verifyLabSubmission('csrf-lab', partialFix)).toBe(false);
+        expect(verifyLabSubmission('csrf-lab', partialFix).passed).toBe(false);
     });
 });
 
@@ -288,23 +288,23 @@ const serverConfig = {
     `;
 
     it('rejects vulnerable configuration with all issues', () => {
-        expect(verifyLabSubmission('misconfig-lab', vulnerableConfig)).toBe(false);
+        expect(verifyLabSubmission('misconfig-lab', vulnerableConfig).passed).toBe(false);
     });
 
     it('accepts properly secured configuration', () => {
-        expect(verifyLabSubmission('misconfig-lab', secureConfig)).toBe(true);
+        expect(verifyLabSubmission('misconfig-lab', secureConfig).passed).toBe(true);
     });
 
     it('rejects partial fix that only disables debug', () => {
-        expect(verifyLabSubmission('misconfig-lab', partialFixDebugOnly)).toBe(false);
+        expect(verifyLabSubmission('misconfig-lab', partialFixDebugOnly).passed).toBe(false);
     });
 
     it('rejects partial fix missing security headers', () => {
-        expect(verifyLabSubmission('misconfig-lab', partialFixMissingHeaders)).toBe(false);
+        expect(verifyLabSubmission('misconfig-lab', partialFixMissingHeaders).passed).toBe(false);
     });
 
     it('rejects config with common default password', () => {
-        expect(verifyLabSubmission('misconfig-lab', partialFixDefaultPassword)).toBe(false);
+        expect(verifyLabSubmission('misconfig-lab', partialFixDefaultPassword).passed).toBe(false);
     });
 });
 
@@ -484,23 +484,23 @@ function isPrivateIP(hostname) {
     `;
 
     it('rejects vulnerable code without any validation', () => {
-        expect(verifyLabSubmission('ssrf-lab', vulnerableCode)).toBe(false);
+        expect(verifyLabSubmission('ssrf-lab', vulnerableCode).passed).toBe(false);
     });
 
     it('accepts properly secured code with all protections', () => {
-        expect(verifyLabSubmission('ssrf-lab', secureCode)).toBe(true);
+        expect(verifyLabSubmission('ssrf-lab', secureCode).passed).toBe(true);
     });
 
     it('rejects partial fix missing protocol check', () => {
-        expect(verifyLabSubmission('ssrf-lab', partialFixNoProtocolCheck)).toBe(false);
+        expect(verifyLabSubmission('ssrf-lab', partialFixNoProtocolCheck).passed).toBe(false);
     });
 
     it('rejects partial fix missing metadata endpoint block', () => {
-        expect(verifyLabSubmission('ssrf-lab', partialFixNoMetadataBlock)).toBe(false);
+        expect(verifyLabSubmission('ssrf-lab', partialFixNoMetadataBlock).passed).toBe(false);
     });
 
     it('rejects partial fix missing domain allowlist', () => {
-        expect(verifyLabSubmission('ssrf-lab', partialFixNoAllowlist)).toBe(false);
+        expect(verifyLabSubmission('ssrf-lab', partialFixNoAllowlist).passed).toBe(false);
     });
 });
 
@@ -632,23 +632,23 @@ function parseUserXml(xmlInput) {
     `;
 
     it('rejects vulnerable code without any protection', () => {
-        expect(verifyLabSubmission('xxe-lab', vulnerableCode)).toBe(false);
+        expect(verifyLabSubmission('xxe-lab', vulnerableCode).passed).toBe(false);
     });
 
     it('accepts properly secured code with all protections', () => {
-        expect(verifyLabSubmission('xxe-lab', secureCode)).toBe(true);
+        expect(verifyLabSubmission('xxe-lab', secureCode).passed).toBe(true);
     });
 
     it('rejects partial fix missing input validation', () => {
-        expect(verifyLabSubmission('xxe-lab', partialFixNoInputValidation)).toBe(false);
+        expect(verifyLabSubmission('xxe-lab', partialFixNoInputValidation).passed).toBe(false);
     });
 
     it('rejects partial fix missing parser configuration', () => {
-        expect(verifyLabSubmission('xxe-lab', partialFixNoParserConfig)).toBe(false);
+        expect(verifyLabSubmission('xxe-lab', partialFixNoParserConfig).passed).toBe(false);
     });
 
     it('rejects partial fix missing some parser options', () => {
-        expect(verifyLabSubmission('xxe-lab', partialFixMissingOptions)).toBe(false);
+        expect(verifyLabSubmission('xxe-lab', partialFixMissingOptions).passed).toBe(false);
     });
 });
 
@@ -807,23 +807,23 @@ function loadSession(serializedData, signature, secretKey) {
     `;
 
     it('rejects vulnerable code using Function constructor', () => {
-        expect(verifyLabSubmission('deser-lab', vulnerableCode)).toBe(false);
+        expect(verifyLabSubmission('deser-lab', vulnerableCode).passed).toBe(false);
     });
 
     it('accepts properly secured code with all protections', () => {
-        expect(verifyLabSubmission('deser-lab', secureCode)).toBe(true);
+        expect(verifyLabSubmission('deser-lab', secureCode).passed).toBe(true);
     });
 
     it('rejects partial fix missing signature verification', () => {
-        expect(verifyLabSubmission('deser-lab', partialFixNoSignature)).toBe(false);
+        expect(verifyLabSubmission('deser-lab', partialFixNoSignature).passed).toBe(false);
     });
 
     it('rejects partial fix missing type validation', () => {
-        expect(verifyLabSubmission('deser-lab', partialFixNoTypeValidation)).toBe(false);
+        expect(verifyLabSubmission('deser-lab', partialFixNoTypeValidation).passed).toBe(false);
     });
 
     it('rejects partial fix missing role allowlist', () => {
-        expect(verifyLabSubmission('deser-lab', partialFixNoRoleAllowlist)).toBe(false);
+        expect(verifyLabSubmission('deser-lab', partialFixNoRoleAllowlist).passed).toBe(false);
     });
 });
 
@@ -1026,26 +1026,26 @@ async function registerUser(userData) {
     `;
 
     it('rejects vulnerable code with all exposure issues', () => {
-        expect(verifyLabSubmission('data-exposure-lab', vulnerableCode)).toBe(false);
+        expect(verifyLabSubmission('data-exposure-lab', vulnerableCode).passed).toBe(false);
     });
 
     it('accepts properly secured code with all protections', () => {
-        expect(verifyLabSubmission('data-exposure-lab', secureCode)).toBe(true);
+        expect(verifyLabSubmission('data-exposure-lab', secureCode).passed).toBe(true);
     });
 
     it('rejects partial fix missing password hashing', () => {
-        expect(verifyLabSubmission('data-exposure-lab', partialFixNoPasswordHashing)).toBe(false);
+        expect(verifyLabSubmission('data-exposure-lab', partialFixNoPasswordHashing).passed).toBe(false);
     });
 
     it('rejects partial fix missing PII encryption', () => {
-        expect(verifyLabSubmission('data-exposure-lab', partialFixNoEncryption)).toBe(false);
+        expect(verifyLabSubmission('data-exposure-lab', partialFixNoEncryption).passed).toBe(false);
     });
 
     it('rejects partial fix missing log sanitization', () => {
-        expect(verifyLabSubmission('data-exposure-lab', partialFixNoLogSanitization)).toBe(false);
+        expect(verifyLabSubmission('data-exposure-lab', partialFixNoLogSanitization).passed).toBe(false);
     });
 
     it('rejects code with plaintext values in user object', () => {
-        expect(verifyLabSubmission('data-exposure-lab', partialFixPlaintextInUserObject)).toBe(false);
+        expect(verifyLabSubmission('data-exposure-lab', partialFixPlaintextInUserObject).passed).toBe(false);
     });
 });

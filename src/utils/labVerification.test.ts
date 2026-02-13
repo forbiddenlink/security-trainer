@@ -3,9 +3,10 @@ import { verifyLabSubmission, labVerifiers } from './labVerification';
 
 describe('labVerification', () => {
     describe('verifyLabSubmission', () => {
-        it('returns false for unknown lab IDs', () => {
+        it('returns passed: false for unknown lab IDs', () => {
             const result = verifyLabSubmission('unknown-lab', 'some code');
-            expect(result).toBe(false);
+            expect(result.passed).toBe(false);
+            expect(result.hints).toContain('Unknown lab exercise');
         });
     });
 
@@ -20,7 +21,7 @@ function getUser(username) {
 }
             `;
 
-            expect(verifyLabSubmission(labId, secureCode)).toBe(true);
+            expect(verifyLabSubmission(labId, secureCode).passed).toBe(true);
         });
 
         it('fails when code still uses string concatenation', () => {
@@ -31,7 +32,7 @@ function getUser(username) {
 }
             `;
 
-            expect(verifyLabSubmission(labId, vulnerableCode)).toBe(false);
+            expect(verifyLabSubmission(labId, vulnerableCode).passed).toBe(false);
         });
 
         it('fails when missing parameter array', () => {
@@ -42,7 +43,7 @@ function getUser(username) {
 }
             `;
 
-            expect(verifyLabSubmission(labId, incompleteCode)).toBe(false);
+            expect(verifyLabSubmission(labId, incompleteCode).passed).toBe(false);
         });
     });
 
@@ -61,7 +62,7 @@ function Comment({ userComment }) {
 }
             `;
 
-            expect(verifyLabSubmission(labId, secureCode)).toBe(true);
+            expect(verifyLabSubmission(labId, secureCode).passed).toBe(true);
         });
 
         it('fails when dangerous HTML rendering is still present', () => {
@@ -78,7 +79,7 @@ function Comment({ userComment }) {
 }
             `;
 
-            expect(verifyLabSubmission(labId, vulnerableCode)).toBe(false);
+            expect(verifyLabSubmission(labId, vulnerableCode).passed).toBe(false);
         });
     });
 
@@ -102,7 +103,7 @@ function getDocument(user, docId) {
 }
             `;
 
-            expect(verifyLabSubmission(labId, secureCode)).toBe(true);
+            expect(verifyLabSubmission(labId, secureCode).passed).toBe(true);
         });
 
         it('fails when ownership check is missing', () => {
@@ -118,7 +119,7 @@ function getDocument(user, docId) {
 }
             `;
 
-            expect(verifyLabSubmission(labId, vulnerableCode)).toBe(false);
+            expect(verifyLabSubmission(labId, vulnerableCode).passed).toBe(false);
         });
 
         it('fails when Unauthorized error is not returned', () => {
@@ -138,7 +139,7 @@ function getDocument(user, docId) {
 }
             `;
 
-            expect(verifyLabSubmission(labId, incompleteCode)).toBe(false);
+            expect(verifyLabSubmission(labId, incompleteCode).passed).toBe(false);
         });
     });
 

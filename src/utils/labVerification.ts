@@ -8,7 +8,12 @@
  * 3. Easy to test and audit
  */
 
-type VerificationFn = (code: string) => boolean;
+export interface VerificationResult {
+    passed: boolean;
+    hints: string[];
+}
+
+type VerificationFn = (code: string) => VerificationResult;
 
 // Pattern constants to avoid magic strings
 const PATTERNS = {
@@ -90,188 +95,198 @@ const PATTERNS = {
 export const labVerifiers: Record<string, VerificationFn> = {
     // SQL Injection Lab: Check for parameterized query pattern
     'sqli-lab': (code: string) => {
+        const hints: string[] = [];
         const hasPlaceholder = code.includes(PATTERNS.PARAMETERIZED_PLACEHOLDER);
         const hasParameterArray = code.includes(PATTERNS.PARAMETER_ARRAY);
         const noStringConcat = !code.includes(PATTERNS.STRING_CONCAT_VULN);
-        return hasPlaceholder && hasParameterArray && noStringConcat;
+
+        if (!noStringConcat) hints.push("Remove string concatenation - don't build SQL with '+' operator");
+        if (!hasPlaceholder) hints.push("Use a placeholder '?' in your SQL query instead of the variable");
+        if (!hasParameterArray) hints.push("Pass the username as an array parameter: db.execute(query, [username])");
+
+        return { passed: hasPlaceholder && hasParameterArray && noStringConcat, hints };
     },
 
     // XSS Lab: Check that the dangerous HTML prop is removed
     'xss-lab': (code: string) => {
+        const hints: string[] = [];
         const noDangerousHtml = !code.includes(PATTERNS.DANGEROUS_INNER_HTML);
         const hasJsxVariable = code.includes(PATTERNS.JSX_VARIABLE_RENDER);
-        return noDangerousHtml && hasJsxVariable;
+
+        if (!noDangerousHtml) hints.push("Remove dangerouslySetInnerHTML - it allows raw HTML injection");
+        if (!hasJsxVariable) hints.push("Render the variable using JSX syntax: {userComment}");
+
+        return { passed: noDangerousHtml && hasJsxVariable, hints };
     },
 
     // IDOR Lab: Check for ownership verification
     'idor-lab': (code: string) => {
+        const hints: string[] = [];
         const checksOwnerId = code.includes(PATTERNS.OWNER_ID_CHECK);
         const checksUserId = code.includes(PATTERNS.USER_ID_CHECK);
         const returnsUnauthorized = code.includes(PATTERNS.UNAUTHORIZED_ERROR);
-        return checksOwnerId && checksUserId && returnsUnauthorized;
+
+        if (!checksOwnerId) hints.push("Check the document's ownerId property");
+        if (!checksUserId) hints.push("Compare against the current user.id");
+        if (!returnsUnauthorized) hints.push("Return an 'Unauthorized' error when access is denied");
+
+        return { passed: checksOwnerId && checksUserId && returnsUnauthorized, hints };
     },
 
     // CSRF Lab: Check for CSRF token validation
     'csrf-lab': (code: string) => {
+        const hints: string[] = [];
         const extractsCsrfToken = code.includes(PATTERNS.CSRF_TOKEN_EXTRACT);
         const checksSessionToken = code.includes(PATTERNS.CSRF_SESSION_CHECK);
         const returnsInvalidError = code.includes(PATTERNS.CSRF_INVALID_ERROR);
-        return extractsCsrfToken && checksSessionToken && returnsInvalidError;
+
+        if (!extractsCsrfToken) hints.push("Extract the csrfToken from the request");
+        if (!checksSessionToken) hints.push("Compare the token against req.session.csrfToken");
+        if (!returnsInvalidError) hints.push("Return 'Invalid CSRF token' error when validation fails");
+
+        return { passed: extractsCsrfToken && checksSessionToken && returnsInvalidError, hints };
     },
 
     // Security Misconfiguration Lab: Check for hardened configuration
     'misconfig-lab': (code: string) => {
-        // Debug mode must be disabled
-        const debugDisabled = code.includes(PATTERNS.DEBUG_DISABLED);
+        const hints: string[] = [];
 
-        // Default credentials must be changed
+        const debugDisabled = code.includes(PATTERNS.DEBUG_DISABLED);
         const noDefaultAdminUser = !code.includes(PATTERNS.DEFAULT_ADMIN_USER);
         const noDefaultAdminPass = !code.includes(PATTERNS.DEFAULT_ADMIN_PASS);
         const noDefaultPassword = !code.includes(PATTERNS.DEFAULT_PASSWORD);
-
-        // Security headers must be present
         const hasContentTypeOptions = code.includes(PATTERNS.X_CONTENT_TYPE_OPTIONS);
         const hasFrameOptions = code.includes(PATTERNS.X_FRAME_OPTIONS);
-
-        // X-Powered-By should be removed (information disclosure)
         const noPoweredBy = !code.includes(PATTERNS.X_POWERED_BY);
 
-        return debugDisabled &&
-               noDefaultAdminUser &&
-               noDefaultAdminPass &&
-               noDefaultPassword &&
-               hasContentTypeOptions &&
-               hasFrameOptions &&
-               noPoweredBy;
+        if (!debugDisabled) hints.push("Set debug: false to disable debug mode in production");
+        if (!noDefaultAdminUser || !noDefaultAdminPass) hints.push("Change the default admin credentials");
+        if (!noDefaultPassword) hints.push("Remove any default passwords like 'password'");
+        if (!hasContentTypeOptions) hints.push("Add X-Content-Type-Options security header");
+        if (!hasFrameOptions) hints.push("Add X-Frame-Options security header");
+        if (!noPoweredBy) hints.push("Remove X-Powered-By header to hide server info");
+
+        const passed = debugDisabled && noDefaultAdminUser && noDefaultAdminPass &&
+                       noDefaultPassword && hasContentTypeOptions && hasFrameOptions && noPoweredBy;
+        return { passed, hints };
     },
 
     // SSRF Lab: Check for proper URL validation
     'ssrf-lab': (code: string) => {
-        // Must parse the URL properly
+        const hints: string[] = [];
+
         const parsesUrl = code.includes(PATTERNS.SSRF_URL_PARSE);
-
-        // Must check for HTTPS protocol
         const checksProtocol = code.includes(PATTERNS.SSRF_PROTOCOL_CHECK);
-
-        // Must have domain allowlist
         const hasAllowedDomains = code.includes(PATTERNS.SSRF_ALLOWED_DOMAINS);
         const hasDomainError = code.includes(PATTERNS.SSRF_DOMAIN_NOT_ALLOWED);
-
-        // Must have private IP detection function
         const hasPrivateIpCheck = code.includes(PATTERNS.SSRF_PRIVATE_IP_CHECK);
-
-        // Must block critical internal IPs
         const blocksLocalhost = code.includes(PATTERNS.SSRF_LOCALHOST_CHECK);
         const blocksLoopback = code.includes(PATTERNS.SSRF_LOOPBACK_CHECK);
         const blocksMetadata = code.includes(PATTERNS.SSRF_METADATA_CHECK);
-
-        // Must have proper error message
         const hasInternalBlockedError = code.includes(PATTERNS.SSRF_INTERNAL_BLOCKED);
 
-        return parsesUrl &&
-               checksProtocol &&
-               hasAllowedDomains &&
-               hasDomainError &&
-               hasPrivateIpCheck &&
-               blocksLocalhost &&
-               blocksLoopback &&
-               blocksMetadata &&
-               hasInternalBlockedError;
+        if (!parsesUrl) hints.push("Parse the URL using new URL() to extract components");
+        if (!checksProtocol) hints.push("Check that protocol !== 'https:' to enforce HTTPS");
+        if (!hasAllowedDomains || !hasDomainError) hints.push("Create an allowedDomains list and validate against it");
+        if (!hasPrivateIpCheck) hints.push("Add an isPrivateIP function to detect internal addresses");
+        if (!blocksLocalhost || !blocksLoopback) hints.push("Block localhost and 127.0.0.1");
+        if (!blocksMetadata) hints.push("Block cloud metadata IP 169.254.169.254");
+        if (!hasInternalBlockedError) hints.push("Return 'Internal IPs are blocked' error message");
+
+        const passed = parsesUrl && checksProtocol && hasAllowedDomains && hasDomainError &&
+                       hasPrivateIpCheck && blocksLocalhost && blocksLoopback && blocksMetadata && hasInternalBlockedError;
+        return { passed, hints };
     },
 
     // XXE Lab: Check for secure XML parser configuration
     'xxe-lab': (code: string) => {
-        // Must validate input for DOCTYPE and ENTITY declarations
+        const hints: string[] = [];
+
         const checksDoctypeInInput = code.includes(PATTERNS.XXE_DOCTYPE_CHECK);
         const checksEntityInInput = code.includes(PATTERNS.XXE_ENTITY_CHECK);
         const hasInputValidationError = code.includes(PATTERNS.XXE_INPUT_VALIDATION_ERROR);
-
-        // Must configure parser with security options
         const disablesDtd = code.includes(PATTERNS.XXE_ALLOW_DTD_FALSE);
         const disablesExternalEntities = code.includes(PATTERNS.XXE_RESOLVE_EXTERNAL_FALSE);
         const disablesProcessEntities = code.includes(PATTERNS.XXE_PROCESS_ENTITIES_FALSE);
         const disablesExpandEntity = code.includes(PATTERNS.XXE_EXPAND_ENTITY_FALSE);
 
-        return checksDoctypeInInput &&
-               checksEntityInInput &&
-               hasInputValidationError &&
-               disablesDtd &&
-               disablesExternalEntities &&
-               disablesProcessEntities &&
-               disablesExpandEntity;
+        if (!checksDoctypeInInput || !checksEntityInInput) hints.push("Check input for <!DOCTYPE and <!ENTITY declarations");
+        if (!hasInputValidationError) hints.push("Return 'DTD and entities are not allowed' error");
+        if (!disablesDtd) hints.push("Set allowDtd: false in parser options");
+        if (!disablesExternalEntities) hints.push("Set resolveExternalEntities: false");
+        if (!disablesProcessEntities) hints.push("Set processEntities: false");
+        if (!disablesExpandEntity) hints.push("Set expandEntityReferences: false");
+
+        const passed = checksDoctypeInInput && checksEntityInInput && hasInputValidationError &&
+                       disablesDtd && disablesExternalEntities && disablesProcessEntities && disablesExpandEntity;
+        return { passed, hints };
     },
 
     // Insecure Deserialization Lab: Check for safe deserialization practices
     'deser-lab': (code: string) => {
-        // Must use HMAC for signature verification
+        const hints: string[] = [];
+
         const usesHmac = code.includes(PATTERNS.DESER_HMAC_VERIFY);
         const usesSha256 = code.includes(PATTERNS.DESER_SHA256);
         const hasInvalidSignatureError = code.includes(PATTERNS.DESER_INVALID_SIGNATURE);
-
-        // Must use JSON.parse instead of Function constructor
         const usesJsonParse = code.includes(PATTERNS.DESER_JSON_PARSE);
         const noFunctionConstructor = !code.includes(PATTERNS.DESER_FUNCTION_CONSTRUCTOR);
-
-        // Must validate types
         const checksUserIdType = code.includes(PATTERNS.DESER_TYPE_CHECK_USERID);
         const checksRoleType = code.includes(PATTERNS.DESER_TYPE_CHECK_ROLE);
         const hasInvalidFormatError = code.includes(PATTERNS.DESER_INVALID_FORMAT);
-
-        // Must have role allowlist
         const hasAllowedRoles = code.includes(PATTERNS.DESER_ALLOWED_ROLES);
         const hasInvalidRoleError = code.includes(PATTERNS.DESER_INVALID_ROLE);
 
-        return usesHmac &&
-               usesSha256 &&
-               hasInvalidSignatureError &&
-               usesJsonParse &&
-               noFunctionConstructor &&
-               checksUserIdType &&
-               checksRoleType &&
-               hasInvalidFormatError &&
-               hasAllowedRoles &&
-               hasInvalidRoleError;
+        if (!usesHmac || !usesSha256) hints.push("Use createHmac with sha256 to verify signature");
+        if (!hasInvalidSignatureError) hints.push("Return 'Invalid signature' error when verification fails");
+        if (!noFunctionConstructor) hints.push("Replace Function constructor with JSON.parse");
+        if (!usesJsonParse) hints.push("Use JSON.parse for safe deserialization");
+        if (!checksUserIdType || !checksRoleType) hints.push("Validate typeof session.userId and typeof session.role");
+        if (!hasInvalidFormatError) hints.push("Return 'Invalid session format' for type mismatches");
+        if (!hasAllowedRoles || !hasInvalidRoleError) hints.push("Create allowedRoles list and return 'Invalid role' error");
+
+        const passed = usesHmac && usesSha256 && hasInvalidSignatureError && usesJsonParse &&
+                       noFunctionConstructor && checksUserIdType && checksRoleType &&
+                       hasInvalidFormatError && hasAllowedRoles && hasInvalidRoleError;
+        return { passed, hints };
     },
 
     // Sensitive Data Exposure Lab: Check for proper data protection practices
     'data-exposure-lab': (code: string) => {
-        // Must hash passwords with bcrypt
+        const hints: string[] = [];
+
         const usesBcryptHash = code.includes(PATTERNS.DATA_EXPOSURE_BCRYPT_HASH);
         const usesHashedPassword = code.includes(PATTERNS.DATA_EXPOSURE_HASHED_PASSWORD);
-
-        // Must encrypt PII
         const usesEncryptCall = code.includes(PATTERNS.DATA_EXPOSURE_ENCRYPT_CALL);
         const usesEncryptionKey = code.includes(PATTERNS.DATA_EXPOSURE_ENCRYPTION_KEY);
         const usesEncryptedSSN = code.includes(PATTERNS.DATA_EXPOSURE_ENCRYPTED_SSN);
-
-        // Must sanitize logs with [REDACTED]
         const hasRedacted = code.includes(PATTERNS.DATA_EXPOSURE_REDACTED);
-
-        // Must NOT have plaintext sensitive data in user object
         const noPlaintextPassword = !code.includes(PATTERNS.DATA_EXPOSURE_PLAINTEXT_PASSWORD);
         const noPlaintextSSN = !code.includes(PATTERNS.DATA_EXPOSURE_PLAINTEXT_SSN);
 
-        return usesBcryptHash &&
-               usesHashedPassword &&
-               usesEncryptCall &&
-               usesEncryptionKey &&
-               usesEncryptedSSN &&
-               hasRedacted &&
-               noPlaintextPassword &&
-               noPlaintextSSN;
+        if (!usesBcryptHash || !usesHashedPassword) hints.push("Hash passwords with bcrypt.hash and store as hashedPassword");
+        if (!usesEncryptCall || !usesEncryptionKey) hints.push("Encrypt PII using encrypt() with process.env.ENCRYPTION_KEY");
+        if (!usesEncryptedSSN) hints.push("Store SSN as encryptedSSN after encryption");
+        if (!hasRedacted) hints.push("Use [REDACTED] to sanitize sensitive data in logs");
+        if (!noPlaintextPassword) hints.push("Don't store plaintext password in user object");
+        if (!noPlaintextSSN) hints.push("Don't store plaintext ssn in user object");
+
+        const passed = usesBcryptHash && usesHashedPassword && usesEncryptCall &&
+                       usesEncryptionKey && usesEncryptedSSN && hasRedacted &&
+                       noPlaintextPassword && noPlaintextSSN;
+        return { passed, hints };
     },
 };
 
 /**
  * Verify a lab submission using the registered verifier.
- * Returns true if the code passes verification, false otherwise.
+ * Returns a VerificationResult with passed status and hints.
  */
-export function verifyLabSubmission(labId: string, code: string): boolean {
+export function verifyLabSubmission(labId: string, code: string): VerificationResult {
     const verifier = labVerifiers[labId];
     if (!verifier) {
         console.warn(`No verifier registered for lab: ${labId}`);
-        // Fail-safe: don't accept unverified labs
-        return false;
+        return { passed: false, hints: ['Unknown lab exercise'] };
     }
     return verifier(code);
 }
