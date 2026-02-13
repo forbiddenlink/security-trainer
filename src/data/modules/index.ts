@@ -11,6 +11,9 @@ import { ssrfAttacks } from './ssrf-attacks';
 import { xxeAttacks } from './xxe-attacks';
 import { insecureDeserialization } from './insecure-deserialization';
 import { sensitiveDataExposure } from './sensitive-data-exposure';
+import { clickjacking } from './clickjacking';
+import { jwtVulnerabilities } from './jwt-vulnerabilities';
+import { businessLogic } from './business-logic';
 
 export const MODULES: Module[] = [
     owaspIntro,
@@ -24,6 +27,9 @@ export const MODULES: Module[] = [
     xxeAttacks,
     insecureDeserialization,
     sensitiveDataExposure,
+    clickjacking,
+    jwtVulnerabilities,
+    businessLogic,
 ];
 
 // Re-export individual modules for direct imports
@@ -39,4 +45,7 @@ export {
     xxeAttacks,
     insecureDeserialization,
     sensitiveDataExposure,
+    clickjacking,
+    jwtVulnerabilities,
+    businessLogic,
 };

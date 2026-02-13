@@ -86,6 +86,29 @@ const PATTERNS = {
     DATA_EXPOSURE_REDACTED: '[REDACTED]',
     DATA_EXPOSURE_PLAINTEXT_PASSWORD: 'password: password',
     DATA_EXPOSURE_PLAINTEXT_SSN: 'ssn: ssn',
+
+    // Clickjacking patterns
+    CLICKJACK_X_FRAME_OPTIONS: 'X-Frame-Options',
+    CLICKJACK_DENY: 'DENY',
+    CLICKJACK_CSP: 'Content-Security-Policy',
+    CLICKJACK_FRAME_ANCESTORS: "frame-ancestors 'none'",
+
+    // JWT patterns
+    JWT_ALLOWED_ALGORITHMS: 'allowedAlgorithms',
+    JWT_RS256: "'RS256'",
+    JWT_ISSUER: 'issuer:',
+    JWT_AUDIENCE: 'audience:',
+    JWT_ALGORITHMS_OPTION: 'algorithms:',
+    JWT_NO_HEADER_ALG: 'decoded.header.alg',
+
+    // Business Logic patterns
+    BL_DB_FIND_ITEM: 'db.items.findById',
+    BL_ITEM_PRICE: 'item.price',
+    BL_SERVER_PRICE: 'serverPrice',
+    BL_CHECKOUT_STATE: 'checkoutState',
+    BL_PAYMENT_PENDING: 'payment_pending',
+    BL_STATE_UPDATE: 'checkoutStates.update',
+    BL_COMPLETED: 'completed',
 };
 
 /**
@@ -274,6 +297,69 @@ export const labVerifiers: Record<string, VerificationFn> = {
         const passed = usesBcryptHash && usesHashedPassword && usesEncryptCall &&
                        usesEncryptionKey && usesEncryptedSSN && hasRedacted &&
                        noPlaintextPassword && noPlaintextSSN;
+        return { passed, hints };
+    },
+
+    // Clickjacking Lab: Check for frame protection headers
+    'clickjacking-lab': (code: string) => {
+        const hints: string[] = [];
+
+        const hasXFrameOptions = code.includes(PATTERNS.CLICKJACK_X_FRAME_OPTIONS);
+        const hasDeny = code.includes(PATTERNS.CLICKJACK_DENY);
+        const hasCSP = code.includes(PATTERNS.CLICKJACK_CSP);
+        const hasFrameAncestors = code.includes(PATTERNS.CLICKJACK_FRAME_ANCESTORS);
+
+        if (!hasXFrameOptions || !hasDeny) hints.push("Set X-Frame-Options header to 'DENY'");
+        if (!hasCSP || !hasFrameAncestors) hints.push("Set Content-Security-Policy with frame-ancestors 'none'");
+
+        const passed = hasXFrameOptions && hasDeny && hasCSP && hasFrameAncestors;
+        return { passed, hints };
+    },
+
+    // JWT Lab: Check for secure JWT verification
+    'jwt-lab': (code: string) => {
+        const hints: string[] = [];
+
+        const hasAllowedAlgorithms = code.includes(PATTERNS.JWT_ALLOWED_ALGORITHMS);
+        const hasRS256 = code.includes(PATTERNS.JWT_RS256);
+        const hasAlgorithmsOption = code.includes(PATTERNS.JWT_ALGORITHMS_OPTION);
+        const hasIssuer = code.includes(PATTERNS.JWT_ISSUER);
+        const hasAudience = code.includes(PATTERNS.JWT_AUDIENCE);
+        const noHeaderAlg = !code.includes(PATTERNS.JWT_NO_HEADER_ALG);
+
+        if (!hasAllowedAlgorithms) hints.push("Create an allowedAlgorithms array to whitelist acceptable algorithms");
+        if (!hasRS256) hints.push("Include 'RS256' in your allowed algorithms");
+        if (!hasAlgorithmsOption) hints.push("Pass algorithms: option to jwt.verify with your whitelist");
+        if (!hasIssuer) hints.push("Add issuer: validation to jwt.verify options");
+        if (!hasAudience) hints.push("Add audience: validation to jwt.verify options");
+        if (!noHeaderAlg) hints.push("Don't read algorithm from token header - use your whitelist instead");
+
+        const passed = hasAllowedAlgorithms && hasRS256 && hasAlgorithmsOption &&
+                       hasIssuer && hasAudience && noHeaderAlg;
+        return { passed, hints };
+    },
+
+    // Business Logic Lab: Check for secure checkout implementation
+    'business-logic-lab': (code: string) => {
+        const hints: string[] = [];
+
+        const hasDbLookup = code.includes(PATTERNS.BL_DB_FIND_ITEM);
+        const hasItemPrice = code.includes(PATTERNS.BL_ITEM_PRICE);
+        const hasServerPrice = code.includes(PATTERNS.BL_SERVER_PRICE);
+        const hasCheckoutState = code.includes(PATTERNS.BL_CHECKOUT_STATE);
+        const hasPaymentPending = code.includes(PATTERNS.BL_PAYMENT_PENDING);
+        const hasStateUpdate = code.includes(PATTERNS.BL_STATE_UPDATE);
+        const hasCompleted = code.includes(PATTERNS.BL_COMPLETED);
+
+        if (!hasDbLookup) hints.push("Look up the item from database using db.items.findById(itemId)");
+        if (!hasItemPrice || !hasServerPrice) hints.push("Use item.price from database as serverPrice, don't trust client price");
+        if (!hasCheckoutState) hints.push("Retrieve checkout state to validate workflow");
+        if (!hasPaymentPending) hints.push("Check that checkoutState.step === 'payment_pending' before processing");
+        if (!hasStateUpdate) hints.push("Update checkout state using db.checkoutStates.update");
+        if (!hasCompleted) hints.push("Set state to 'completed' after successful payment");
+
+        const passed = hasDbLookup && hasItemPrice && hasServerPrice &&
+                       hasCheckoutState && hasPaymentPending && hasStateUpdate && hasCompleted;
         return { passed, hints };
     },
 };

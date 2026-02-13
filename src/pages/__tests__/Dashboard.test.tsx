@@ -70,7 +70,8 @@ describe('Dashboard', () => {
 
             renderWithRouter(<Dashboard />);
 
-            expect(screen.getByText('Introduction to OWASP')).toBeInTheDocument();
+            // Multiple elements may contain the title, check at least one exists
+            expect(screen.getAllByText('Introduction to OWASP').length).toBeGreaterThan(0);
         });
     });
 
