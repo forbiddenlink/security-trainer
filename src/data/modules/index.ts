@@ -19,6 +19,8 @@ import { loggingMonitoringModule } from "./logging-monitoring";
 import { commandInjection } from "./command-injection";
 import { pathTraversal } from "./path-traversal";
 import { fileUpload } from "./file-upload";
+import { corsMisconfig } from "./cors-misconfig";
+import { sessionManagement } from "./session-management";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -40,6 +42,8 @@ export const MODULES: Module[] = [
   commandInjection,
   pathTraversal,
   fileUpload,
+  corsMisconfig,
+  sessionManagement,
 ];
 
 // Re-export individual modules for direct imports
@@ -63,4 +67,6 @@ export {
   commandInjection,
   pathTraversal,
   fileUpload,
+  corsMisconfig,
+  sessionManagement,
 };

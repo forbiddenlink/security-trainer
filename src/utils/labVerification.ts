@@ -156,6 +156,19 @@ const PATTERNS = {
   UPLOAD_INVALID_TYPE: "Invalid file type",
   UPLOAD_RANDOM_UUID: "randomUUID",
   UPLOAD_SAFE_FILENAME: "safeFilename",
+
+  // CORS Misconfiguration patterns
+  CORS_ALLOWED_ORIGINS: "ALLOWED_ORIGINS",
+  CORS_INCLUDES_CHECK: ".includes(origin)",
+  CORS_ORIGIN_CHECK: "if (origin",
+  CORS_NO_REFLECT: "res.setHeader('Access-Control-Allow-Origin', origin)",
+
+  // Session Management patterns
+  SESSION_REGENERATE: "session.regenerate",
+  SESSION_HTTPONLY: "httpOnly: true",
+  SESSION_SECURE: "secure: true",
+  SESSION_SAMESITE: "sameSite:",
+  SESSION_MAXAGE: "maxAge:",
 };
 
 /**
@@ -803,6 +816,76 @@ export const labVerifiers: Record<string, VerificationFn> = {
       hasInvalidType &&
       hasRandomUUID &&
       hasSafeFilename;
+    return { passed, hints };
+  },
+
+  // CORS Misconfiguration Lab: Check for allowlist-based CORS
+  "cors-lab": (code: string) => {
+    const hints: string[] = [];
+    const hasAllowedOrigins = code.includes(PATTERNS.CORS_ALLOWED_ORIGINS);
+    const hasIncludesCheck = code.includes(PATTERNS.CORS_INCLUDES_CHECK);
+    const hasOriginCheck = code.includes(PATTERNS.CORS_ORIGIN_CHECK);
+
+    // Check that the origin reflection is now inside a conditional
+    const lines = code.split("\n");
+    let originReflectInConditional = false;
+    let inConditional = false;
+
+    for (const line of lines) {
+      if (line.includes("if") && line.includes("origin")) {
+        inConditional = true;
+      }
+      if (inConditional && line.includes("Access-Control-Allow-Origin")) {
+        originReflectInConditional = true;
+        break;
+      }
+      if (line.includes("}") && inConditional) {
+        inConditional = false;
+      }
+    }
+
+    if (!hasAllowedOrigins)
+      hints.push("Define an ALLOWED_ORIGINS array with trusted domains");
+    if (!hasIncludesCheck)
+      hints.push("Check if the origin is in the allowlist using .includes()");
+    if (!hasOriginCheck)
+      hints.push("Add a conditional check: if (origin && ...)");
+    if (!originReflectInConditional)
+      hints.push(
+        "Only set Access-Control-Allow-Origin inside the allowlist check",
+      );
+
+    const passed =
+      hasAllowedOrigins &&
+      hasIncludesCheck &&
+      hasOriginCheck &&
+      originReflectInConditional;
+    return { passed, hints };
+  },
+
+  // Session Management Lab: Check for secure session handling
+  "session-lab": (code: string) => {
+    const hints: string[] = [];
+    const hasRegenerate = code.includes(PATTERNS.SESSION_REGENERATE);
+    const hasHttpOnly = code.includes(PATTERNS.SESSION_HTTPONLY);
+    const hasSecure = code.includes(PATTERNS.SESSION_SECURE);
+    const hasSameSite = code.includes(PATTERNS.SESSION_SAMESITE);
+    const hasMaxAge = code.includes(PATTERNS.SESSION_MAXAGE);
+
+    if (!hasRegenerate)
+      hints.push(
+        "Call session.regenerate() after authentication to prevent session fixation",
+      );
+    if (!hasHttpOnly)
+      hints.push("Add httpOnly: true to prevent JavaScript cookie access");
+    if (!hasSecure)
+      hints.push("Add secure: true to ensure HTTPS-only transmission");
+    if (!hasSameSite)
+      hints.push("Add sameSite: 'Strict' or 'Lax' to prevent CSRF");
+    if (!hasMaxAge) hints.push("Add maxAge to set session expiration time");
+
+    const passed =
+      hasRegenerate && hasHttpOnly && hasSecure && hasSameSite && hasMaxAge;
     return { passed, hints };
   },
 };
