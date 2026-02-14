@@ -126,6 +126,14 @@ const PATTERNS = {
   LOG_USER_ID: "userId",
   LOG_IP_ADDRESS: "ip",
   LOG_CONSOLE_LOG: "console.log",
+
+  // Rate Limiting / Broken Auth patterns
+  AUTH_MAX_ATTEMPTS: "MAX_ATTEMPTS",
+  AUTH_LOCKOUT_TIME: "LOCKOUT_TIME",
+  AUTH_TOO_MANY_ATTEMPTS: "Too many attempts",
+  AUTH_STATUS_429: "429",
+  AUTH_LOGIN_ATTEMPTS_SET: "loginAttempts.set",
+  AUTH_LOGIN_ATTEMPTS_DELETE: "loginAttempts.delete",
 };
 
 /**
@@ -631,6 +639,44 @@ export const labVerifiers: Record<string, VerificationFn> = {
       hasSanitization &&
       logsUserId &&
       logsIp;
+    return { passed, hints };
+  },
+
+  // Broken Auth Lab: Check for rate limiting implementation
+  "auth-lab": (code: string) => {
+    const hints: string[] = [];
+
+    const hasMaxAttempts = code.includes(PATTERNS.AUTH_MAX_ATTEMPTS);
+    const hasLockoutTime = code.includes(PATTERNS.AUTH_LOCKOUT_TIME);
+    const hasTooManyAttemptsError = code.includes(
+      PATTERNS.AUTH_TOO_MANY_ATTEMPTS,
+    );
+    const hasStatus429 = code.includes(PATTERNS.AUTH_STATUS_429);
+    const tracksAttempts = code.includes(PATTERNS.AUTH_LOGIN_ATTEMPTS_SET);
+    const clearsOnSuccess = code.includes(PATTERNS.AUTH_LOGIN_ATTEMPTS_DELETE);
+
+    if (!hasMaxAttempts)
+      hints.push("Define MAX_ATTEMPTS constant (e.g., 5 attempts)");
+    if (!hasLockoutTime)
+      hints.push("Define LOCKOUT_TIME constant (e.g., 15 minutes in ms)");
+    if (!hasTooManyAttemptsError || !hasStatus429)
+      hints.push(
+        "Return 429 status with 'Too many attempts' error when locked out",
+      );
+    if (!tracksAttempts)
+      hints.push("Track failed attempts using loginAttempts.set()");
+    if (!clearsOnSuccess)
+      hints.push(
+        "Clear attempts on successful login with loginAttempts.delete()",
+      );
+
+    const passed =
+      hasMaxAttempts &&
+      hasLockoutTime &&
+      hasTooManyAttemptsError &&
+      hasStatus429 &&
+      tracksAttempts &&
+      clearsOnSuccess;
     return { passed, hints };
   },
 };
