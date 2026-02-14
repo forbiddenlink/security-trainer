@@ -134,6 +134,20 @@ const PATTERNS = {
   AUTH_STATUS_429: "429",
   AUTH_LOGIN_ATTEMPTS_SET: "loginAttempts.set",
   AUTH_LOGIN_ATTEMPTS_DELETE: "loginAttempts.delete",
+
+  // Command Injection patterns
+  CMDI_EXEC_FILE: "execFile",
+  CMDI_ARGS_ARRAY: "args",
+  CMDI_ALPHANUMERIC_CHECK: "/^[a-zA-Z0-9]+$/",
+  CMDI_INVALID_FORMAT: "Invalid format",
+  CMDI_NO_EXEC_CONCAT: "exec('convert ' +",
+
+  // Path Traversal patterns
+  PATH_RESOLVE: "path.resolve",
+  PATH_CANONICAL: "canonicalPath",
+  PATH_STARTS_WITH: "startsWith(UPLOADS_DIR)",
+  PATH_ACCESS_DENIED: "Access denied",
+  PATH_STATUS_403: "403",
 };
 
 /**
@@ -677,6 +691,72 @@ export const labVerifiers: Record<string, VerificationFn> = {
       hasStatus429 &&
       tracksAttempts &&
       clearsOnSuccess;
+    return { passed, hints };
+  },
+
+  // Command Injection Lab: Check for safe command execution
+  "cmdi-lab": (code: string) => {
+    const hints: string[] = [];
+
+    const usesExecFile = code.includes(PATTERNS.CMDI_EXEC_FILE);
+    const usesArgsArray = code.includes(PATTERNS.CMDI_ARGS_ARRAY);
+    const hasAlphanumericCheck =
+      code.includes(PATTERNS.CMDI_ALPHANUMERIC_CHECK) ||
+      code.includes("[a-zA-Z0-9]");
+    const hasInvalidFormatError = code.includes(PATTERNS.CMDI_INVALID_FORMAT);
+    const noExecConcat = !code.includes(PATTERNS.CMDI_NO_EXEC_CONCAT);
+
+    if (!usesExecFile)
+      hints.push(
+        "Replace exec() with execFile() to avoid shell interpretation",
+      );
+    if (!usesArgsArray)
+      hints.push("Pass command arguments as an array, not concatenated string");
+    if (!hasAlphanumericCheck)
+      hints.push(
+        "Add validation to ensure format contains only alphanumeric characters",
+      );
+    if (!hasInvalidFormatError)
+      hints.push("Return 'Invalid format' error when validation fails");
+    if (!noExecConcat)
+      hints.push("Remove the vulnerable exec() call with string concatenation");
+
+    const passed =
+      usesExecFile &&
+      usesArgsArray &&
+      hasAlphanumericCheck &&
+      hasInvalidFormatError &&
+      noExecConcat;
+    return { passed, hints };
+  },
+
+  // Path Traversal Lab: Check for secure path handling
+  "path-lab": (code: string) => {
+    const hints: string[] = [];
+
+    const usesPathResolve = code.includes(PATTERNS.PATH_RESOLVE);
+    const hasCanonicalVar = code.includes(PATTERNS.PATH_CANONICAL);
+    const checksStartsWith = code.includes(PATTERNS.PATH_STARTS_WITH);
+    const hasAccessDenied = code.includes(PATTERNS.PATH_ACCESS_DENIED);
+    const hasStatus403 = code.includes(PATTERNS.PATH_STATUS_403);
+
+    if (!usesPathResolve)
+      hints.push("Use path.resolve() to get the canonical absolute path");
+    if (!hasCanonicalVar)
+      hints.push("Store the resolved path in a canonicalPath variable");
+    if (!checksStartsWith)
+      hints.push("Check that canonicalPath.startsWith(UPLOADS_DIR)");
+    if (!hasAccessDenied || !hasStatus403)
+      hints.push(
+        "Return 403 status with 'Access denied' when path escapes allowed directory",
+      );
+
+    const passed =
+      usesPathResolve &&
+      hasCanonicalVar &&
+      checksStartsWith &&
+      hasAccessDenied &&
+      hasStatus403;
     return { passed, hints };
   },
 };

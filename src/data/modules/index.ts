@@ -16,6 +16,8 @@ import { jwtVulnerabilities } from "./jwt-vulnerabilities";
 import { businessLogic } from "./business-logic";
 import { vulnerableComponentsModule } from "./vulnerable-components";
 import { loggingMonitoringModule } from "./logging-monitoring";
+import { commandInjection } from "./command-injection";
+import { pathTraversal } from "./path-traversal";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -34,6 +36,8 @@ export const MODULES: Module[] = [
   businessLogic,
   vulnerableComponentsModule,
   loggingMonitoringModule,
+  commandInjection,
+  pathTraversal,
 ];
 
 // Re-export individual modules for direct imports
@@ -54,4 +58,6 @@ export {
   businessLogic,
   vulnerableComponentsModule,
   loggingMonitoringModule,
+  commandInjection,
+  pathTraversal,
 };
