@@ -148,6 +148,14 @@ const PATTERNS = {
   PATH_STARTS_WITH: "startsWith(UPLOADS_DIR)",
   PATH_ACCESS_DENIED: "Access denied",
   PATH_STATUS_403: "403",
+
+  // File Upload patterns
+  UPLOAD_MAX_SIZE: "MAX_SIZE",
+  UPLOAD_FILE_TOO_LARGE: "File too large",
+  UPLOAD_MAGIC_BYTES: "magicBytes",
+  UPLOAD_INVALID_TYPE: "Invalid file type",
+  UPLOAD_RANDOM_UUID: "randomUUID",
+  UPLOAD_SAFE_FILENAME: "safeFilename",
 };
 
 /**
@@ -757,6 +765,44 @@ export const labVerifiers: Record<string, VerificationFn> = {
       checksStartsWith &&
       hasAccessDenied &&
       hasStatus403;
+    return { passed, hints };
+  },
+
+  // File Upload Lab: Check for secure upload handling
+  "upload-lab": (code: string) => {
+    const hints: string[] = [];
+
+    const hasMaxSize = code.includes(PATTERNS.UPLOAD_MAX_SIZE);
+    const hasFileTooLarge = code.includes(PATTERNS.UPLOAD_FILE_TOO_LARGE);
+    const hasMagicBytes = code.includes(PATTERNS.UPLOAD_MAGIC_BYTES);
+    const hasInvalidType = code.includes(PATTERNS.UPLOAD_INVALID_TYPE);
+    const hasRandomUUID = code.includes(PATTERNS.UPLOAD_RANDOM_UUID);
+    const hasSafeFilename = code.includes(PATTERNS.UPLOAD_SAFE_FILENAME);
+
+    if (!hasMaxSize || !hasFileTooLarge)
+      hints.push(
+        "Add MAX_SIZE constant and return 'File too large' error for oversized files",
+      );
+    if (!hasMagicBytes)
+      hints.push(
+        "Check file content by reading magic bytes (first few bytes of file)",
+      );
+    if (!hasInvalidType)
+      hints.push(
+        "Return 'Invalid file type' error when magic bytes don't match",
+      );
+    if (!hasRandomUUID)
+      hints.push("Use crypto.randomUUID() to generate safe random filenames");
+    if (!hasSafeFilename)
+      hints.push("Store the generated filename in a safeFilename variable");
+
+    const passed =
+      hasMaxSize &&
+      hasFileTooLarge &&
+      hasMagicBytes &&
+      hasInvalidType &&
+      hasRandomUUID &&
+      hasSafeFilename;
     return { passed, hints };
   },
 };

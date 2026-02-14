@@ -18,6 +18,7 @@ import { vulnerableComponentsModule } from "./vulnerable-components";
 import { loggingMonitoringModule } from "./logging-monitoring";
 import { commandInjection } from "./command-injection";
 import { pathTraversal } from "./path-traversal";
+import { fileUpload } from "./file-upload";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -38,6 +39,7 @@ export const MODULES: Module[] = [
   loggingMonitoringModule,
   commandInjection,
   pathTraversal,
+  fileUpload,
 ];
 
 // Re-export individual modules for direct imports
@@ -60,4 +62,5 @@ export {
   loggingMonitoringModule,
   commandInjection,
   pathTraversal,
+  fileUpload,
 };
