@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type { UserState, AchievementNotification } from "../types";
 import { MODULES } from "../data/modules";
 import { getBadgeById } from "../data/badges";
+import { useAuthStore } from "./authStore";
 
 // ============================================
 // GAME CONFIGURATION CONSTANTS
@@ -42,8 +43,6 @@ let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 
 // Sync progress to cloud (debounced)
 const syncToCloud = async () => {
-  // Dynamic import to avoid circular dependency
-  const { useAuthStore } = await import("./authStore");
   const { user, syncProgressToCloud } = useAuthStore.getState();
 
   if (!user) return;

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { MODULES } from "../data/modules";
 import { useGameStore } from "../store/gameStore";
 import { TheoryView, QuizView, LabView } from "../components/lesson";
+import { Button, Progress } from "../components/ui";
 import {
   ChevronRight,
   ChevronLeft,
@@ -101,25 +102,24 @@ export const LessonView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] -m-6">
-      {/* Context Header */}
-      <div className="bg-card border-b border-border p-4 flex items-center justify-between">
+    <div className="flex flex-col h-[calc(100vh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6">
+      <div className="border-b border-border/70 bg-card/92 backdrop-blur px-4 py-3 md:px-6 flex items-center justify-between gap-4">
         <div>
-          <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+          <span className="text-xs text-muted-foreground uppercase tracking-[0.08em] font-semibold">
             {module.title}
           </span>
-          <h2 className="text-lg font-bold flex items-center gap-2">
+          <h2 className="text-lg md:text-xl font-semibold tracking-tight flex items-center gap-2">
             {currentLesson.title}
-            <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-primary/10 text-primary capitalize">
+            <span className="ui-chip border-primary/35 bg-primary/10 text-primary capitalize">
               {currentLesson.type}
             </span>
           </h2>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <div className="relative">
             <button
               onClick={() => setShowLessonMenu(!showLessonMenu)}
-              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted"
+              className="h-9 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 rounded-[var(--radius-sm)] hover:bg-muted/60"
               aria-expanded={showLessonMenu}
               aria-haspopup="true"
               aria-label={`Step ${currentLessonIndex + 1} of ${module.lessons.length}. Click to see all lessons.`}
@@ -141,7 +141,7 @@ export const LessonView: React.FC = () => {
                   aria-hidden="true"
                 />
                 <div
-                  className="absolute right-0 top-full mt-2 w-72 bg-card border border-border rounded-lg shadow-lg z-50 py-2 max-h-80 overflow-auto"
+                  className="absolute right-0 top-full mt-2 w-80 max-w-[88vw] ui-card ui-card-elevated z-50 py-2 max-h-80 overflow-auto"
                   role="menu"
                   aria-label="Lesson navigation"
                 >
@@ -154,7 +154,7 @@ export const LessonView: React.FC = () => {
                         onClick={() => jumpToLesson(idx)}
                         role="menuitem"
                         className={clsx(
-                          "w-full text-left px-4 py-2 flex items-center gap-3 hover:bg-muted transition-colors",
+                          "w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-muted transition-colors",
                           isCurrent && "bg-primary/10 text-primary",
                         )}
                       >
@@ -185,25 +185,16 @@ export const LessonView: React.FC = () => {
               </>
             )}
           </div>
-          <div
-            className="w-32 h-2 bg-muted rounded-full overflow-hidden"
-            role="progressbar"
-            aria-valuenow={currentLessonIndex + 1}
-            aria-valuemin={1}
-            aria-valuemax={module.lessons.length}
+          <Progress
+            className="hidden md:block w-36"
+            value={currentLessonIndex + 1}
+            min={1}
+            max={module.lessons.length}
             aria-label={`Lesson progress: step ${currentLessonIndex + 1} of ${module.lessons.length}`}
-          >
-            <div
-              className="h-full bg-primary transition-all duration-300"
-              style={{
-                width: `${((currentLessonIndex + 1) / module.lessons.length) * 100}%`,
-              }}
-            />
-          </div>
+          />
         </div>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 overflow-hidden relative">
         <AnimatePresence mode="wait">
           <motion.div
@@ -212,14 +203,12 @@ export const LessonView: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="h-full overflow-auto p-8"
+            className="h-full overflow-auto px-4 py-6 md:px-8 md:py-8"
           >
-            {/* THEORY VIEW */}
             {currentLesson.type === "theory" && (
               <TheoryView content={currentLesson.content || ""} />
             )}
 
-            {/* QUIZ VIEW */}
             {currentLesson.type === "quiz" && currentLesson.quiz && (
               <QuizView
                 key={currentLesson.id}
@@ -228,7 +217,6 @@ export const LessonView: React.FC = () => {
               />
             )}
 
-            {/* LAB VIEW */}
             {currentLesson.type === "lab" && currentLesson.lab && (
               <LabView
                 key={currentLesson.id}
@@ -241,32 +229,27 @@ export const LessonView: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      {/* Footer Navigation */}
       <nav
-        className="bg-card border-t border-border p-4 flex justify-between items-center"
+        className="border-t border-border/70 bg-card/92 backdrop-blur px-4 py-3 md:px-6 flex justify-between items-center"
         aria-label="Lesson navigation"
       >
-        <button
+        <Button
           onClick={handlePrev}
           disabled={isFirstLesson}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
           aria-label="Go to previous lesson"
         >
           <ChevronLeft className="w-4 h-4" aria-hidden="true" /> Back
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={handleNext}
           disabled={
             (currentLesson.type === "quiz" && !quizCompleted) ||
             (currentLesson.type === "lab" && !labCompleted)
           }
-          className={clsx(
-            "flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-            isLastLesson
-              ? "bg-emerald-500 text-white hover:bg-emerald-600"
-              : "bg-primary text-primary-foreground hover:bg-primary/90",
-          )}
+          variant={isLastLesson ? "accent" : "primary"}
+          className="px-5"
           aria-label={
             isLastLesson
               ? "Complete this mission and return to modules"
@@ -275,7 +258,7 @@ export const LessonView: React.FC = () => {
         >
           {isLastLesson ? "Complete Mission" : "Next Step"}{" "}
           <ChevronRight className="w-4 h-4" aria-hidden="true" />
-        </button>
+        </Button>
       </nav>
     </div>
   );

@@ -2,7 +2,6 @@ import { useEffect, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "./layouts/MainLayout";
 import { useThemeStore } from "./store/themeStore";
-import { AuthModal } from "./components/AuthModal";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // Lazy load pages for code splitting
@@ -23,6 +22,9 @@ const Challenge = lazy(() =>
 );
 const Leaderboard = lazy(() =>
   import("./pages/Leaderboard").then((m) => ({ default: m.Leaderboard })),
+);
+const AuthModal = lazy(() =>
+  import("./components/AuthModal").then((m) => ({ default: m.AuthModal })),
 );
 
 // Simple loading fallback
@@ -67,7 +69,9 @@ function App() {
           </Routes>
         </Suspense>
       </ErrorBoundary>
-      <AuthModal />
+      <Suspense fallback={null}>
+        <AuthModal />
+      </Suspense>
     </BrowserRouter>
   );
 }

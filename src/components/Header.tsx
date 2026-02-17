@@ -5,6 +5,7 @@ import { Bell, Trophy, LogIn, LogOut, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StreakIndicator } from "./StreakIndicator";
 import { ThemeToggle } from "./ThemeToggle";
+import { Button, Progress } from "./ui";
 import { isSupabaseConfigured } from "../lib/supabase";
 
 /** XP required per level - keep in sync with gameStore constants */
@@ -58,8 +59,6 @@ export const Header: React.FC = memo(() => {
   }, []);
 
   const nextLevelXp = level * XP_PER_LEVEL;
-  const progress = Math.min((xp / nextLevelXp) * 100, 100);
-
   // Memoize sign out handler
   const handleSignOut = useCallback(() => {
     setShowUserMenu(false);
@@ -72,43 +71,36 @@ export const Header: React.FC = memo(() => {
 
   return (
     <header
-      className="h-16 bg-card/50 backdrop-blur-sm border-b border-border flex items-center justify-between px-6 sticky top-0 z-10 transition-all"
+      className="sticky top-0 z-20 h-16 border-b border-border/70 bg-card/82 backdrop-blur-md px-4 md:px-6 flex items-center justify-between"
       role="banner"
     >
       <div className="flex items-center gap-4">
-        {/* Breadcrumbs or Page Title could go here */}
-        <h1 className="text-lg font-semibold text-foreground">
+        <h1 className="text-[1.05rem] font-semibold tracking-tight text-foreground">
           Mission Control
         </h1>
       </div>
 
-      <div className="flex items-center gap-6" aria-label="User stats">
-        {/* Level Indicator */}
+      <div className="flex items-center gap-2 md:gap-3" aria-label="User stats">
         <div
-          className="flex flex-col items-end mr-2 group cursor-help"
+          className="hidden xl:flex flex-col items-end rounded-[var(--radius-sm)] border border-border/70 bg-background/40 px-3 py-2 group cursor-help min-w-[190px]"
           aria-live="polite"
         >
-          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-            <Trophy className="w-4 h-4 text-yellow-500" aria-hidden="true" />
+          <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+            <Trophy className="w-3.5 h-3.5 text-warning" aria-hidden="true" />
             <span>Level {level}</span>
+            <span className="text-muted-foreground font-normal">|</span>
+            <span className="text-muted-foreground">{xp} XP</span>
           </div>
-          <div
-            className="w-32 h-2 bg-muted rounded-full mt-1 overflow-hidden relative"
-            role="progressbar"
-            aria-valuenow={xp}
-            aria-valuemin={0}
-            aria-valuemax={nextLevelXp}
+          <Progress
+            className="mt-1 w-full"
+            value={xp}
+            min={0}
+            max={nextLevelXp}
             aria-label={`${xp} of ${nextLevelXp} XP to next level`}
-          >
-            <motion.div
-              className="h-full bg-gradient-to-r from-primary to-purple-500"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
-            />
-          </div>
+            indicatorClassName="bg-linear-to-r from-primary to-accent"
+          />
           <span
-            className="text-[10px] text-muted-foreground absolute top-12 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1"
             aria-hidden="true"
           >
             {xp} / {nextLevelXp} XP
@@ -118,32 +110,29 @@ export const Header: React.FC = memo(() => {
           </span>
         </div>
 
-        {/* Streak Indicator */}
         <StreakIndicator />
 
-        {/* Theme Toggle */}
         <ThemeToggle />
 
         <button
-          className="relative p-2 rounded-full hover:bg-muted/50 transition-colors"
+          className="relative grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground hover:bg-muted/60"
           aria-label="Notifications (1 unread)"
         >
-          <Bell className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
+          <Bell className="w-4 h-4" aria-hidden="true" />
           <span
             className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border border-card"
             aria-hidden="true"
           />
         </button>
 
-        {/* Auth Section */}
         {isSupabaseConfigured() ? (
           loading ? (
-            <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+            <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
           ) : user ? (
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-2 rounded-full border border-border/80 bg-background/40 py-0.5 pl-0.5 pr-2 hover:bg-muted/55"
                 aria-label="User menu"
                 aria-expanded={showUserMenu}
               >
@@ -154,7 +143,7 @@ export const Header: React.FC = memo(() => {
                     className="w-8 h-8 rounded-full object-cover border border-primary/20"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border border-primary/20 shadow-lg shadow-primary/20 flex items-center justify-center text-white text-sm font-bold">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent border border-primary/30 flex items-center justify-center text-primary-foreground text-sm font-bold">
                     {avatarInitial}
                   </div>
                 )}
@@ -167,9 +156,9 @@ export const Header: React.FC = memo(() => {
                     initial={{ opacity: 0, y: 8, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-lg overflow-hidden"
+                    className="absolute right-0 mt-2 w-56 ui-card ui-card-elevated overflow-hidden"
                   >
-                    <div className="p-3 border-b border-border">
+                    <div className="p-3 border-b border-border/70">
                       <p className="font-medium text-foreground truncate">
                         {displayName}
                       </p>
@@ -180,7 +169,7 @@ export const Header: React.FC = memo(() => {
                     <div className="p-2">
                       <button
                         onClick={handleSignOut}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-muted rounded-lg transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-muted rounded-[var(--radius-sm)] transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
                         Sign Out
@@ -191,17 +180,17 @@ export const Header: React.FC = memo(() => {
               </AnimatePresence>
             </div>
           ) : (
-            <button
+            <Button
               onClick={() => openAuthModal("login")}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
               <span className="hidden sm:inline">Sign In</span>
-            </button>
+            </Button>
           )
         ) : (
           <div
-            className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border border-primary/20 shadow-lg shadow-primary/20"
+            className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent border border-primary/20"
             role="img"
             aria-label="User avatar"
           />

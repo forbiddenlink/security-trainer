@@ -34,17 +34,17 @@ export const BadgeList: React.FC = memo(() => {
           <li
             key={badge.id}
             className={clsx(
-              "relative group p-4 rounded-xl border transition-all duration-300",
+              "relative group p-4 rounded-[var(--radius-md)] border transition-all duration-200",
               isUnlocked
-                ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]"
-                : "bg-muted/20 border-border opacity-60",
+                ? "bg-primary/10 border-primary/40 shadow-[var(--shadow-1)]"
+                : "bg-muted/20 border-border opacity-65",
             )}
             aria-label={`${badge.name}: ${isUnlocked ? "Unlocked" : "Locked"} - ${badge.description}`}
           >
             <div className="flex flex-col items-center text-center gap-3">
               <div
                 className={clsx(
-                  "p-3 rounded-full lg:mb-2 transition-transform group-hover:scale-110",
+                  "p-3 rounded-full lg:mb-2 transition-transform duration-200 group-hover:scale-105",
                   isUnlocked
                     ? "bg-primary/20 text-primary"
                     : "bg-muted text-muted-foreground",

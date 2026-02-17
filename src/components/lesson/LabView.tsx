@@ -3,6 +3,7 @@ import type { LabConfig } from "../../types";
 import { CodeEditor } from "../CodeEditor";
 import { verifyLabSubmission } from "../../utils/labVerification";
 import { AlertTriangle, CheckCircle, XCircle, Play } from "lucide-react";
+import { Button, Card } from "../ui";
 import { clsx } from "clsx";
 
 interface LabViewProps {
@@ -56,30 +57,27 @@ export const LabView: React.FC<LabViewProps> = memo(
 
     return (
       <div className="flex flex-col lg:flex-row h-full gap-4">
-        <div className="lg:w-1/3 flex flex-col gap-4 overflow-auto pb-8">
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h3 className="font-bold flex items-center gap-2 mb-2">
+        <div className="lg:w-[34%] flex flex-col gap-4 overflow-auto pb-8">
+          <Card className="p-6">
+            <h3 className="font-semibold tracking-tight flex items-center gap-2 mb-2">
               <AlertTriangle
-                className="w-5 h-5 text-yellow-500"
+                className="w-5 h-5 text-warning"
                 aria-hidden="true"
               />
               Mission Objective
             </h3>
             <p className="text-muted-foreground">{lab.instructions}</p>
-          </div>
-          <div
-            className="bg-muted/20 border border-border rounded-xl p-6 flex-1"
-            aria-live="polite"
-          >
+          </Card>
+          <Card className="bg-muted/20 p-6 flex-1" aria-live="polite">
             <p className="text-sm font-mono text-muted-foreground opacity-50">
               Virtual Environment Active
             </p>
             {output && (
               <div
                 className={clsx(
-                  "mt-4 p-4 rounded-lg border animate-in fade-in slide-in-from-bottom-2",
+                  "mt-4 p-4 rounded-[var(--radius-sm)] border animate-in fade-in slide-in-from-bottom-2",
                   output.type === "success"
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                    ? "bg-accent/10 border-accent/20 text-accent"
                     : "bg-destructive/10 border-destructive/20 text-destructive",
                 )}
                 role="alert"
@@ -99,7 +97,7 @@ export const LabView: React.FC<LabViewProps> = memo(
                   <ul className="mt-3 space-y-1 text-sm text-foreground/80">
                     {output.hints.map((hint, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <span className="text-yellow-500 mt-0.5">→</span>
+                        <span className="text-warning mt-0.5">-</span>
                         {hint}
                       </li>
                     ))}
@@ -107,20 +105,21 @@ export const LabView: React.FC<LabViewProps> = memo(
                 )}
               </div>
             )}
-          </div>
+          </Card>
         </div>
-        <div className="lg:w-2/3 flex flex-col gap-2 h-full">
+        <div className="lg:w-[66%] flex flex-col gap-2 h-full">
           <div className="flex-1 min-h-[400px]" aria-label="Code editor">
             <CodeEditor initialCode={code} onChange={handleCodeChange} />
           </div>
           <div className="flex justify-end">
-            <button
+            <Button
               onClick={handleVerify}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold transition-colors"
+              variant="accent"
+              className="px-5"
               aria-label="Deploy patch and verify your code fix"
             >
               <Play className="w-4 h-4" aria-hidden="true" /> Deploy Patch
-            </button>
+            </Button>
           </div>
         </div>
       </div>

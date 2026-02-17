@@ -1,6 +1,7 @@
 import React, { memo, useState, useCallback } from "react";
 import type { QuizQuestion } from "../../types";
 import { CheckCircle, XCircle } from "lucide-react";
+import { Button, Card } from "../ui";
 import { clsx } from "clsx";
 
 interface QuizViewProps {
@@ -34,13 +35,16 @@ export const QuizView: React.FC<QuizViewProps> = memo(
     };
 
     return (
-      <div className="max-w-2xl mx-auto mt-10">
-        <div
-          className="bg-card border border-border rounded-xl p-8 shadow-sm"
+      <div className="max-w-2xl mx-auto mt-4 md:mt-8">
+        <Card
+          className="p-6 md:p-8"
           role="form"
           aria-labelledby="quiz-question"
         >
-          <h3 id="quiz-question" className="text-xl font-bold mb-6">
+          <h3
+            id="quiz-question"
+            className="text-xl font-semibold tracking-tight mb-6"
+          >
             {quiz.question}
           </h3>
           <div
@@ -58,12 +62,12 @@ export const QuizView: React.FC<QuizViewProps> = memo(
                 aria-disabled={submitted}
                 tabIndex={0}
                 className={clsx(
-                  "w-full text-left p-4 rounded-lg border transition-all flex items-center justify-between",
+                  "w-full min-h-[52px] text-left p-4 rounded-[var(--radius-sm)] border transition-colors flex items-center justify-between",
                   selectedOption === idx
-                    ? "border-primary bg-primary/5"
+                    ? "border-2 border-primary bg-primary/8"
                     : "border-border hover:bg-muted/50",
                   submitted && idx === quiz.correctAnswer
-                    ? "border-emerald-500 bg-emerald-500/10"
+                    ? "border-accent bg-accent/10"
                     : "",
                   submitted &&
                     selectedOption === idx &&
@@ -98,20 +102,20 @@ export const QuizView: React.FC<QuizViewProps> = memo(
           </div>
 
           {!submitted ? (
-            <button
+            <Button
               onClick={handleSubmit}
               disabled={selectedOption === null}
-              className="mt-6 w-full py-3 bg-primary text-primary-foreground font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-6 w-full"
               aria-label="Submit your selected answer"
             >
               Submit Answer
-            </button>
+            </Button>
           ) : (
             <div
               className={clsx(
-                "mt-6 p-4 rounded-lg border",
+                "mt-6 p-4 rounded-[var(--radius-sm)] border",
                 selectedOption === quiz.correctAnswer
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                  ? "bg-accent/10 border-accent/20 text-accent"
                   : "bg-destructive/10 border-destructive/20 text-destructive",
               )}
               role="alert"
@@ -125,7 +129,7 @@ export const QuizView: React.FC<QuizViewProps> = memo(
               <p className="text-sm mt-1 text-foreground">{quiz.explanation}</p>
             </div>
           )}
-        </div>
+        </Card>
       </div>
     );
   },

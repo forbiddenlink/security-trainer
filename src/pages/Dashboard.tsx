@@ -1,8 +1,10 @@
 import React, { useMemo } from "react";
+import { cn } from "../lib/cn";
 import { useGameStore } from "../store/gameStore";
 import { BadgeList } from "../components/BadgeList";
 import { DailyChallenge } from "../components/DailyChallenge";
 import { MODULES } from "../data/modules";
+import { Card, Progress } from "../components/ui";
 import {
   ArrowRight,
   Activity,
@@ -26,189 +28,189 @@ export const Dashboard: React.FC = () => {
     [currentModuleId],
   );
   const nextLevelXp = level * 1000;
-  const progress = Math.min((xp / nextLevelXp) * 100, 100);
   const streakMultiplier = getStreakMultiplier();
   const bonusPercent = Math.round((streakMultiplier - 1) * 100);
 
   return (
     <div
-      className="space-y-8 max-w-6xl mx-auto animate-in fade-in duration-500"
+      className="space-y-10 max-w-6xl mx-auto animate-in fade-in duration-500"
       role="main"
     >
-      {/* Welcome Banner */}
       <section
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/20 p-8"
+        className="ui-card ui-card-elevated relative overflow-hidden p-6 md:p-8"
         aria-label="Welcome section"
       >
+        <div className="absolute inset-0 pointer-events-none bg-linear-to-r from-primary/6 via-transparent to-accent/6" />
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <h2 className="text-4xl font-bold tracking-tight mb-2">
-              Identity Verified. Welcome, Agent.
+            <p className="ui-chip mb-3">Mission Status</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+              Welcome back, Agent.
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-base md:text-lg">
               Current Clearance Level:{" "}
-              <span className="text-primary font-bold">Level {level}</span>.
+              <span className="text-primary font-semibold">Level {level}</span>.
             </p>
           </div>
           <Link
             to="/modules"
-            className="group flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-105 transition-all"
+            className={cn(
+              "group inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-primary px-5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90",
+              "shadow-[var(--shadow-2)]",
+            )}
             aria-label="Resume training modules"
           >
             Resume Training
             <ArrowRight
-              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+              className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
               aria-hidden="true"
             />
           </Link>
         </div>
-
-        {/* Decorative background element */}
-        <div
-          className="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-primary/20 blur-3xl rounded-full pointer-events-none"
-          aria-hidden="true"
-        />
       </section>
 
-      {/* Stats Grid */}
       <section
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
         aria-label="Statistics"
       >
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:border-primary/50 transition-colors">
+        <Card className="p-6 hover:border-primary/45">
           <div className="flex items-center gap-4 mb-4">
             <div
-              className="p-3 bg-blue-500/10 text-blue-500 rounded-lg"
+              className="h-10 w-10 grid place-items-center rounded-[var(--radius-sm)] bg-primary/10 text-primary"
               aria-hidden="true"
             >
-              <Activity className="w-6 h-6" />
+              <Activity className="w-5 h-5" />
             </div>
             <div>
               <p
-                className="text-sm text-muted-foreground font-medium"
+                className="text-xs uppercase tracking-[0.08em] text-muted-foreground font-semibold"
                 id="score-label"
               >
                 Current Score
               </p>
-              <h3 className="text-2xl font-bold" aria-labelledby="score-label">
+              <h3
+                className="text-[1.75rem] leading-[1.1] font-semibold tracking-tight"
+                aria-labelledby="score-label"
+              >
                 {xp} XP
               </h3>
             </div>
           </div>
 
-          <div
-            className="w-full h-2 bg-muted rounded-full overflow-hidden"
-            role="progressbar"
-            aria-valuenow={xp}
-            aria-valuemin={0}
-            aria-valuemax={nextLevelXp}
+          <Progress
+            value={xp}
+            min={0}
+            max={nextLevelXp}
             aria-label={`XP progress: ${xp} of ${nextLevelXp}`}
-          >
-            <div
-              className="h-full bg-blue-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground mt-2 text-right">
+            indicatorClassName="bg-primary"
+          />
+          <p className="text-xs text-muted-foreground mt-2">
             {nextLevelXp - xp} XP to next level
           </p>
-        </div>
+        </Card>
 
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:border-emerald-500/50 transition-colors">
+        <Card className="p-6 hover:border-accent/45">
           <div className="flex items-center gap-4">
             <div
-              className="p-3 bg-emerald-500/10 text-emerald-500 rounded-lg"
+              className="h-10 w-10 grid place-items-center rounded-[var(--radius-sm)] bg-accent/10 text-accent"
               aria-hidden="true"
             >
-              <CheckCircle className="w-6 h-6" />
+              <CheckCircle className="w-5 h-5" />
             </div>
             <div>
               <p
-                className="text-sm text-muted-foreground font-medium"
+                className="text-xs uppercase tracking-[0.08em] text-muted-foreground font-semibold"
                 id="modules-label"
               >
                 Modules Completed
               </p>
               <h3
-                className="text-2xl font-bold"
+                className="text-[1.75rem] leading-[1.1] font-semibold tracking-tight"
                 aria-labelledby="modules-label"
               >
                 {completedModules.length}
               </h3>
             </div>
           </div>
-        </div>
+        </Card>
 
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:border-purple-500/50 transition-colors">
+        <Card className="p-6 hover:border-primary/45">
           <div className="flex items-center gap-4">
             <div
-              className="p-3 bg-purple-500/10 text-purple-500 rounded-lg"
+              className="h-10 w-10 grid place-items-center rounded-[var(--radius-sm)] bg-primary/10 text-primary"
               aria-hidden="true"
             >
-              <BookOpen className="w-6 h-6" />
+              <BookOpen className="w-5 h-5" />
             </div>
             <div>
               <p
-                className="text-sm text-muted-foreground font-medium"
+                className="text-xs uppercase tracking-[0.08em] text-muted-foreground font-semibold"
                 id="mission-label"
               >
                 Active Mission
               </p>
               <h3
-                className="text-lg font-bold truncate"
+                className="text-lg leading-[1.2] font-semibold truncate"
                 aria-labelledby="mission-label"
               >
                 {currentModule?.title || "No Active Mission"}
               </h3>
             </div>
           </div>
-        </div>
+        </Card>
 
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:border-orange-500/50 transition-colors">
+        <Card className="p-6 hover:border-warning/45">
           <div className="flex items-center gap-4">
             <div
-              className="p-3 bg-orange-500/10 text-orange-500 rounded-lg"
+              className="h-10 w-10 grid place-items-center rounded-[var(--radius-sm)] bg-warning/10 text-warning"
               aria-hidden="true"
             >
-              <Flame className="w-6 h-6" />
+              <Flame className="w-5 h-5" />
             </div>
             <div>
               <p
-                className="text-sm text-muted-foreground font-medium"
+                className="text-xs uppercase tracking-[0.08em] text-muted-foreground font-semibold"
                 id="streak-label"
               >
                 Current Streak
               </p>
-              <h3 className="text-2xl font-bold" aria-labelledby="streak-label">
+              <h3
+                className="text-[1.75rem] leading-[1.1] font-semibold tracking-tight"
+                aria-labelledby="streak-label"
+              >
                 {streakDays} day{streakDays !== 1 ? "s" : ""}
                 {bonusPercent > 0 && (
-                  <span className="text-sm text-orange-500 ml-2">
+                  <span className="text-sm text-warning ml-2">
                     +{bonusPercent}% XP
                   </span>
                 )}
               </h3>
             </div>
           </div>
-        </div>
+        </Card>
       </section>
 
-      {/* Daily Challenge Section */}
       <section aria-labelledby="daily-challenge-heading">
-        <h2 id="daily-challenge-heading" className="text-2xl font-bold mb-4">
+        <h2
+          id="daily-challenge-heading"
+          className="text-[1.75rem] font-semibold tracking-tight mb-4"
+        >
           Daily Challenge
         </h2>
         <DailyChallenge />
       </section>
 
-      {/* Badges Section */}
       <section aria-labelledby="achievements-heading">
         <div className="flex items-center justify-between mb-6">
-          <h2 id="achievements-heading" className="text-2xl font-bold">
+          <h2
+            id="achievements-heading"
+            className="text-[1.75rem] font-semibold tracking-tight"
+          >
             Achievements
           </h2>
           <Link
             to="/profile"
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-primary hover:text-primary/85"
             aria-label="View all achievements on profile page"
           >
             View All

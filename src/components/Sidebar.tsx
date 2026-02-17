@@ -26,52 +26,55 @@ const NAV_ITEMS = [
 export const Sidebar: React.FC = memo(() => {
   return (
     <aside
-      className="w-64 bg-card border-r border-border min-h-screen flex flex-col shadow-2xl relative z-10"
+      className="w-64 min-h-screen flex flex-col border-r border-border/70 bg-card/90 backdrop-blur relative z-10"
       aria-label="Main navigation"
     >
-      <div className="p-6 flex items-center gap-3 border-b border-border/50 bg-muted/20">
-        <div className="relative">
-          <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full animate-pulse" />
-          <ShieldCheck
-            className="w-8 h-8 text-primary relative z-10"
-            aria-hidden="true"
-          />
+      <div className="px-5 py-5 flex items-center gap-3 border-b border-border/70">
+        <div className="h-9 w-9 rounded-[var(--radius-sm)] bg-primary/12 border border-primary/25 flex items-center justify-center">
+          <ShieldCheck className="w-5 h-5 text-primary" aria-hidden="true" />
         </div>
-        <span className="font-bold text-xl tracking-tight text-foreground flex flex-col leading-none">
+        <span className="font-semibold text-xl tracking-tight text-foreground flex flex-col leading-none">
           <span>SecTrainer</span>
-          <span className="text-[10px] text-primary uppercase tracking-widest opacity-80">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-[0.18em] opacity-90">
             v1.0.0
           </span>
         </span>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2" aria-label="Primary">
+      <nav className="flex-1 px-3 py-4 space-y-1.5" aria-label="Primary">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
               clsx(
-                "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 relative overflow-hidden group",
+                "group relative flex h-11 items-center gap-3 rounded-[var(--radius-sm)] px-3.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-primary/10 text-primary shadow-[0_0_15px_rgba(0,255,157,0.1)] border-r-2 border-primary"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:pl-5",
+                  ? "bg-primary/10 text-primary shadow-[var(--shadow-glow)]"
+                  : "text-muted-foreground hover:bg-muted/55 hover:text-foreground",
               )
             }
           >
             {({ isActive }) => (
               <>
-                {isActive && (
-                  <div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent opacity-50" />
-                )}
-                <item.icon
+                <span
                   className={clsx(
-                    "w-5 h-5 transition-transform duration-300",
-                    isActive ? "scale-110" : "group-hover:scale-110",
+                    "absolute left-0 top-2 bottom-2 w-0.5 rounded-full transition-opacity",
+                    isActive ? "bg-primary opacity-100" : "opacity-0",
                   )}
                   aria-hidden="true"
                 />
-                <span className="font-medium relative z-10">{item.label}</span>
+                {isActive && (
+                  <div className="absolute inset-0 bg-linear-to-r from-primary/12 to-transparent opacity-70" />
+                )}
+                <item.icon
+                  className={clsx(
+                    "w-4 h-4 transition-transform duration-200",
+                    isActive ? "scale-105" : "group-hover:scale-105",
+                  )}
+                  aria-hidden="true"
+                />
+                <span className="relative z-10">{item.label}</span>
                 {isActive && <span className="sr-only">(current page)</span>}
               </>
             )}
@@ -80,24 +83,19 @@ export const Sidebar: React.FC = memo(() => {
       </nav>
 
       <div
-        className="p-4 m-4 bg-black/40 rounded-lg text-xs border border-primary/20 relative overflow-hidden group"
+        className="m-3 mt-0 ui-card p-4 text-xs"
         aria-label="System information"
       >
-        {/* Scanline effect for this box */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-size-[100%_4px]" />
-
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-2.5">
           <span className="text-muted-foreground">Status</span>
-          <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="flex h-2 w-2 rounded-full bg-accent animate-pulse" />
         </div>
-        <p className="font-mono text-muted-foreground">
+        <p className="font-mono text-muted-foreground tracking-tight">
           Clearance:{" "}
-          <span className="text-primary font-bold shadow-cyan-500/50">
-            Classified
-          </span>
+          <span className="text-primary font-semibold">Classified</span>
         </p>
-        <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-primary w-[75%] animate-[pulse_2s_infinite]" />
+        <div className="mt-2.5 h-1.5 bg-muted rounded-full overflow-hidden">
+          <div className="h-full bg-primary w-[75%]" />
         </div>
       </div>
     </aside>
