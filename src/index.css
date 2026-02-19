@@ -2,40 +2,78 @@
 
 :root,
 .light {
+  /* Font Families */
   --font-display: "Space Grotesk", "IBM Plex Sans", system-ui, sans-serif;
   --font-body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
   --font-mono: "IBM Plex Mono", "JetBrains Mono", monospace;
 
+  /* Typography Scale (Minor Third 1.2 ratio) */
+  --text-display: 3rem; /* 48px - Page heroes */
+  --text-h1: 2.5rem; /* 40px - Page titles */
+  --text-h2: 2rem; /* 32px - Section headers */
+  --text-h3: 1.5rem; /* 24px - Card titles */
+  --text-h4: 1.25rem; /* 20px - Subsections */
+  --text-body: 1rem; /* 16px - Body text */
+  --text-body-sm: 0.875rem; /* 14px - Secondary text */
+  --text-caption: 0.75rem; /* 12px - Labels, chips */
+
+  /* Line Heights */
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-normal: 1.55;
+
+  /* Spacing Scale (8px base) */
+  --space-0: 0;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
+  --space-16: 64px;
 
+  /* Border Radius */
+  --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
+  --radius-full: 9999px;
 
-  --shadow-1: 0 1px 2px rgb(15 23 42 / 0.06);
-  --shadow-2: 0 8px 24px rgb(15 23 42 / 0.1);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 12px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 8px 24px rgb(15 23 42 / 0.1);
   --shadow-glow:
     0 0 0 1px rgb(37 99 235 / 0.22), 0 12px 30px rgb(37 99 235 / 0.16);
 
+  /* Timing */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Primary */
   --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
   --color-primary-foreground: #ffffff;
 
+  /* Secondary */
   --color-secondary: #f1f5f9;
   --color-secondary-foreground: #0f172a;
+
+  /* Accent (Success/Completion) */
   --color-accent: #0f766e;
   --color-accent-foreground: #ffffff;
 
+  /* Semantic */
   --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
   --color-success: #15803d;
-  --color-warning: #b45309;
+  --color-warning: #d97706;
+  --color-terminal: #22c55e;
 
   --color-background: #f3f6fb;
   --color-foreground: #0f172a;
@@ -57,24 +95,32 @@
 }
 
 .dark {
-  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.32);
-  --shadow-2: 0 8px 24px rgb(0 0 0 / 0.46);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.32);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.38);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.46);
   --shadow-glow:
     0 0 0 1px rgb(56 189 248 / 0.34), 0 12px 30px rgb(56 189 248 / 0.2);
 
+  /* Primary (Cyan) */
   --color-primary: #38bdf8;
+  --color-primary-hover: #0ea5e9;
   --color-primary-foreground: #05243a;
 
+  /* Secondary */
   --color-secondary: #141d2a;
   --color-secondary-foreground: #d0dded;
 
+  /* Accent (Green) */
   --color-accent: #22c55e;
   --color-accent-foreground: #05240f;
 
+  /* Semantic */
   --color-destructive: #f87171;
   --color-destructive-foreground: #ffffff;
   --color-success: #4ade80;
   --color-warning: #f59e0b;
+  --color-terminal: #9fef00;
 
   --color-background: #090d14;
   --color-foreground: #e6ebf5;
@@ -96,7 +142,9 @@
 }
 
 @theme {
+  /* Colors */
   --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
   --color-primary-foreground: var(--color-primary-foreground);
 
   --color-secondary: var(--color-secondary);
@@ -106,6 +154,7 @@
   --color-accent-foreground: var(--color-accent-foreground);
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
+  --color-terminal: var(--color-terminal);
 
   --color-destructive: var(--color-destructive);
   --color-destructive-foreground: var(--color-destructive-foreground);
@@ -125,6 +174,16 @@
   --color-border: var(--color-border);
   --color-input: var(--color-input);
   --color-ring: var(--color-ring);
+
+  /* Typography */
+  --text-display: var(--text-display);
+  --text-h1: var(--text-h1);
+  --text-h2: var(--text-h2);
+  --text-h3: var(--text-h3);
+  --text-h4: var(--text-h4);
+  --text-body: var(--text-body);
+  --text-body-sm: var(--text-body-sm);
+  --text-caption: var(--text-caption);
 }
 
 body {
@@ -189,19 +248,48 @@ h2 {
 }
 
 @layer components {
+  /* Card System */
   .ui-card {
-    @apply bg-card text-card-foreground border border-border/80;
+    @apply bg-card text-card-foreground border border-border/70;
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-1);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-4);
+  }
+
+  .ui-card-md {
+    padding: var(--space-6);
+  }
+
+  .ui-card-lg {
+    padding: var(--space-8);
+    border-radius: var(--radius-lg);
   }
 
   .ui-card-elevated {
-    box-shadow: var(--shadow-2);
+    box-shadow: var(--shadow-lg);
   }
 
+  .ui-card-interactive {
+    transition:
+      border-color var(--duration-fast) var(--ease-smooth),
+      box-shadow var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-fast) var(--ease-smooth);
+  }
+
+  .ui-card-interactive:hover {
+    border-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  /* Button System */
   .ui-button-primary {
     @apply h-10 px-4 font-semibold bg-primary text-primary-foreground;
     border-radius: var(--radius-sm);
+  }
+
+  .ui-button-primary:hover {
+    background-color: var(--color-primary-hover);
   }
 
   .ui-button-secondary {
@@ -209,18 +297,108 @@ h2 {
     border-radius: var(--radius-sm);
   }
 
+  /* Input System */
   .ui-input {
     @apply h-10 px-3 border border-border bg-input text-foreground;
     border-radius: var(--radius-sm);
   }
 
+  /* Chip/Badge System */
   .ui-chip {
     @apply inline-flex items-center gap-1.5 border border-border bg-muted/60 text-muted-foreground;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     padding: 2px 10px;
-    font-size: 0.75rem;
+    font-size: var(--text-caption);
     line-height: 1.2;
     font-weight: 600;
+  }
+
+  /* Typography Utilities */
+  .text-display {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.02em;
+  }
+
+  .text-h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-h1);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+
+  .text-h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .text-h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    letter-spacing: -0.005em;
+  }
+
+  .text-h4 {
+    font-size: var(--text-h4);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .text-body-sm {
+    font-size: var(--text-body-sm);
+    line-height: 1.5;
+  }
+
+  .text-caption {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .text-mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-body-sm);
+  }
+
+  /* Label Pattern */
+  .ui-label {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted-foreground);
+  }
+
+  /* Stat Value Pattern */
+  .ui-stat-value {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  /* Icon Container */
+  .ui-icon-box {
+    @apply grid place-items-center;
+    width: var(--space-10);
+    height: var(--space-10);
+    border-radius: var(--radius-sm);
+  }
+
+  .ui-icon-box-sm {
+    width: var(--space-8);
+    height: var(--space-8);
   }
 }
 

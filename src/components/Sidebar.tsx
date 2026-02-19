@@ -59,7 +59,7 @@ export const Sidebar: React.FC = memo(() => {
               <>
                 <span
                   className={clsx(
-                    "absolute left-0 top-2 bottom-2 w-0.5 rounded-full transition-opacity",
+                    "absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full transition-opacity",
                     isActive ? "bg-primary opacity-100" : "opacity-0",
                   )}
                   aria-hidden="true"
@@ -82,20 +82,17 @@ export const Sidebar: React.FC = memo(() => {
         ))}
       </nav>
 
-      <div
-        className="m-3 mt-0 ui-card p-4 text-xs"
-        aria-label="System information"
-      >
+      <div className="m-3 mt-0 ui-card" aria-label="System information">
         <div className="flex justify-between items-center mb-2.5">
-          <span className="text-muted-foreground">Status</span>
+          <span className="ui-label">Status</span>
           <span className="flex h-2 w-2 rounded-full bg-accent animate-pulse" />
         </div>
-        <p className="font-mono text-muted-foreground tracking-tight">
+        <p className="text-mono text-muted-foreground tracking-tight">
           Clearance:{" "}
           <span className="text-primary font-semibold">Classified</span>
         </p>
         <div className="mt-2.5 h-1.5 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-primary w-[75%]" />
+          <div className="h-full bg-primary w-[75%] transition-all duration-500" />
         </div>
       </div>
     </aside>

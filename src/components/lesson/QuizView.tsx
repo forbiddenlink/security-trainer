@@ -37,14 +37,11 @@ export const QuizView: React.FC<QuizViewProps> = memo(
     return (
       <div className="max-w-2xl mx-auto mt-4 md:mt-8">
         <Card
-          className="p-6 md:p-8"
+          className="ui-card-lg"
           role="form"
           aria-labelledby="quiz-question"
         >
-          <h3
-            id="quiz-question"
-            className="text-xl font-semibold tracking-tight mb-6"
-          >
+          <h3 id="quiz-question" className="text-h3 mb-6">
             {quiz.question}
           </h3>
           <div
@@ -62,17 +59,17 @@ export const QuizView: React.FC<QuizViewProps> = memo(
                 aria-disabled={submitted}
                 tabIndex={0}
                 className={clsx(
-                  "w-full min-h-[52px] text-left p-4 rounded-[var(--radius-sm)] border transition-colors flex items-center justify-between",
-                  selectedOption === idx
+                  "w-full min-h-[52px] text-left p-4 rounded-[var(--radius-sm)] border transition-all duration-150 flex items-center justify-between",
+                  selectedOption === idx && !submitted
                     ? "border-2 border-primary bg-primary/8"
-                    : "border-border hover:bg-muted/50",
+                    : "border-border/70 hover:bg-muted/40 hover:border-primary/40",
                   submitted && idx === quiz.correctAnswer
-                    ? "border-accent bg-accent/10"
+                    ? "border-2 border-accent bg-accent/10"
                     : "",
                   submitted &&
                     selectedOption === idx &&
                     idx !== quiz.correctAnswer
-                    ? "border-destructive bg-destructive/10"
+                    ? "border-2 border-destructive bg-destructive/10"
                     : "",
                 )}
               >

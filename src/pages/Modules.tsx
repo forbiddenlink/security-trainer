@@ -12,10 +12,8 @@ export const Modules: React.FC = () => {
   return (
     <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in duration-500">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Active Operations
-        </h1>
-        <p className="text-muted-foreground text-base">
+        <h1 className="text-h1">Active Operations</h1>
+        <p className="text-muted-foreground text-body">
           Select a mission to upgrade your security clearance level.
         </p>
       </div>
@@ -29,10 +27,8 @@ export const Modules: React.FC = () => {
             <Card
               key={module.id}
               className={clsx(
-                "group relative overflow-hidden p-6 md:p-7 transition-all duration-200",
-                isLocked
-                  ? "bg-muted/20 opacity-72"
-                  : "hover:border-primary/45 hover:shadow-[var(--shadow-2)]",
+                "group relative overflow-hidden ui-card-md",
+                isLocked ? "bg-muted/20 opacity-70" : "ui-card-interactive",
               )}
             >
               {!isLocked && (
@@ -45,16 +41,16 @@ export const Modules: React.FC = () => {
                     className={clsx(
                       "h-12 w-12 shrink-0 grid place-items-center rounded-[var(--radius-sm)] relative overflow-hidden",
                       isCompleted
-                        ? "bg-accent/10 text-accent"
-                        : "bg-primary/10 text-primary",
+                        ? "bg-accent/12 text-accent"
+                        : "bg-primary/12 text-primary",
                     )}
                   >
                     <div className="absolute inset-0 bg-current opacity-0 group-hover:opacity-10 transition-opacity" />
                     <Shield className="w-6 h-6 relative z-10" />
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-xl font-semibold tracking-tight group-hover:text-primary transition-colors">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <h3 className="text-h4 group-hover:text-primary transition-colors">
                         {module.title}
                       </h3>
                       {isCompleted && (
@@ -83,10 +79,8 @@ export const Modules: React.FC = () => {
 
                 <div className="flex items-center justify-between md:justify-end gap-5">
                   <div className="text-left md:text-right">
-                    <p className="text-xs text-muted-foreground uppercase tracking-[0.08em] font-semibold">
-                      Reward
-                    </p>
-                    <p className="font-mono text-primary font-semibold">
+                    <p className="ui-label">Reward</p>
+                    <p className="text-mono text-primary font-semibold">
                       {module.xpReward} XP
                     </p>
                   </div>

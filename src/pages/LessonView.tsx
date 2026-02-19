@@ -105,12 +105,10 @@ export const LessonView: React.FC = () => {
     <div className="flex flex-col h-[calc(100vh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6">
       <div className="border-b border-border/70 bg-card/92 backdrop-blur px-4 py-3 md:px-6 flex items-center justify-between gap-4">
         <div>
-          <span className="text-xs text-muted-foreground uppercase tracking-[0.08em] font-semibold">
-            {module.title}
-          </span>
-          <h2 className="text-lg md:text-xl font-semibold tracking-tight flex items-center gap-2">
+          <span className="ui-label">{module.title}</span>
+          <h2 className="text-h4 flex items-center gap-2">
             {currentLesson.title}
-            <span className="ui-chip border-primary/35 bg-primary/10 text-primary capitalize">
+            <span className="ui-chip border-primary/30 bg-primary/10 text-primary capitalize">
               {currentLesson.type}
             </span>
           </h2>
@@ -119,7 +117,7 @@ export const LessonView: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setShowLessonMenu(!showLessonMenu)}
-              className="h-9 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 rounded-[var(--radius-sm)] hover:bg-muted/60"
+              className="h-9 inline-flex items-center gap-2 text-body-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 rounded-[var(--radius-sm)] hover:bg-muted/40"
               aria-expanded={showLessonMenu}
               aria-haspopup="true"
               aria-label={`Step ${currentLessonIndex + 1} of ${module.lessons.length}. Click to see all lessons.`}
@@ -154,7 +152,7 @@ export const LessonView: React.FC = () => {
                         onClick={() => jumpToLesson(idx)}
                         role="menuitem"
                         className={clsx(
-                          "w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-muted transition-colors",
+                          "w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-muted/40 transition-colors",
                           isCurrent && "bg-primary/10 text-primary",
                         )}
                       >

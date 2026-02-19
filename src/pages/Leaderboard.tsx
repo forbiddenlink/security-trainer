@@ -59,8 +59,8 @@ export const Leaderboard: React.FC = () => {
       <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Leaderboard Unavailable</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-h2 mb-2">Leaderboard Unavailable</h2>
+          <p className="text-body text-muted-foreground">
             Configure Supabase to enable the leaderboard feature.
           </p>
         </div>
@@ -73,16 +73,14 @@ export const Leaderboard: React.FC = () => {
       className="max-w-4xl mx-auto animate-in fade-in duration-500"
       role="main"
     >
-      <section className="ui-card ui-card-elevated relative overflow-hidden rounded-[var(--radius-lg)] p-8 mb-8">
+      <section className="ui-card ui-card-lg ui-card-elevated relative overflow-hidden mb-8">
         <div className="absolute inset-0 pointer-events-none bg-linear-to-r from-warning/10 to-transparent" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <Trophy className="w-8 h-8 text-warning" />
-            <h1 className="text-3xl font-semibold tracking-tight">
-              Leaderboard
-            </h1>
+            <h1 className="text-h1">Leaderboard</h1>
           </div>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-body">
             Top security agents ranked by experience points
           </p>
         </div>
@@ -92,25 +90,23 @@ export const Leaderboard: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 p-6 ui-card border-primary/30"
+          className="mb-8 ui-card ui-card-md border-primary/30"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-semibold text-lg">
+              <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-semibold text-body">
                 {profile.display_name?.[0]?.toUpperCase() || "A"}
               </div>
               <div>
-                <h3 className="font-semibold text-lg tracking-tight">
-                  {profile.display_name || "Agent"}
-                </h3>
-                <p className="text-muted-foreground">Your current standing</p>
+                <h3 className="text-h4">{profile.display_name || "Agent"}</h3>
+                <p className="text-muted-foreground text-body-sm">
+                  Your current standing
+                </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-3xl font-bold text-primary">
-                #{userRank || "-"}
-              </p>
-              <p className="text-muted-foreground">
+              <p className="text-h1 text-primary">#{userRank || "-"}</p>
+              <p className="text-muted-foreground text-body-sm">
                 {profile.xp.toLocaleString()} XP
               </p>
             </div>
@@ -123,13 +119,11 @@ export const Leaderboard: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 p-6 ui-card bg-muted/40 text-center"
+          className="mb-8 ui-card ui-card-md bg-muted/40 text-center"
         >
           <User className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="font-semibold text-lg tracking-tight mb-2">
-            Join the Leaderboard
-          </h3>
-          <p className="text-muted-foreground mb-4">
+          <h3 className="text-h4 mb-2">Join the Leaderboard</h3>
+          <p className="text-muted-foreground text-body mb-4">
             Sign in to save your progress and compete with other agents.
           </p>
           <Button onClick={() => openAuthModal("login")} className="px-5">
@@ -153,7 +147,7 @@ export const Leaderboard: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className={`flex items-center gap-4 p-4 rounded-[var(--radius-md)] border ${getRankBgClass(entry.rank || index + 1, isCurrentUser)} transition-colors hover:border-primary/50`}
+                className={`flex items-center gap-4 p-4 rounded-[var(--radius-md)] border ${getRankBgClass(entry.rank || index + 1, isCurrentUser)} transition-all duration-150 hover:border-primary/50`}
               >
                 {/* Rank */}
                 <div className="w-10 flex justify-center">
@@ -200,10 +194,8 @@ export const Leaderboard: React.FC = () => {
 
                 {/* XP */}
                 <div className="text-right">
-                  <p className="font-bold text-lg">
-                    {entry.xp.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">XP</p>
+                  <p className="text-h4">{entry.xp.toLocaleString()}</p>
+                  <p className="ui-label">XP</p>
                 </div>
               </motion.div>
             );

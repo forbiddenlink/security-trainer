@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { clsx } from "clsx";
 import { Timer, AlertTriangle, Skull, CheckCircle } from "lucide-react";
 import { MODULES } from "../data/modules";
 import { useGameStore } from "../store/gameStore";
@@ -101,15 +102,13 @@ export const Challenge: React.FC = () => {
         aria-label="Final exam start screen"
       >
         <div
-          className="p-7 rounded-full bg-destructive/10 border-2 border-destructive/35 animate-pulse"
+          className="p-7 rounded-full bg-destructive/10 border-2 border-destructive/30 animate-pulse"
           aria-hidden="true"
         >
           <AlertTriangle className="w-20 h-20 text-destructive" />
         </div>
-        <h1 className="text-5xl font-bold text-foreground tracking-tight">
-          FINAL EXAM
-        </h1>
-        <p className="text-xl text-muted-foreground">
+        <h1 className="text-display text-foreground">FINAL EXAM</h1>
+        <p className="text-h4 text-muted-foreground font-normal">
           60 Seconds. 5 Random Questions. <br />
           <span className="text-destructive font-semibold">
             One mistake ends the run.
@@ -119,7 +118,7 @@ export const Challenge: React.FC = () => {
           onClick={() => setGameStarted(true)}
           variant="destructive"
           size="lg"
-          className="px-8 text-base"
+          className="px-8 text-body"
           aria-label="Start the final exam"
         >
           INITIATE PROTOCOL
@@ -136,10 +135,8 @@ export const Challenge: React.FC = () => {
         aria-live="assertive"
       >
         <Skull className="w-28 h-28 text-destructive" aria-hidden="true" />
-        <h1 className="text-4xl font-bold text-destructive tracking-tight">
-          MISSION FAILED
-        </h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-h1 text-destructive">MISSION FAILED</h1>
+        <p className="text-body text-muted-foreground">
           The vulnerability remains unpatched.
         </p>
         <Button
@@ -162,10 +159,8 @@ export const Challenge: React.FC = () => {
         aria-live="polite"
       >
         <CheckCircle className="w-28 h-28 text-accent" aria-hidden="true" />
-        <h1 className="text-4xl font-bold text-accent tracking-tight">
-          MISSION ACCOMPLISHED
-        </h1>
-        <p className="text-xl">
+        <h1 className="text-h1 text-accent">MISSION ACCOMPLISHED</h1>
+        <p className="text-h4 font-normal">
           You have earned the{" "}
           <span className="font-semibold text-warning">Elite Hacker</span>{" "}
           Status.
@@ -198,9 +193,12 @@ export const Challenge: React.FC = () => {
       aria-label="Final exam quiz"
     >
       {/* HUD */}
-      <Card className="flex justify-between items-center mb-8 p-4">
+      <Card className="ui-card-md flex justify-between items-center mb-8">
         <div
-          className="flex items-center gap-2 text-2xl font-mono font-semibold text-destructive"
+          className={clsx(
+            "flex items-center gap-2 text-h2 font-mono font-bold text-destructive",
+            timeLeft <= 10 && "animate-pulse",
+          )}
           aria-live="polite"
           aria-atomic="true"
         >
@@ -208,7 +206,7 @@ export const Challenge: React.FC = () => {
           <span aria-label={`${timeLeft} seconds remaining`}>{timeLeft}s</span>
           <span className="sr-only">Time remaining: {timeLeft} seconds</span>
         </div>
-        <div className="text-muted-foreground" aria-live="polite">
+        <div className="text-muted-foreground text-body-sm" aria-live="polite">
           Question {currentIndex + 1} of {questions.length}
         </div>
       </Card>
@@ -218,14 +216,12 @@ export const Challenge: React.FC = () => {
         key={currentIndex}
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
-        className="ui-card ui-card-elevated p-8 rounded-[var(--radius-lg)]"
+        transition={{ duration: 0.2 }}
+        className="ui-card ui-card-lg ui-card-elevated"
         role="form"
         aria-labelledby="challenge-question"
       >
-        <h2
-          id="challenge-question"
-          className="text-2xl font-semibold tracking-tight mb-8"
-        >
+        <h2 id="challenge-question" className="text-h2 mb-8">
           {question.question}
         </h2>
         <div
@@ -241,7 +237,7 @@ export const Challenge: React.FC = () => {
               role="radio"
               aria-checked={false}
               tabIndex={0}
-              className="w-full text-left p-4 rounded-[var(--radius-sm)] bg-muted/50 hover:bg-primary/8 border border-transparent hover:border-primary transition-colors group"
+              className="w-full text-left p-4 rounded-[var(--radius-sm)] bg-muted/40 hover:bg-primary/8 border border-border/50 hover:border-primary/50 transition-all duration-150 group"
               aria-label={`Option ${String.fromCharCode(65 + idx)}: ${option}`}
             >
               <span
