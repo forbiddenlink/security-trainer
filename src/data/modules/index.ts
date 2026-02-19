@@ -23,6 +23,7 @@ import { corsMisconfig } from "./cors-misconfig";
 import { sessionManagement } from "./session-management";
 import { apiSecurity } from "./api-security";
 import { raceConditions } from "./race-conditions";
+import { graphqlSecurity } from "./graphql-security";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -48,6 +49,7 @@ export const MODULES: Module[] = [
   sessionManagement,
   apiSecurity,
   raceConditions,
+  graphqlSecurity,
 ];
 
 // Re-export individual modules for direct imports
@@ -75,4 +77,5 @@ export {
   sessionManagement,
   apiSecurity,
   raceConditions,
+  graphqlSecurity,
 };

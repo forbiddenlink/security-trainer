@@ -1005,6 +1005,53 @@ export const labVerifiers: Record<string, VerificationFn> = {
       hasStatus400;
     return { passed, hints };
   },
+
+  // GraphQL Security Lab: Check for proper authorization in resolvers
+  "graphql-security-lab": (code: string) => {
+    const hints: string[] = [];
+
+    // Must use context.user for authorization
+    const hasContextUser =
+      code.includes("context.user") || code.includes("ctx.user");
+
+    // Must compare user ID with parent/args ID
+    const hasIdComparison =
+      /context\.user\.id\s*(!==|===|!=|==)\s*(parent\.id|args\.id)/.test(
+        code,
+      ) ||
+      /(parent\.id|args\.id)\s*(!==|===|!=|==)\s*context\.user\.id/.test(code);
+
+    // Must handle unauthorized access (throw error or return null)
+    const hasAccessDenied =
+      /throw\s+new\s+\w*Error/i.test(code) ||
+      /return\s+null/i.test(code) ||
+      /throw\s+.*forbidden/i.test(code) ||
+      /throw\s+.*unauthorized/i.test(code);
+
+    // Should not directly return parent.email or parent.ssn without checks
+    const hasUnprotectedReturn =
+      /return\s+parent\.(email|ssn)\s*;?\s*\}/.test(code) && !hasIdComparison;
+
+    if (!hasContextUser)
+      hints.push(
+        "Use context.user to access the authenticated user in resolvers",
+      );
+    if (!hasIdComparison)
+      hints.push("Compare context.user.id with parent.id to verify ownership");
+    if (!hasAccessDenied)
+      hints.push("Return null or throw an error when user is not authorized");
+    if (hasUnprotectedReturn)
+      hints.push(
+        "Don't return sensitive fields (email, ssn) without checking authorization first",
+      );
+
+    const passed =
+      hasContextUser &&
+      hasIdComparison &&
+      hasAccessDenied &&
+      !hasUnprotectedReturn;
+    return { passed, hints };
+  },
 };
 
 /**
