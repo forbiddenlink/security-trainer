@@ -6,7 +6,7 @@ A gamified web-based interactive learning platform for teaching web security vul
 
 ## Features
 
-- **17+ Security Modules** - OWASP Top 10, Clickjacking, JWT vulnerabilities, Business Logic flaws, and more
+- **24 Security Modules** - OWASP Top 10, API Security, GraphQL, Race Conditions, JWT vulnerabilities, and more
 - **Hands-on Labs** - Interactive code editor with real-time verification
 - **Gamification** - XP system, levels, daily challenges, streaks, and achievements
 - **Leaderboard** - Compete with other security agents (requires Supabase)
