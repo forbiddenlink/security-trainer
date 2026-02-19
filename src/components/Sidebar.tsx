@@ -19,11 +19,15 @@ const NAV_ITEMS = [
   { label: "Final Exam", path: "/challenge", icon: ShieldAlert },
 ] as const;
 
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
 /**
  * Main navigation sidebar - memoized since it contains static content
  * and only re-renders when NavLink active states change
  */
-export const Sidebar: React.FC = memo(() => {
+export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
   return (
     <aside
       className="w-64 min-h-screen flex flex-col border-r border-border/70 bg-card/90 backdrop-blur relative z-10"
@@ -46,6 +50,7 @@ export const Sidebar: React.FC = memo(() => {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={onNavigate}
             className={({ isActive }) =>
               clsx(
                 "group relative flex h-11 items-center gap-3 rounded-[var(--radius-sm)] px-3.5 text-sm font-medium transition-all duration-200",

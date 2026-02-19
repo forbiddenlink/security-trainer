@@ -888,6 +888,75 @@ export const labVerifiers: Record<string, VerificationFn> = {
       hasRegenerate && hasHttpOnly && hasSecure && hasSameSite && hasMaxAge;
     return { passed, hints };
   },
+
+  // API Security Lab: Check for secure API endpoint implementation
+  "api-security-lab": (code: string) => {
+    const hints: string[] = [];
+
+    // Check for parameterized query
+    const hasParameterizedQuery =
+      code.includes("?") &&
+      (code.includes("db.query(") || code.includes("db.execute("));
+    const noStringConcat =
+      !code.includes("+ req.params") && !code.includes("' + id");
+
+    // Check for authorization
+    const hasReqUser = code.includes("req.user");
+    const hasIdComparison =
+      code.includes("req.user.id") &&
+      (code.includes("=== user.id") ||
+        code.includes("!== user.id") ||
+        code.includes("req.params.id"));
+    const hasStatus403 = code.includes("403");
+
+    // Check for data filtering (no password hash)
+    const noPasswordHash =
+      !code.includes("password_hash") || code.includes("delete");
+    const hasDataFilter =
+      code.includes("delete user.password") ||
+      code.includes("password: undefined") ||
+      code.includes("{ id,") ||
+      code.includes("{id,") ||
+      code.includes("omit") ||
+      code.includes("pick");
+
+    // Check for 404 handling
+    const hasStatus404 = code.includes("404");
+    const hasNotFoundCheck =
+      code.includes("!user") || code.includes("user === null");
+
+    if (!noStringConcat)
+      hints.push(
+        "Remove string concatenation - use parameterized query with ?",
+      );
+    if (!hasParameterizedQuery)
+      hints.push(
+        "Use a parameterized query: db.query('SELECT ... WHERE id = ?', [id])",
+      );
+    if (!hasReqUser || !hasIdComparison)
+      hints.push(
+        "Add authorization: compare req.user.id with the requested user's ID",
+      );
+    if (!hasStatus403)
+      hints.push("Return 403 status code for unauthorized access attempts");
+    if (!noPasswordHash || !hasDataFilter)
+      hints.push(
+        "Filter sensitive fields: remove password_hash before returning user",
+      );
+    if (!hasNotFoundCheck || !hasStatus404)
+      hints.push("Return 404 status code when user is not found");
+
+    const passed =
+      hasParameterizedQuery &&
+      noStringConcat &&
+      hasReqUser &&
+      hasIdComparison &&
+      hasStatus403 &&
+      (noPasswordHash || hasDataFilter) &&
+      hasNotFoundCheck &&
+      hasStatus404;
+    return { passed, hints };
+  },
 };
 
 /**

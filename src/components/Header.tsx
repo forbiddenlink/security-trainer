@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, memo, useCallback } from "react";
 import { useGameStore } from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
-import { Bell, Trophy, LogIn, LogOut, ChevronDown } from "lucide-react";
+import { Bell, Trophy, LogIn, LogOut, ChevronDown, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StreakIndicator } from "./StreakIndicator";
 import { ThemeToggle } from "./ThemeToggle";
@@ -11,10 +11,14 @@ import { isSupabaseConfigured } from "../lib/supabase";
 /** XP required per level - keep in sync with gameStore constants */
 const XP_PER_LEVEL = 1000;
 
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
 /**
  * Main header with user stats, level progress, and auth controls
  */
-export const Header: React.FC = memo(() => {
+export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
   // Use selectors for better performance - only re-render when specific values change
   const xp = useGameStore((state) => state.xp);
   const level = useGameStore((state) => state.level);
@@ -74,7 +78,14 @@ export const Header: React.FC = memo(() => {
       className="sticky top-0 z-20 h-16 border-b border-border/70 bg-card/82 backdrop-blur-md px-4 md:px-6 flex items-center justify-between"
       role="banner"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground hover:bg-muted/60"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="w-5 h-5" aria-hidden="true" />
+        </button>
         <h1 className="text-[1.05rem] font-semibold tracking-tight text-foreground">
           Mission Control
         </h1>

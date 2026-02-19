@@ -21,6 +21,7 @@ import { pathTraversal } from "./path-traversal";
 import { fileUpload } from "./file-upload";
 import { corsMisconfig } from "./cors-misconfig";
 import { sessionManagement } from "./session-management";
+import { apiSecurity } from "./api-security";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -44,6 +45,7 @@ export const MODULES: Module[] = [
   fileUpload,
   corsMisconfig,
   sessionManagement,
+  apiSecurity,
 ];
 
 // Re-export individual modules for direct imports
@@ -69,4 +71,5 @@ export {
   fileUpload,
   corsMisconfig,
   sessionManagement,
+  apiSecurity,
 };
