@@ -1,73 +1,106 @@
-# React + TypeScript + Vite
+# Security Trainer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A gamified web-based interactive learning platform for teaching web security vulnerabilities and defensive coding practices. Features a spy/agent theme with XP, levels, badges, and hands-on code labs.
 
-Currently, two official plugins are available:
+**Live Demo:** [securitytrainer.vercel.app](https://securitytrainer.vercel.app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- **17+ Security Modules** - OWASP Top 10, Clickjacking, JWT vulnerabilities, Business Logic flaws, and more
+- **Hands-on Labs** - Interactive code editor with real-time verification
+- **Gamification** - XP system, levels, daily challenges, streaks, and achievements
+- **Leaderboard** - Compete with other security agents (requires Supabase)
+- **Cloud Sync** - Save progress across devices (requires Supabase)
+- **Dark/Light Mode** - System preference detection with manual override
+- **Mobile Responsive** - Works on desktop and mobile devices
+- **Accessibility** - WCAG compliant with ARIA labels, keyboard navigation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Quick Start
 
-## Expanding the ESLint configuration
+```bash
+# Install dependencies
+npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Start development server
+npm run dev
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Open http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Commands
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command            | Description              |
+| ------------------ | ------------------------ |
+| `npm run dev`      | Start development server |
+| `npm run build`    | Build for production     |
+| `npm run preview`  | Preview production build |
+| `npm run test`     | Run tests in watch mode  |
+| `npm run test:run` | Run tests once           |
+| `npm run lint`     | Run ESLint               |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tech Stack
+
+- **Frontend:** React 19 + TypeScript 5.9
+- **Build:** Vite 7.2
+- **State:** Zustand (with localStorage persistence)
+- **Styling:** Tailwind CSS 4.1
+- **Animations:** Framer Motion
+- **Code Editor:** Monaco Editor
+- **Testing:** Vitest + Testing Library
+
+## Optional: Cloud Features (Supabase)
+
+To enable user authentication, cloud sync, and leaderboards:
+
+### 1. Create a Supabase Project
+
+1. Go to [supabase.com](https://supabase.com) and create a free project
+2. Go to **Settings > API** and copy your Project URL and anon key
+
+### 2. Configure Environment Variables
+
+```bash
+cp .env.example .env
 ```
+
+Edit `.env` with your Supabase credentials:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### 3. Set Up the Database
+
+1. Go to **SQL Editor** in your Supabase dashboard
+2. Run the contents of `supabase/schema.sql`
+
+### 4. Enable Google OAuth (Optional)
+
+1. Go to **Authentication > Providers**
+2. Enable Google and add your OAuth credentials
+
+## Project Structure
+
+```
+src/
+├── components/    # Reusable UI components
+├── pages/         # Route page components
+├── layouts/       # Layout wrappers
+├── store/         # Zustand state management
+├── data/          # Static module/lesson content
+├── types/         # TypeScript interfaces
+├── utils/         # Utility functions (lab verification)
+├── lib/           # External service clients
+```
+
+## Adding New Modules
+
+1. Create a new file in `src/data/modules/` (e.g., `my-module.ts`)
+2. Export a module definition following the existing pattern
+3. Import and add it to the `MODULES` array in `src/data/modules/index.ts`
+4. For labs, add a verifier to `src/utils/labVerification.ts`
+
+## License
+
+MIT
