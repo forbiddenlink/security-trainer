@@ -957,6 +957,54 @@ export const labVerifiers: Record<string, VerificationFn> = {
       hasStatus404;
     return { passed, hints };
   },
+
+  // Race Conditions Lab: Check for atomic database operations
+  "race-conditions-lab": (code: string) => {
+    const hints: string[] = [];
+    const normalized = code.toLowerCase();
+
+    // Must use atomic update pattern: UPDATE ... SET balance = balance - amount WHERE ... AND balance >= amount
+    const hasAtomicUpdate =
+      /update\s+\w+\s+set\s+balance\s*=\s*balance\s*-/.test(normalized) &&
+      /where.*balance\s*>=/.test(normalized);
+
+    // Should NOT have separate SELECT for balance check
+    const hasSeparateSelect =
+      /select.*balance.*from/i.test(code) && /if\s*\(.*balance/.test(code);
+
+    // Should check rowCount for detecting insufficient balance
+    const hasRowCountCheck =
+      code.includes("rowCount") || code.includes("rows.length");
+
+    // Should return 400 for insufficient balance
+    const hasStatus400 = code.includes("400");
+
+    // Alternative: Uses transaction with FOR UPDATE locking
+    const hasForUpdate = /for\s+update/i.test(code);
+    const hasTransaction = /begin/i.test(code) && /commit/i.test(code);
+
+    if (!hasAtomicUpdate && !hasForUpdate)
+      hints.push(
+        "Use atomic UPDATE: UPDATE ... SET balance = balance - $1 WHERE id = $2 AND balance >= $1",
+      );
+    if (hasSeparateSelect)
+      hints.push(
+        "Remove the separate SELECT query - check balance in the UPDATE WHERE clause",
+      );
+    if (!hasRowCountCheck)
+      hints.push(
+        "Check result.rowCount to detect if the update succeeded (0 = insufficient balance)",
+      );
+    if (!hasStatus400)
+      hints.push("Return 400 status code when balance is insufficient");
+
+    const passed =
+      (hasAtomicUpdate || (hasForUpdate && hasTransaction)) &&
+      !hasSeparateSelect &&
+      hasRowCountCheck &&
+      hasStatus400;
+    return { passed, hints };
+  },
 };
 
 /**

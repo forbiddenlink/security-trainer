@@ -22,6 +22,7 @@ import { fileUpload } from "./file-upload";
 import { corsMisconfig } from "./cors-misconfig";
 import { sessionManagement } from "./session-management";
 import { apiSecurity } from "./api-security";
+import { raceConditions } from "./race-conditions";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -46,6 +47,7 @@ export const MODULES: Module[] = [
   corsMisconfig,
   sessionManagement,
   apiSecurity,
+  raceConditions,
 ];
 
 // Re-export individual modules for direct imports
@@ -72,4 +74,5 @@ export {
   corsMisconfig,
   sessionManagement,
   apiSecurity,
+  raceConditions,
 };
