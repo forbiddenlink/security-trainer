@@ -1006,6 +1006,111 @@ export const labVerifiers: Record<string, VerificationFn> = {
     return { passed, hints };
   },
 
+  // AI Security Lab: Check for prompt injection detection
+  "ai-security-lab": (code: string) => {
+    const hints: string[] = [];
+
+    // Must have injection patterns array
+    const hasInjectionPatterns = code.includes("INJECTION_PATTERNS");
+
+    // Must have detection function
+    const hasDetectFunction =
+      code.includes("detectPromptInjection") ||
+      code.includes("detect") ||
+      code.includes("sanitize");
+
+    // Must check for dangerous patterns
+    const checksIgnore = code.toLowerCase().includes("ignore");
+    const checksForget = code.toLowerCase().includes("forget");
+    const checksNewInstructions =
+      code.toLowerCase().includes("new instructions") ||
+      code.toLowerCase().includes("instructions");
+
+    // Must throw or return error
+    const hasErrorHandling =
+      code.includes("throw new Error") || code.includes("throw Error");
+    const hasMaliciousMessage = code.includes("malicious input detected");
+
+    if (!hasInjectionPatterns)
+      hints.push(
+        "Create an INJECTION_PATTERNS array containing dangerous phrases",
+      );
+    if (!hasDetectFunction)
+      hints.push(
+        "Add a detectPromptInjection function to check input against patterns",
+      );
+    if (!checksIgnore || !checksForget || !checksNewInstructions)
+      hints.push(
+        "Include patterns like 'ignore previous', 'forget', 'new instructions'",
+      );
+    if (!hasErrorHandling || !hasMaliciousMessage)
+      hints.push(
+        "Throw an error with message 'Potentially malicious input detected'",
+      );
+
+    const passed =
+      hasInjectionPatterns &&
+      hasDetectFunction &&
+      checksIgnore &&
+      hasErrorHandling &&
+      hasMaliciousMessage;
+    return { passed, hints };
+  },
+
+  // Supply Chain Security Lab: Check for dependency verification
+  "supply-chain-lab": (code: string) => {
+    const hints: string[] = [];
+
+    // Must have approved packages list
+    const hasApprovedPackages = code.includes("APPROVED_PACKAGES");
+
+    // Must check for pinned versions
+    const checksVersionPinned =
+      code.includes("isVersionPinned") || code.includes("pinned");
+    const rejectsCaretTilde =
+      code.includes("^") && code.includes("~") && code.includes("startsWith");
+
+    // Must validate against allowlist
+    const checksApproved =
+      code.includes("isPackageApproved") || code.includes("approved");
+
+    // Must have proper error messages
+    const hasVersionError =
+      code.includes("Version must be pinned") || code.includes("pinned");
+    const hasApprovedError =
+      code.includes("Package not in approved") ||
+      code.includes("not in approved");
+    const hasChecksumError =
+      code.includes("Checksum") || code.includes("checksum");
+
+    if (!hasApprovedPackages)
+      hints.push(
+        "Create an APPROVED_PACKAGES object as an allowlist of trusted packages",
+      );
+    if (!checksVersionPinned || !rejectsCaretTilde)
+      hints.push(
+        "Add isVersionPinned() that rejects versions starting with ^ or ~",
+      );
+    if (!checksApproved)
+      hints.push(
+        "Add isPackageApproved() to validate packages against the allowlist",
+      );
+    if (!hasVersionError)
+      hints.push("Throw error with 'Version must be pinned' message");
+    if (!hasApprovedError)
+      hints.push("Throw error with 'Package not in approved list' message");
+    if (!hasChecksumError)
+      hints.push("Include checksum verification with appropriate error");
+
+    const passed =
+      hasApprovedPackages &&
+      checksVersionPinned &&
+      checksApproved &&
+      hasVersionError &&
+      hasApprovedError;
+    return { passed, hints };
+  },
+
   // GraphQL Security Lab: Check for proper authorization in resolvers
   "graphql-security-lab": (code: string) => {
     const hints: string[] = [];

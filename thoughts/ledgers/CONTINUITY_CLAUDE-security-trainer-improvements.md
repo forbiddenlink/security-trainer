@@ -1,10 +1,10 @@
 # Security Trainer - Improvements Session
 
-Updated: 2026-02-19T03:25:18.250Z
+Updated: 2026-02-25
 
 ## Goal
 
-✅ **COMPLETE** - Major enhancements including OWASP modules, testing, accessibility, gamification, dark mode, mobile navigation, and cloud-ready auth.
+✅ **COMPLETE** - Major enhancements including OWASP modules, testing, accessibility, gamification, dark mode, mobile navigation, and cloud-ready auth. Now with 26 modules covering AI security and supply chain threats.
 
 ## Constraints
 
@@ -43,7 +43,12 @@ Updated: 2026-02-19T03:25:18.250Z
   - [x] Certificate theme fix (proper dark/light mode support)
   - [x] README with proper documentation and Supabase setup guide
 - Now: Session complete
-- Remaining (optional):
+- Remaining (optional, from research):
+  - [ ] Container & Kubernetes Security module
+  - [ ] Modern Social Engineering module
+  - [ ] Spaced repetition system (150% better retention)
+  - [ ] Learning paths with certification tracks
+  - [ ] Leaderboard feature (currently shows placeholder)
   - [ ] Configure Supabase project for live auth
   - [ ] Content improvements (videos, diagrams)
   - [ ] PWA/offline support
@@ -61,7 +66,7 @@ Feb 18 session improvements:
 
 Overall project stats:
 
-- 24 total training modules (was 5 originally)
+- 26 total training modules (was 5 originally)
 - 202 tests passing
 - Full WCAG accessibility
 - Gamification: XP multipliers, daily challenges, streaks
@@ -78,6 +83,32 @@ Feb 19 cleanup session:
 - Verified all 202 tests pass
 - Verified build succeeds
 - UI tested: Dashboard, Modules, Lessons, Challenge, Mobile menu, Dark mode
+
+Feb 25 audit & enhancement session:
+
+**Bugs Fixed (3 critical):**
+
+1. Memory leak: authStore auth listener not cleaned up - FIXED
+2. Race condition: Profile.tsx useEffect dependency issue - FIXED
+3. Security: Avatar URL validation for XSS prevention - FIXED (new urlValidation.ts utility)
+
+**New Modules Added (2):**
+
+1. **AI Security Fundamentals** (Intermediate, 400 XP) - prompt injection, AI supply chain, data extraction
+2. **Supply Chain Security** (Intermediate, 350 XP) - typosquatting, dependency confusion, SBOM
+
+**Research Findings (from online research):**
+
+- Missing critical 2025 topics identified: AI security, supply chain, container security
+- Spaced repetition recommended for 150% better retention
+- Learning paths/certification tracks suggested (HTB/TryHackMe model)
+- Leaderboards and team features for engagement
+
+**Stats:**
+
+- 26 total modules (was 24)
+- All 202 tests passing
+- Build successful
 
 ## Working Set
 
