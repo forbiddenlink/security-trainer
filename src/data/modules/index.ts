@@ -26,6 +26,8 @@ import { raceConditions } from "./race-conditions";
 import { graphqlSecurity } from "./graphql-security";
 import { aiSecurity } from "./ai-security";
 import { supplyChainSecurity } from "./supply-chain-security";
+import { containerSecurity } from "./container-security";
+import { socialEngineering } from "./social-engineering";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -54,6 +56,8 @@ export const MODULES: Module[] = [
   graphqlSecurity,
   aiSecurity,
   supplyChainSecurity,
+  containerSecurity,
+  socialEngineering,
 ];
 
 // Re-export individual modules for direct imports
@@ -84,4 +88,6 @@ export {
   graphqlSecurity,
   aiSecurity,
   supplyChainSecurity,
+  containerSecurity,
+  socialEngineering,
 };

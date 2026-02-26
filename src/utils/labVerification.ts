@@ -1157,6 +1157,116 @@ export const labVerifiers: Record<string, VerificationFn> = {
       !hasUnprotectedReturn;
     return { passed, hints };
   },
+
+  // Social Engineering Lab: Check for phishing detection implementation
+  "social-engineering-lab": (code: string) => {
+    const hints: string[] = [];
+
+    // Must have urgency keywords array
+    const hasUrgencyKeywords =
+      code.includes("URGENCY_KEYWORDS") || code.includes("urgency");
+
+    // Must have suspicious patterns
+    const hasSuspiciousPatterns =
+      code.includes("SUSPICIOUS_PATTERNS") ||
+      code.includes("suspicious") ||
+      code.includes("-verify") ||
+      code.includes("-secure");
+
+    // Must extract from field components
+    const extractsFrom =
+      code.includes(".match") ||
+      code.includes("split") ||
+      code.includes("displayName") ||
+      code.includes("emailAddr");
+
+    // Must check domain
+    const checksDomain =
+      code.includes("domain") && (code.includes("@") || code.includes("split"));
+
+    // Must return risk level
+    const hasRiskLevel =
+      code.includes("riskLevel") &&
+      (code.includes("high") ||
+        code.includes("medium") ||
+        code.includes("low"));
+
+    // Must return reasons
+    const hasReasons = code.includes("reasons") && code.includes("push");
+
+    if (!hasUrgencyKeywords)
+      hints.push(
+        "Create an URGENCY_KEYWORDS array with terms like 'urgent', 'immediately'",
+      );
+    if (!hasSuspiciousPatterns)
+      hints.push(
+        "Add patterns to detect suspicious domains like '-verify.com'",
+      );
+    if (!extractsFrom)
+      hints.push(
+        "Extract the display name and email address from the 'from' field",
+      );
+    if (!checksDomain)
+      hints.push("Check if the email domain matches expected patterns");
+    if (!hasRiskLevel)
+      hints.push("Return a riskLevel of 'low', 'medium', or 'high'");
+    if (!hasReasons) hints.push("Add detected issues to the reasons array");
+
+    const passed =
+      hasUrgencyKeywords &&
+      hasSuspiciousPatterns &&
+      extractsFrom &&
+      hasRiskLevel &&
+      hasReasons;
+    return { passed, hints };
+  },
+
+  // Container Security Lab: Check for secure Kubernetes pod configuration
+  "container-security-lab": (code: string) => {
+    const hints: string[] = [];
+
+    // Must have securityContext at pod or container level
+    const hasSecurityContext = code.includes("securityContext");
+
+    // Must set runAsNonRoot
+    const hasRunAsNonRoot = code.includes("runAsNonRoot: true");
+
+    // Must drop all capabilities
+    const hasDropAll =
+      code.includes("drop:") &&
+      (code.includes("ALL") ||
+        code.includes('"ALL"') ||
+        code.includes("'ALL'"));
+
+    // Must set allowPrivilegeEscalation: false
+    const hasNoPrivEsc = code.includes("allowPrivilegeEscalation: false");
+
+    // Must have readOnlyRootFilesystem
+    const hasReadOnly = code.includes("readOnlyRootFilesystem: true");
+
+    if (!hasSecurityContext)
+      hints.push("Add a securityContext section to the pod or container spec");
+    if (!hasRunAsNonRoot)
+      hints.push("Set runAsNonRoot: true to prevent running as root");
+    if (!hasDropAll)
+      hints.push("Drop ALL capabilities using capabilities.drop: ['ALL']");
+    if (!hasNoPrivEsc)
+      hints.push(
+        "Set allowPrivilegeEscalation: false to prevent privilege escalation",
+      );
+    if (!hasReadOnly)
+      hints.push(
+        "Set readOnlyRootFilesystem: true to prevent filesystem modifications",
+      );
+
+    const passed =
+      hasSecurityContext &&
+      hasRunAsNonRoot &&
+      hasDropAll &&
+      hasNoPrivEsc &&
+      hasReadOnly;
+    return { passed, hints };
+  },
 };
 
 /**

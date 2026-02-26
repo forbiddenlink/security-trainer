@@ -1,10 +1,10 @@
 # Security Trainer - Improvements Session
 
-Updated: 2026-02-25
+Updated: 2026-02-26T04:50:00.000Z
 
 ## Goal
 
-✅ **COMPLETE** - Major enhancements including OWASP modules, testing, accessibility, gamification, dark mode, mobile navigation, and cloud-ready auth. Now with 26 modules covering AI security and supply chain threats.
+✅ **COMPLETE** - Major enhancements including OWASP modules, testing, accessibility, gamification, dark mode, mobile navigation, and cloud-ready auth. Now with 28 modules covering AI security, supply chain, container/K8s, and social engineering.
 
 ## Constraints
 
@@ -42,10 +42,10 @@ Updated: 2026-02-25
   - [x] API Security module (7 lessons: BOLA, rate limiting, JWT, mass assignment)
   - [x] Certificate theme fix (proper dark/light mode support)
   - [x] README with proper documentation and Supabase setup guide
-- Now: Session complete
+- Now: [→] Adding new modules
 - Remaining (optional, from research):
-  - [ ] Container & Kubernetes Security module
-  - [ ] Modern Social Engineering module
+  - [x] Container & Kubernetes Security module
+  - [x] Modern Social Engineering module
   - [ ] Spaced repetition system (150% better retention)
   - [ ] Learning paths with certification tracks
   - [ ] Leaderboard feature (currently shows placeholder)
@@ -107,6 +107,19 @@ Feb 25 audit & enhancement session:
 **Stats:**
 
 - 26 total modules (was 24)
+- All 202 tests passing
+- Build successful
+
+Feb 26 session:
+
+**New Modules Added (2):**
+
+1. **Container & Kubernetes Security** (Advanced, 450 XP) - Docker security, K8s misconfigurations, container escape, pod security
+2. **Modern Social Engineering** (Intermediate, 350 XP) - phishing, pretexting, deepfakes, OSINT awareness
+
+**Stats:**
+
+- 28 total modules (was 26)
 - All 202 tests passing
 - Build successful
 
