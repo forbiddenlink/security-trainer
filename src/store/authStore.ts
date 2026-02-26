@@ -1,321 +1,356 @@
-import { create } from 'zustand';
-import type { User, AuthError } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import type { Profile, LeaderboardEntry, ProfileInsert } from '../types/database';
+import { create } from "zustand";
+import type { User, AuthError } from "@supabase/supabase-js";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import type {
+  Profile,
+  LeaderboardEntry,
+  ProfileInsert,
+} from "../types/database";
 
 interface AuthState {
-    user: User | null;
-    profile: Profile | null;
-    loading: boolean;
-    error: string | null;
-    isAuthModalOpen: boolean;
-    authModalMode: 'login' | 'signup';
-    leaderboard: LeaderboardEntry[];
-    userRank: number | null;
+  user: User | null;
+  profile: Profile | null;
+  loading: boolean;
+  error: string | null;
+  isAuthModalOpen: boolean;
+  authModalMode: "login" | "signup";
+  leaderboard: LeaderboardEntry[];
+  userRank: number | null;
 }
 
 interface AuthActions {
-    initialize: () => Promise<void>;
-    signUp: (email: string, password: string, displayName?: string) => Promise<{ error: AuthError | null }>;
-    signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-    signInWithGoogle: () => Promise<{ error: AuthError | null }>;
-    signOut: () => Promise<void>;
-    updateProfile: (updates: Partial<Profile>) => Promise<void>;
-    syncProgressToCloud: (progress: {
-        xp: number;
-        level: number;
-        badges: string[];
-        completedModules: string[];
-        completedLessons: string[];
-        streakDays: number;
-        lastLoginDate: string | null;
-        dailyChallengeId: string | null;
-        dailyChallengeDate: string | null;
-        dailyChallengeCompleted: boolean;
-    }) => Promise<void>;
-    loadProgressFromCloud: () => Promise<Profile | null>;
-    fetchLeaderboard: () => Promise<void>;
-    openAuthModal: (mode: 'login' | 'signup') => void;
-    closeAuthModal: () => void;
-    clearError: () => void;
+  initialize: () => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    displayName?: string,
+  ) => Promise<{ error: AuthError | null }>;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: AuthError | null }>;
+  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
+  signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  syncProgressToCloud: (progress: {
+    xp: number;
+    level: number;
+    badges: string[];
+    completedModules: string[];
+    completedLessons: string[];
+    streakDays: number;
+    lastLoginDate: string | null;
+    dailyChallengeId: string | null;
+    dailyChallengeDate: string | null;
+    dailyChallengeCompleted: boolean;
+  }) => Promise<void>;
+  loadProgressFromCloud: () => Promise<Profile | null>;
+  fetchLeaderboard: () => Promise<void>;
+  openAuthModal: (mode: "login" | "signup") => void;
+  closeAuthModal: () => void;
+  clearError: () => void;
 }
 
 type AuthStore = AuthState & AuthActions;
 
+// Store auth subscription for cleanup
+let authSubscription: { unsubscribe: () => void } | null = null;
+
 export const useAuthStore = create<AuthStore>((set, get) => ({
-    user: null,
-    profile: null,
-    loading: true,
-    error: null,
-    isAuthModalOpen: false,
-    authModalMode: 'login',
-    leaderboard: [],
-    userRank: null,
+  user: null,
+  profile: null,
+  loading: true,
+  error: null,
+  isAuthModalOpen: false,
+  authModalMode: "login",
+  leaderboard: [],
+  userRank: null,
 
-    initialize: async () => {
-        if (!isSupabaseConfigured() || !supabase) {
-            set({ loading: false });
-            return;
+  initialize: async () => {
+    if (!isSupabaseConfigured() || !supabase) {
+      set({ loading: false });
+      return;
+    }
+
+    try {
+      // Get initial session
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        set({ user: session.user });
+        await get().loadProgressFromCloud();
+      }
+
+      // Clean up existing subscription to prevent memory leaks
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
+
+      // Listen for auth changes
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (event, session) => {
+        set({ user: session?.user || null });
+
+        if (event === "SIGNED_IN" && session?.user) {
+          await get().loadProgressFromCloud();
+        } else if (event === "SIGNED_OUT") {
+          set({ profile: null, userRank: null });
         }
+      });
 
-        try {
-            // Get initial session
-            const { data: { session } } = await supabase.auth.getSession();
+      // Store subscription for cleanup
+      authSubscription = subscription;
+    } catch (error) {
+      console.error("Auth initialization error:", error);
+    } finally {
+      set({ loading: false });
+    }
+  },
 
-            if (session?.user) {
-                set({ user: session.user });
-                await get().loadProgressFromCloud();
-            }
+  signUp: async (email, password, displayName) => {
+    if (!supabase)
+      return { error: { message: "Supabase not configured" } as AuthError };
 
-            // Listen for auth changes
-            supabase.auth.onAuthStateChange(async (event, session) => {
-                set({ user: session?.user || null });
+    set({ loading: true, error: null });
 
-                if (event === 'SIGNED_IN' && session?.user) {
-                    await get().loadProgressFromCloud();
-                } else if (event === 'SIGNED_OUT') {
-                    set({ profile: null, userRank: null });
-                }
-            });
-        } catch (error) {
-            console.error('Auth initialization error:', error);
-        } finally {
-            set({ loading: false });
-        }
-    },
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          display_name: displayName,
+        },
+      },
+    });
 
-    signUp: async (email, password, displayName) => {
-        if (!supabase) return { error: { message: 'Supabase not configured' } as AuthError };
+    if (error) {
+      set({ loading: false, error: error.message });
+      return { error };
+    }
 
-        set({ loading: true, error: null });
+    if (data.user) {
+      // Create profile record
+      const profileData: ProfileInsert = {
+        id: data.user.id,
+        email: data.user.email ?? null,
+        display_name: displayName || email?.split("@")[0] || "Agent",
+      };
+      await supabase.from("profiles").insert(profileData);
+    }
 
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    display_name: displayName,
-                },
-            },
-        });
+    set({ loading: false });
+    return { error: null };
+  },
 
-        if (error) {
-            set({ loading: false, error: error.message });
-            return { error };
-        }
+  signIn: async (email, password) => {
+    if (!supabase)
+      return { error: { message: "Supabase not configured" } as AuthError };
 
-        if (data.user) {
-            // Create profile record
-            const profileData: ProfileInsert = {
-                id: data.user.id,
-                email: data.user.email ?? null,
-                display_name: displayName || email?.split('@')[0] || 'Agent',
-            };
-            await supabase.from('profiles').insert(profileData);
-        }
+    set({ loading: true, error: null });
 
-        set({ loading: false });
-        return { error: null };
-    },
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    signIn: async (email, password) => {
-        if (!supabase) return { error: { message: 'Supabase not configured' } as AuthError };
+    if (error) {
+      set({ loading: false, error: error.message });
+      return { error };
+    }
 
-        set({ loading: true, error: null });
+    set({ loading: false });
+    return { error: null };
+  },
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+  signInWithGoogle: async () => {
+    if (!supabase)
+      return { error: { message: "Supabase not configured" } as AuthError };
 
-        if (error) {
-            set({ loading: false, error: error.message });
-            return { error };
-        }
+    set({ loading: true, error: null });
 
-        set({ loading: false });
-        return { error: null };
-    },
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
 
-    signInWithGoogle: async () => {
-        if (!supabase) return { error: { message: 'Supabase not configured' } as AuthError };
+    if (error) {
+      set({ loading: false, error: error.message });
+      return { error };
+    }
 
-        set({ loading: true, error: null });
+    set({ loading: false });
+    return { error: null };
+  },
 
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin,
-            },
-        });
+  signOut: async () => {
+    if (!supabase) return;
 
-        if (error) {
-            set({ loading: false, error: error.message });
-            return { error };
-        }
+    set({ loading: true });
+    await supabase.auth.signOut();
+    set({ user: null, profile: null, loading: false, userRank: null });
+  },
 
-        set({ loading: false });
-        return { error: null };
-    },
+  updateProfile: async (updates) => {
+    const { user } = get();
+    if (!supabase || !user) return;
 
-    signOut: async () => {
-        if (!supabase) return;
+    const updateData = {
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
 
-        set({ loading: true });
-        await supabase.auth.signOut();
-        set({ user: null, profile: null, loading: false, userRank: null });
-    },
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(updateData)
+      .eq("id", user.id)
+      .select()
+      .single();
 
-    updateProfile: async (updates) => {
-        const { user } = get();
-        if (!supabase || !user) return;
+    if (error) {
+      console.error("Profile update error:", error);
+      return;
+    }
 
-        const updateData = {
-            ...updates,
-            updated_at: new Date().toISOString()
-        };
+    set({ profile: data });
+  },
 
-        const { data, error } = await supabase
-            .from('profiles')
-            .update(updateData)
-            .eq('id', user.id)
-            .select()
-            .single();
+  syncProgressToCloud: async (progress) => {
+    const { user } = get();
+    if (!supabase || !user) return;
 
-        if (error) {
-            console.error('Profile update error:', error);
-            return;
-        }
+    const profileData: ProfileInsert = {
+      id: user.id,
+      email: user.email ?? null,
+      xp: progress.xp,
+      level: progress.level,
+      badges: progress.badges,
+      completed_modules: progress.completedModules,
+      completed_lessons: progress.completedLessons,
+      streak_days: progress.streakDays,
+      last_login_date: progress.lastLoginDate,
+      daily_challenge_id: progress.dailyChallengeId,
+      daily_challenge_date: progress.dailyChallengeDate,
+      daily_challenge_completed: progress.dailyChallengeCompleted,
+      updated_at: new Date().toISOString(),
+    };
 
-        set({ profile: data });
-    },
+    const { data, error } = await supabase
+      .from("profiles")
+      .upsert(profileData)
+      .select()
+      .single();
 
-    syncProgressToCloud: async (progress) => {
-        const { user } = get();
-        if (!supabase || !user) return;
+    if (error) {
+      console.error("Sync to cloud error:", error);
+      return;
+    }
 
-        const profileData: ProfileInsert = {
-            id: user.id,
-            email: user.email ?? null,
-            xp: progress.xp,
-            level: progress.level,
-            badges: progress.badges,
-            completed_modules: progress.completedModules,
-            completed_lessons: progress.completedLessons,
-            streak_days: progress.streakDays,
-            last_login_date: progress.lastLoginDate,
-            daily_challenge_id: progress.dailyChallengeId,
-            daily_challenge_date: progress.dailyChallengeDate,
-            daily_challenge_completed: progress.dailyChallengeCompleted,
-            updated_at: new Date().toISOString(),
-        };
+    set({ profile: data });
+  },
 
-        const { data, error } = await supabase
-            .from('profiles')
-            .upsert(profileData)
-            .select()
-            .single();
+  loadProgressFromCloud: async () => {
+    const { user } = get();
+    if (!supabase || !user) return null;
 
-        if (error) {
-            console.error('Sync to cloud error:', error);
-            return;
-        }
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-        set({ profile: data });
-    },
+    if (error && error.code !== "PGRST116") {
+      console.error("Load from cloud error:", error);
+      return null;
+    }
 
-    loadProgressFromCloud: async () => {
-        const { user } = get();
-        if (!supabase || !user) return null;
+    if (data) {
+      set({ profile: data });
+      return data;
+    }
 
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+    // Create new profile if doesn't exist
+    const profileData: ProfileInsert = {
+      id: user.id,
+      email: user.email ?? null,
+      display_name:
+        user.user_metadata?.display_name ||
+        user.email?.split("@")[0] ||
+        "Agent",
+    };
 
-        if (error && error.code !== 'PGRST116') {
-            console.error('Load from cloud error:', error);
-            return null;
-        }
+    const { data: newProfile, error: insertError } = await supabase
+      .from("profiles")
+      .insert(profileData)
+      .select()
+      .single();
 
-        if (data) {
-            set({ profile: data });
-            return data;
-        }
+    if (insertError) {
+      console.error("Create profile error:", insertError);
+      return null;
+    }
 
-        // Create new profile if doesn't exist
-        const profileData: ProfileInsert = {
-            id: user.id,
-            email: user.email ?? null,
-            display_name: user.user_metadata?.display_name || user.email?.split('@')[0] || 'Agent',
-        };
+    set({ profile: newProfile });
+    return newProfile;
+  },
 
-        const { data: newProfile, error: insertError } = await supabase
-            .from('profiles')
-            .insert(profileData)
-            .select()
-            .single();
+  fetchLeaderboard: async () => {
+    if (!supabase) {
+      set({ leaderboard: [] });
+      return;
+    }
 
-        if (insertError) {
-            console.error('Create profile error:', insertError);
-            return null;
-        }
+    const { user } = get();
 
-        set({ profile: newProfile });
-        return newProfile;
-    },
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url, xp, level")
+      .order("xp", { ascending: false })
+      .limit(50);
 
-    fetchLeaderboard: async () => {
-        if (!supabase) {
-            set({ leaderboard: [] });
-            return;
-        }
+    if (error) {
+      console.error("Fetch leaderboard error:", error);
+      return;
+    }
 
-        const { user } = get();
+    // Add rank to each entry
+    const leaderboard: LeaderboardEntry[] = (data || []).map(
+      (entry, index) => ({
+        id: entry.id,
+        display_name: entry.display_name,
+        avatar_url: entry.avatar_url,
+        xp: entry.xp,
+        level: entry.level,
+        rank: index + 1,
+      }),
+    );
 
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('id, display_name, avatar_url, xp, level')
-            .order('xp', { ascending: false })
-            .limit(50);
+    // Find current user's rank
+    let userRank: number | null = null;
+    if (user) {
+      const userEntry = leaderboard.find((entry) => entry.id === user.id);
+      if (userEntry) {
+        userRank = userEntry.rank || null;
+      } else {
+        // User not in top 50, fetch their rank
+        const { count } = await supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .gt("xp", get().profile?.xp || 0);
 
-        if (error) {
-            console.error('Fetch leaderboard error:', error);
-            return;
-        }
+        userRank = (count || 0) + 1;
+      }
+    }
 
-        // Add rank to each entry
-        const leaderboard: LeaderboardEntry[] = (data || []).map((entry, index) => ({
-            id: entry.id,
-            display_name: entry.display_name,
-            avatar_url: entry.avatar_url,
-            xp: entry.xp,
-            level: entry.level,
-            rank: index + 1,
-        }));
+    set({ leaderboard, userRank });
+  },
 
-        // Find current user's rank
-        let userRank: number | null = null;
-        if (user) {
-            const userEntry = leaderboard.find(entry => entry.id === user.id);
-            if (userEntry) {
-                userRank = userEntry.rank || null;
-            } else {
-                // User not in top 50, fetch their rank
-                const { count } = await supabase
-                    .from('profiles')
-                    .select('id', { count: 'exact', head: true })
-                    .gt('xp', get().profile?.xp || 0);
-
-                userRank = (count || 0) + 1;
-            }
-        }
-
-        set({ leaderboard, userRank });
-    },
-
-    openAuthModal: (mode) => set({ isAuthModalOpen: true, authModalMode: mode, error: null }),
-    closeAuthModal: () => set({ isAuthModalOpen: false, error: null }),
-    clearError: () => set({ error: null }),
+  openAuthModal: (mode) =>
+    set({ isAuthModalOpen: true, authModalMode: mode, error: null }),
+  closeAuthModal: () => set({ isAuthModalOpen: false, error: null }),
+  clearError: () => set({ error: null }),
 }));

@@ -8,15 +8,14 @@ import { motion } from "framer-motion";
 import { Certificate } from "../components/Certificate";
 
 export const Profile: React.FC = () => {
-  const { xp, level, streakDays, completedModules, checkStreak } =
-    useGameStore();
+  const { xp, level, streakDays, completedModules } = useGameStore();
   const { profile } = useAuthStore();
   const displayName = profile?.display_name || "Agent";
 
   useEffect(() => {
-    checkStreak();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only on mount
+    // Use getState to ensure we always get the latest function reference
+    useGameStore.getState().checkStreak();
+  }, []);
 
   const nextLevelXp = level * 1000;
   const progress = Math.min((xp / nextLevelXp) * 100, 100);

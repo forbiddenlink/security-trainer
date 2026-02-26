@@ -7,6 +7,7 @@ import { StreakIndicator } from "./StreakIndicator";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button, Progress } from "./ui";
 import { isSupabaseConfigured } from "../lib/supabase";
+import { getSafeAvatarUrl } from "../utils/urlValidation";
 
 /** XP required per level - keep in sync with gameStore constants */
 const XP_PER_LEVEL = 1000;
@@ -147,9 +148,9 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
                 aria-label="User menu"
                 aria-expanded={showUserMenu}
               >
-                {profile?.avatar_url ? (
+                {getSafeAvatarUrl(profile?.avatar_url) ? (
                   <img
-                    src={profile.avatar_url}
+                    src={getSafeAvatarUrl(profile?.avatar_url)}
                     alt=""
                     className="w-8 h-8 rounded-full object-cover border border-primary/20"
                   />
