@@ -1,16 +1,14 @@
 import React, { useEffect, useRef, useState, memo, useCallback } from "react";
 import { useGameStore } from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
-import { Bell, Trophy, LogIn, LogOut, ChevronDown, Menu } from "lucide-react";
+import { Trophy, LogIn, LogOut, ChevronDown, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StreakIndicator } from "./StreakIndicator";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button, Progress } from "./ui";
 import { isSupabaseConfigured } from "../lib/supabase";
 import { getSafeAvatarUrl } from "../utils/urlValidation";
-
-/** XP required per level - keep in sync with gameStore constants */
-const XP_PER_LEVEL = 1000;
+import { getNextLevelXp } from "../utils/gameUtils";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -63,7 +61,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const nextLevelXp = level * XP_PER_LEVEL;
+  const nextLevelXp = getNextLevelXp(level);
   // Memoize sign out handler
   const handleSignOut = useCallback(() => {
     setShowUserMenu(false);
@@ -125,17 +123,6 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
         <StreakIndicator />
 
         <ThemeToggle />
-
-        <button
-          className="relative grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground hover:bg-muted/60"
-          aria-label="Notifications (1 unread)"
-        >
-          <Bell className="w-4 h-4" aria-hidden="true" />
-          <span
-            className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border border-card"
-            aria-hidden="true"
-          />
-        </button>
 
         {isSupabaseConfigured() ? (
           loading ? (

@@ -43,10 +43,14 @@ export const LabView: React.FC<LabViewProps> = memo(
             hints: result.hints,
           });
         }
-      } catch {
+      } catch (error) {
+        console.error("Lab verification failed:", error);
         setOutput({
           type: "error",
-          message: "Syntax Error or Runtime Exception",
+          message:
+            error instanceof Error
+              ? `Verification Error: ${error.message}`
+              : "Syntax Error or Runtime Exception",
         });
       }
     }, [code, lessonId, onSuccess]);

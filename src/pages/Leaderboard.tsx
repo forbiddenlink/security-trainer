@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
 import { Button } from "../components/ui";
 import { isSupabaseConfigured } from "../lib/supabase";
+import { getSafeAvatarUrl } from "../utils/urlValidation";
 
 export const Leaderboard: React.FC = () => {
   const {
@@ -166,10 +167,10 @@ export const Leaderboard: React.FC = () => {
                           : "bg-gradient-to-br from-blue-500 to-cyan-500"
                   }`}
                 >
-                  {entry.avatar_url ? (
+                  {getSafeAvatarUrl(entry.avatar_url) ? (
                     <img
-                      src={entry.avatar_url}
-                      alt=""
+                      src={getSafeAvatarUrl(entry.avatar_url)}
+                      alt={`${entry.display_name || "Agent"}'s avatar`}
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (

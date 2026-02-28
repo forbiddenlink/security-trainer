@@ -1,74 +1,102 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = "light" | "dark" | "system";
 
 interface ThemeStore {
-    theme: Theme;
-    resolvedTheme: 'light' | 'dark';
-    setTheme: (theme: Theme) => void;
-    initializeTheme: () => void;
+  theme: Theme;
+  resolvedTheme: "light" | "dark";
+  setTheme: (theme: Theme) => void;
+  initializeTheme: () => () => void;
 }
 
+// Store listener reference for cleanup
+let mediaQueryCleanup: (() => void) | null = null;
+
 // Get system preference
-const getSystemTheme = (): 'light' | 'dark' => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const getSystemTheme = (): "light" | "dark" => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function")
+    return "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 };
 
 // Apply theme to document
-const applyTheme = (resolvedTheme: 'light' | 'dark') => {
-    const root = document.documentElement;
+const applyTheme = (resolvedTheme: "light" | "dark") => {
+  const root = document.documentElement;
 
-    if (resolvedTheme === 'dark') {
-        root.classList.add('dark');
-        root.classList.remove('light');
-    } else {
-        root.classList.add('light');
-        root.classList.remove('dark');
-    }
+  if (resolvedTheme === "dark") {
+    root.classList.add("dark");
+    root.classList.remove("light");
+  } else {
+    root.classList.add("light");
+    root.classList.remove("dark");
+  }
 };
 
 export const useThemeStore = create<ThemeStore>()(
-    persist(
-        (set, get) => ({
-            theme: 'system',
-            resolvedTheme: getSystemTheme(),
+  persist(
+    (set, get) => ({
+      theme: "system",
+      resolvedTheme: getSystemTheme(),
 
-            setTheme: (theme: Theme) => {
-                const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
-                applyTheme(resolvedTheme);
-                set({ theme, resolvedTheme });
-            },
+      setTheme: (theme: Theme) => {
+        const resolvedTheme = theme === "system" ? getSystemTheme() : theme;
+        applyTheme(resolvedTheme);
+        set({ theme, resolvedTheme });
+      },
 
-            initializeTheme: () => {
-                const { theme } = get();
-                const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
-                applyTheme(resolvedTheme);
-                set({ resolvedTheme });
-
-                // Listen for system preference changes
-                if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-                    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-                    const handleChange = (e: MediaQueryListEvent) => {
-                        const { theme } = get();
-                        if (theme === 'system') {
-                            const newResolvedTheme = e.matches ? 'dark' : 'light';
-                            applyTheme(newResolvedTheme);
-                            set({ resolvedTheme: newResolvedTheme });
-                        }
-                    };
-
-                    mediaQuery.addEventListener('change', handleChange);
-                }
-            },
-        }),
-        {
-            name: 'security-trainer-theme',
-            partialize: (state) => ({
-                theme: state.theme,
-            }),
+      initializeTheme: () => {
+        // Clean up previous listener if exists
+        if (mediaQueryCleanup) {
+          mediaQueryCleanup();
+          mediaQueryCleanup = null;
         }
-    )
+
+        const { theme } = get();
+        const resolvedTheme = theme === "system" ? getSystemTheme() : theme;
+        applyTheme(resolvedTheme);
+        set({ resolvedTheme });
+
+        // Listen for system preference changes
+        if (
+          typeof window !== "undefined" &&
+          typeof window.matchMedia === "function"
+        ) {
+          const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+          const handleChange = (e: MediaQueryListEvent) => {
+            const { theme } = get();
+            if (theme === "system") {
+              const newResolvedTheme = e.matches ? "dark" : "light";
+              applyTheme(newResolvedTheme);
+              set({ resolvedTheme: newResolvedTheme });
+            }
+          };
+
+          mediaQuery.addEventListener("change", handleChange);
+
+          // Store cleanup function
+          mediaQueryCleanup = () => {
+            mediaQuery.removeEventListener("change", handleChange);
+          };
+        }
+
+        // Return cleanup function for useEffect
+        return () => {
+          if (mediaQueryCleanup) {
+            mediaQueryCleanup();
+            mediaQueryCleanup = null;
+          }
+        };
+      },
+    }),
+    {
+      name: "security-trainer-theme",
+      partialize: (state) => ({
+        theme: state.theme,
+      }),
+    },
+  ),
 );

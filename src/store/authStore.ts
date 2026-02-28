@@ -6,6 +6,7 @@ import type {
   LeaderboardEntry,
   ProfileInsert,
 } from "../types/database";
+import { isValidAvatarUrl } from "../utils/urlValidation";
 
 interface AuthState {
   user: User | null;
@@ -198,6 +199,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   updateProfile: async (updates) => {
     const { user } = get();
     if (!supabase || !user) return;
+
+    // Validate avatar_url if provided - prevent XSS via malicious URLs
+    if (updates.avatar_url !== undefined) {
+      if (updates.avatar_url && !isValidAvatarUrl(updates.avatar_url)) {
+        console.error("Invalid avatar URL rejected:", updates.avatar_url);
+        return;
+      }
+    }
 
     const updateData = {
       ...updates,
