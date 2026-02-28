@@ -17,6 +17,11 @@ type VerificationFn = (code: string) => VerificationResult;
 
 // Pattern constants to avoid magic strings
 const PATTERNS = {
+  // OWASP Intro Lab patterns - vulnerability identification
+  OWASP_INJECTION_COMMENT: "INJECTION",
+  OWASP_XSS_COMMENT: "XSS",
+  OWASP_IDOR_COMMENT: "IDOR",
+
   // SQL patterns
   PARAMETERIZED_PLACEHOLDER: "username = ?",
   PARAMETER_ARRAY: ", [username]",
@@ -176,6 +181,38 @@ const PATTERNS = {
  * Each function checks if the user's code correctly patches the vulnerability.
  */
 export const labVerifiers: Record<string, VerificationFn> = {
+  // OWASP Intro Lab: Check that users correctly identified the vulnerabilities
+  "owasp-lab": (code: string) => {
+    const hints: string[] = [];
+
+    // Check that TODO comments have been replaced with vulnerability identifications
+    const hasInjectionLabel = code.includes(PATTERNS.OWASP_INJECTION_COMMENT);
+    const hasXssLabel = code.includes(PATTERNS.OWASP_XSS_COMMENT);
+    const hasIdorLabel = code.includes(PATTERNS.OWASP_IDOR_COMMENT);
+    const noTodoRemaining = !code.includes("TODO:");
+
+    if (!noTodoRemaining)
+      hints.push("Replace all TODO comments with vulnerability types");
+    if (!hasInjectionLabel)
+      hints.push(
+        "The first function has an INJECTION vulnerability (SQL concatenation)",
+      );
+    if (!hasXssLabel)
+      hints.push(
+        "The second function has an XSS vulnerability (innerHTML assignment)",
+      );
+    if (!hasIdorLabel)
+      hints.push(
+        "The third function has an IDOR vulnerability (no authorization check)",
+      );
+
+    return {
+      passed:
+        hasInjectionLabel && hasXssLabel && hasIdorLabel && noTodoRemaining,
+      hints,
+    };
+  },
+
   // SQL Injection Lab: Check for parameterized query pattern
   "sqli-lab": (code: string) => {
     const hints: string[] = [];

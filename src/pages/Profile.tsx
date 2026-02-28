@@ -1,16 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
 import { BadgeList } from "../components/BadgeList";
 import { MODULES } from "../data/modules";
-import { User, Shield, Trophy, Target, Award } from "lucide-react";
+import { User, Shield, Trophy, Target, Award, Pencil } from "lucide-react";
 import { motion } from "framer-motion";
 import { Certificate } from "../components/Certificate";
+import { ProfileEditModal } from "../components/ProfileEditModal";
 
 export const Profile: React.FC = () => {
   const { xp, level, streakDays, completedModules } = useGameStore();
-  const { profile } = useAuthStore();
+  const { profile, user } = useAuthStore();
   const displayName = profile?.display_name || "Agent";
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     // Use getState to ensure we always get the latest function reference
@@ -30,7 +32,18 @@ export const Profile: React.FC = () => {
             </div>
           </div>
           <div className="text-center">
-            <h2 className="text-h2">{displayName}</h2>
+            <div className="flex items-center justify-center gap-2">
+              <h2 className="text-h2">{displayName}</h2>
+              {user && (
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="p-1.5 rounded-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+                  aria-label="Edit profile"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              )}
+            </div>
             <p className="text-primary text-mono uppercase tracking-widest mt-1">
               Level {level} Operator
             </p>
@@ -116,6 +129,12 @@ export const Profile: React.FC = () => {
       <div className="ui-card ui-card-lg">
         <Certificate />
       </div>
+
+      {/* Profile Edit Modal */}
+      <ProfileEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      />
     </div>
   );
 };

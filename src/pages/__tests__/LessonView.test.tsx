@@ -91,7 +91,7 @@ describe("LessonView", () => {
     it("displays step progress", () => {
       renderWithRouter(<LessonView />);
 
-      expect(screen.getByText("Step 1 of 2")).toBeInTheDocument();
+      expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
     });
 
     it("renders theory content", () => {
@@ -264,9 +264,9 @@ describe("LessonView", () => {
         screen.getByRole("button", { name: /go to next lesson step/i }),
       );
 
-      // Next button should be disabled before submitting
+      // Next button should be disabled before submitting (goes to lab on lesson 2 of 3)
       const nextButton = screen.getByRole("button", {
-        name: /complete this mission and return to modules/i,
+        name: /go to next lesson step/i,
       });
       expect(nextButton).toBeDisabled();
     });
@@ -286,9 +286,9 @@ describe("LessonView", () => {
         screen.getByRole("button", { name: /submit your selected answer/i }),
       );
 
-      // Next button should now be enabled
+      // Next button should now be enabled (goes to lab since there are 3 lessons now)
       const nextButton = screen.getByRole("button", {
-        name: /complete this mission and return to modules/i,
+        name: /go to next lesson step/i,
       });
       expect(nextButton).toBeEnabled();
     });
@@ -382,7 +382,7 @@ describe("LessonView", () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       renderWithRouter(<LessonView />);
 
-      // Go to quiz
+      // Go to quiz (lesson 2)
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
       );
@@ -393,6 +393,35 @@ describe("LessonView", () => {
       await user.click(
         screen.getByRole("button", { name: /submit your selected answer/i }),
       );
+
+      // Go to lab (lesson 3)
+      await user.click(
+        screen.getByRole("button", { name: /go to next lesson step/i }),
+      );
+
+      // Complete the lab - the verifier checks for INJECTION, XSS, IDOR keywords
+      const editor = screen.getByTestId("code-editor");
+      await user.clear(editor);
+      await user.type(
+        editor,
+        "// INJECTION: SQL\n// XSS: innerHTML\n// IDOR: No auth check",
+      );
+
+      // Submit lab
+      await user.click(
+        screen.getByRole("button", {
+          name: /deploy patch and verify your code fix/i,
+        }),
+      );
+
+      // Wait for success state then complete
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", {
+            name: /complete this mission and return to modules/i,
+          }),
+        ).not.toBeDisabled();
+      });
 
       // Complete module
       await user.click(
@@ -427,7 +456,7 @@ describe("LessonView", () => {
       );
 
       // Should be on first lesson again
-      expect(screen.getByText("Step 1 of 2")).toBeInTheDocument();
+      expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
     });
   });
 });
