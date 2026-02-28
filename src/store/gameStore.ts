@@ -6,6 +6,7 @@ import type {
   LessonReview,
 } from "../types";
 import { MODULES } from "../data/modules";
+import { getPathById } from "../data/learningPaths";
 import { getBadgeById } from "../data/badges";
 import { useAuthStore } from "./authStore";
 import {
@@ -110,6 +111,10 @@ interface GameStore extends UserState {
   getReviewsDue: () => LessonReview[];
   getNextReview: () => LessonReview | null;
   isLessonDueForReview: (lessonId: string) => boolean;
+  // Learning Paths
+  getPathProgress: (pathId: string) => { completed: number; total: number };
+  isPathUnlocked: (pathId: string) => boolean;
+  completePath: (pathId: string) => void;
 }
 
 const INITIAL_STATE: UserState = {
@@ -125,6 +130,7 @@ const INITIAL_STATE: UserState = {
   dailyChallengeDate: null,
   dailyChallengeCompleted: false,
   lessonReviews: {},
+  completedPaths: [],
 };
 
 // Helper to get today's date string
@@ -471,6 +477,56 @@ export const useGameStore = create<GameStore>()(
         return review.nextReviewDate <= today;
       },
 
+      // ============================================
+      // LEARNING PATHS
+      // ============================================
+
+      getPathProgress: (pathId) => {
+        const { completedModules } = get();
+        const path = getPathById(pathId);
+        if (!path) return { completed: 0, total: 0 };
+
+        const completed = path.modules.filter((moduleId) =>
+          completedModules.includes(moduleId),
+        ).length;
+
+        return { completed, total: path.modules.length };
+      },
+
+      isPathUnlocked: (pathId) => {
+        const { completedModules } = get();
+        const path = getPathById(pathId);
+        if (!path) return false;
+        if (!path.requiredCompletions) return true;
+
+        return completedModules.length >= path.requiredCompletions;
+      },
+
+      completePath: (pathId) => {
+        const { completedPaths, achievementQueue, addXp } = get();
+        if (completedPaths.includes(pathId)) return;
+
+        const path = getPathById(pathId);
+        if (!path) return;
+
+        // Add certification notification
+        const notification: AchievementNotification = {
+          id: `path-${pathId}-${Date.now()}`,
+          type: "badge",
+          title: "Certification Earned!",
+          message: `${path.codename} complete - ${path.title}`,
+        };
+
+        set({
+          completedPaths: [...completedPaths, pathId],
+          achievementQueue: [...achievementQueue, notification],
+        });
+
+        // Award certificate XP
+        addXp(path.certificateXp);
+        debouncedSyncToCloud();
+      },
+
       resetProgress: () => {
         set({ ...INITIAL_STATE });
         debouncedSyncToCloud();
@@ -503,6 +559,7 @@ export const useGameStore = create<GameStore>()(
         dailyChallengeDate: state.dailyChallengeDate,
         dailyChallengeCompleted: state.dailyChallengeCompleted,
         lessonReviews: state.lessonReviews,
+        completedPaths: state.completedPaths,
       }),
     },
   ),

@@ -53,6 +53,8 @@ export interface UserState {
   dailyChallengeCompleted: boolean;
   // Spaced Repetition
   lessonReviews: Record<string, LessonReview>;
+  // Learning Paths
+  completedPaths: string[];
 }
 
 export interface AchievementNotification {
@@ -69,4 +71,16 @@ export interface LessonReview {
   interval: number; // days until next review
   easeFactor: number; // SM-2 ease factor (default 2.5)
   reviewCount: number; // times reviewed
+}
+
+export interface LearningPath {
+  id: string;
+  title: string;
+  codename: string; // Spy theme name
+  description: string;
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  modules: string[]; // Ordered module IDs
+  certificateXp: number; // Bonus XP on completion
+  icon: string; // Lucide icon name
+  requiredCompletions?: number; // Modules needed to unlock
 }

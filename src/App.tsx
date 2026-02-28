@@ -23,6 +23,12 @@ const Challenge = lazy(() =>
 const Leaderboard = lazy(() =>
   import("./pages/Leaderboard").then((m) => ({ default: m.Leaderboard })),
 );
+const Paths = lazy(() =>
+  import("./pages/Paths").then((m) => ({ default: m.Paths })),
+);
+const PathDetail = lazy(() =>
+  import("./pages/PathDetail").then((m) => ({ default: m.PathDetail })),
+);
 const AuthModal = lazy(() =>
   import("./components/AuthModal").then((m) => ({ default: m.AuthModal })),
 );
@@ -63,6 +69,8 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/challenge" element={<Challenge />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/paths" element={<Paths />} />
+              <Route path="/paths/:pathId" element={<PathDetail />} />
               {/* Fallback route */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
