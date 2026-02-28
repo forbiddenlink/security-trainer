@@ -158,7 +158,7 @@ export const IntelRefresher: React.FC = () => {
               </h3>
               <p className="text-xs text-muted-foreground">
                 {reviewsDue.length} lesson{reviewsDue.length !== 1 ? "s" : ""}{" "}
-                need review
+                {reviewsDue.length === 1 ? "needs" : "need"} review
               </p>
             </div>
           </div>

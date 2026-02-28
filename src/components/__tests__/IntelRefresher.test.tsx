@@ -115,7 +115,7 @@ describe("IntelRefresher", () => {
       });
       renderWithRouter(<IntelRefresher />);
 
-      expect(screen.getByText("1 lesson need review")).toBeInTheDocument();
+      expect(screen.getByText("1 lesson needs review")).toBeInTheDocument();
     });
 
     it("pluralizes lesson count correctly", () => {
