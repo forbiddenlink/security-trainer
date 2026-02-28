@@ -1,61 +1,72 @@
 export interface Module {
-    id: string;
-    title: string;
-    description: string;
-    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-    xpReward: number;
-    lessons: Lesson[];
-    locked: boolean;
+  id: string;
+  title: string;
+  description: string;
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  xpReward: number;
+  lessons: Lesson[];
+  locked: boolean;
 }
 
 export interface Lesson {
-    id: string;
-    title: string;
-    type: 'theory' | 'quiz' | 'lab';
-    content: string; // Markdown content for theory
-    quiz?: QuizQuestion;
-    lab?: LabConfig;
+  id: string;
+  title: string;
+  type: "theory" | "quiz" | "lab";
+  content: string; // Markdown content for theory
+  quiz?: QuizQuestion;
+  lab?: LabConfig;
 }
 
 export interface QuizQuestion {
-    question: string;
-    options: string[];
-    correctAnswer: number; // Index of the correct option
-    explanation: string;
+  question: string;
+  options: string[];
+  correctAnswer: number; // Index of the correct option
+  explanation: string;
 }
 
 export interface LabConfig {
-    initialCode: string;
-    solutionCode: string;
-    instructions: string;
+  initialCode: string;
+  solutionCode: string;
+  instructions: string;
 }
 
 export interface Badge {
-    id: string;
-    name: string;
-    description: string;
-    icon: string; // Lucide icon name or image path
-    condition: string; // Description of how to unlock
+  id: string;
+  name: string;
+  description: string;
+  icon: string; // Lucide icon name or image path
+  condition: string; // Description of how to unlock
 }
 
 export interface UserState {
-    xp: number;
-    level: number;
-    completedModules: string[];
-    completedLessons: string[];
-    badges: string[];
-    currentModuleId: string | null;
-    streakDays: number;
-    lastLoginDate: string | null;
-    // Daily Challenge
-    dailyChallengeId: string | null;
-    dailyChallengeDate: string | null;
-    dailyChallengeCompleted: boolean;
+  xp: number;
+  level: number;
+  completedModules: string[];
+  completedLessons: string[];
+  badges: string[];
+  currentModuleId: string | null;
+  streakDays: number;
+  lastLoginDate: string | null;
+  // Daily Challenge
+  dailyChallengeId: string | null;
+  dailyChallengeDate: string | null;
+  dailyChallengeCompleted: boolean;
+  // Spaced Repetition
+  lessonReviews: Record<string, LessonReview>;
 }
 
 export interface AchievementNotification {
-    id: string;
-    type: 'badge' | 'streak' | 'module_complete' | 'daily_challenge';
-    title: string;
-    message: string;
+  id: string;
+  type: "badge" | "streak" | "module_complete" | "daily_challenge" | "review";
+  title: string;
+  message: string;
+}
+
+export interface LessonReview {
+  lessonId: string;
+  lastReviewDate: string; // ISO date string
+  nextReviewDate: string; // ISO date string
+  interval: number; // days until next review
+  easeFactor: number; // SM-2 ease factor (default 2.5)
+  reviewCount: number; // times reviewed
 }

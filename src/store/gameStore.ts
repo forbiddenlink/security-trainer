@@ -1,9 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { UserState, AchievementNotification } from "../types";
+import type {
+  UserState,
+  AchievementNotification,
+  LessonReview,
+} from "../types";
 import { MODULES } from "../data/modules";
 import { getBadgeById } from "../data/badges";
 import { useAuthStore } from "./authStore";
+import {
+  createInitialReview,
+  calculateNextReview,
+  getLessonsDueForReview,
+  getNextUpcomingReview,
+  REVIEW_XP_REWARDS,
+  type ReviewQuality,
+} from "../utils/spacedRepetition";
 
 // ============================================
 // GAME CONFIGURATION CONSTANTS
@@ -92,6 +104,12 @@ interface GameStore extends UserState {
   getStreakMultiplier: () => number;
   calculateXpWithMultipliers: (baseXp: number, moduleId?: string) => number;
   syncToCloud: () => void;
+  // Spaced Repetition
+  initializeLessonReview: (lessonId: string) => void;
+  markLessonReviewed: (lessonId: string, quality: ReviewQuality) => void;
+  getReviewsDue: () => LessonReview[];
+  getNextReview: () => LessonReview | null;
+  isLessonDueForReview: (lessonId: string) => boolean;
 }
 
 const INITIAL_STATE: UserState = {
@@ -106,6 +124,7 @@ const INITIAL_STATE: UserState = {
   dailyChallengeId: null,
   dailyChallengeDate: null,
   dailyChallengeCompleted: false,
+  lessonReviews: {},
 };
 
 // Helper to get today's date string
@@ -221,10 +240,14 @@ export const useGameStore = create<GameStore>()(
           dailyChallengeId,
           dailyChallengeCompleted,
           completeDailyChallenge,
+          initializeLessonReview,
         } = get();
 
         if (!completedLessons.includes(lessonId)) {
           set({ completedLessons: [...completedLessons, lessonId] });
+
+          // Initialize spaced repetition tracking for this lesson
+          initializeLessonReview(lessonId);
 
           // Check if this was the daily challenge
           if (lessonId === dailyChallengeId && !dailyChallengeCompleted) {
@@ -386,6 +409,68 @@ export const useGameStore = create<GameStore>()(
         return null;
       },
 
+      // ============================================
+      // SPACED REPETITION
+      // ============================================
+
+      initializeLessonReview: (lessonId) => {
+        const { lessonReviews } = get();
+        // Only initialize if not already tracked
+        if (!lessonReviews[lessonId]) {
+          const newReview = createInitialReview(lessonId);
+          set({
+            lessonReviews: { ...lessonReviews, [lessonId]: newReview },
+          });
+          debouncedSyncToCloud();
+        }
+      },
+
+      markLessonReviewed: (lessonId, quality) => {
+        const { lessonReviews, achievementQueue, addXp } = get();
+        const currentReview = lessonReviews[lessonId];
+
+        if (!currentReview) return;
+
+        // Calculate next review using SM-2
+        const updatedReview = calculateNextReview(currentReview, quality);
+
+        // Add review XP
+        const xpReward = REVIEW_XP_REWARDS[quality];
+        addXp(xpReward);
+
+        // Add notification
+        const notification: AchievementNotification = {
+          id: `review-${lessonId}-${Date.now()}`,
+          type: "review",
+          title: "Intel Refreshed!",
+          message: `+${xpReward} XP - Next review in ${updatedReview.interval} day${updatedReview.interval > 1 ? "s" : ""}`,
+        };
+
+        set({
+          lessonReviews: { ...lessonReviews, [lessonId]: updatedReview },
+          achievementQueue: [...achievementQueue, notification],
+        });
+        debouncedSyncToCloud();
+      },
+
+      getReviewsDue: () => {
+        const { lessonReviews } = get();
+        return getLessonsDueForReview(lessonReviews);
+      },
+
+      getNextReview: () => {
+        const { lessonReviews } = get();
+        return getNextUpcomingReview(lessonReviews);
+      },
+
+      isLessonDueForReview: (lessonId) => {
+        const { lessonReviews } = get();
+        const review = lessonReviews[lessonId];
+        if (!review) return false;
+        const today = new Date().toISOString().split("T")[0];
+        return review.nextReviewDate <= today;
+      },
+
       resetProgress: () => {
         set({ ...INITIAL_STATE });
         debouncedSyncToCloud();
@@ -417,6 +502,7 @@ export const useGameStore = create<GameStore>()(
         dailyChallengeId: state.dailyChallengeId,
         dailyChallengeDate: state.dailyChallengeDate,
         dailyChallengeCompleted: state.dailyChallengeCompleted,
+        lessonReviews: state.lessonReviews,
       }),
     },
   ),

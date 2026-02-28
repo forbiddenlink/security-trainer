@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { MODULES } from "../data/modules";
 import { useGameStore } from "../store/gameStore";
 import { TheoryView, QuizView, LabView } from "../components/lesson";
+import { ReviewModal } from "../components/ReviewModal";
 import { Button, Progress } from "../components/ui";
 import {
   ChevronRight,
@@ -21,7 +22,12 @@ export const LessonView: React.FC = () => {
     lessonId?: string;
   }>();
   const navigate = useNavigate();
-  const { completeModule, completeLesson, addXp } = useGameStore();
+  const [searchParams] = useSearchParams();
+  const { completeModule, completeLesson, addXp, isLessonDueForReview } =
+    useGameStore();
+
+  // Check if this is a review session
+  const isReviewSession = searchParams.get("review") === "true";
 
   const module = MODULES.find((m) => m.id === moduleId);
 
@@ -38,6 +44,9 @@ export const LessonView: React.FC = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [labCompleted, setLabCompleted] = useState(false);
   const [showLessonMenu, setShowLessonMenu] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewLessonId, setReviewLessonId] = useState<string | null>(null);
+  const [reviewLessonTitle, setReviewLessonTitle] = useState<string>("");
 
   const currentLesson = module?.lessons[currentLessonIndex];
   const isFirstLesson = currentLessonIndex === 0;
@@ -71,8 +80,20 @@ export const LessonView: React.FC = () => {
   };
 
   const handleNext = () => {
-    // Mark current lesson as complete
+    // Check if this lesson is due for review before completing
+    const isDueForReview =
+      isReviewSession || isLessonDueForReview(currentLesson.id);
+
+    // Mark current lesson as complete (this initializes review tracking for new lessons)
     completeLesson(currentLesson.id, module.id);
+
+    // Show review modal if this was a review session
+    if (isDueForReview) {
+      setReviewLessonId(currentLesson.id);
+      setReviewLessonTitle(currentLesson.title);
+      setShowReviewModal(true);
+      return; // Don't navigate yet, wait for review modal
+    }
 
     if (isLastLesson) {
       completeModule(module.id);
@@ -93,6 +114,12 @@ export const LessonView: React.FC = () => {
     } else {
       setCurrentLessonIndex((prev) => prev + 1);
     }
+  };
+
+  const handleReviewModalClose = () => {
+    setShowReviewModal(false);
+    // After review, navigate back to dashboard
+    navigate("/");
   };
 
   const handlePrev = () => {
@@ -258,6 +285,14 @@ export const LessonView: React.FC = () => {
           <ChevronRight className="w-4 h-4" aria-hidden="true" />
         </Button>
       </nav>
+
+      {/* Review Modal for spaced repetition */}
+      <ReviewModal
+        isOpen={showReviewModal}
+        onClose={handleReviewModalClose}
+        lessonId={reviewLessonId || ""}
+        lessonTitle={reviewLessonTitle}
+      />
     </div>
   );
 };

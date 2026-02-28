@@ -3,6 +3,7 @@ import { cn } from "../lib/cn";
 import { useGameStore } from "../store/gameStore";
 import { BadgeList } from "../components/BadgeList";
 import { DailyChallenge } from "../components/DailyChallenge";
+import { IntelRefresher } from "../components/IntelRefresher";
 import { MODULES } from "../data/modules";
 import { Card, Progress } from "../components/ui";
 import {
@@ -186,6 +187,13 @@ export const Dashboard: React.FC = () => {
           Daily Challenge
         </h2>
         <DailyChallenge />
+      </section>
+
+      <section aria-labelledby="intel-refresher-heading">
+        <h2 id="intel-refresher-heading" className="sr-only">
+          Intel Refresher
+        </h2>
+        <IntelRefresher />
       </section>
 
       <section aria-labelledby="achievements-heading">
