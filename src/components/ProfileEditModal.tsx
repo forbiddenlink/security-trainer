@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, AlertCircle, Loader2, Check } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
+import { useFocusTrap } from "../utils/useFocusTrap";
 import { Button, Input } from "./ui";
 
 interface ProfileEditModalProps {
@@ -21,6 +22,16 @@ const ProfileEditForm: React.FC<{
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +57,8 @@ const ProfileEditForm: React.FC<{
     await updateProfile({ display_name: trimmedName });
     setSuccess(true);
 
-    // Close after brief success feedback
-    setTimeout(() => {
+    // Close after brief success feedback (with cleanup on unmount)
+    closeTimeoutRef.current = setTimeout(() => {
       onClose();
     }, 1000);
   };
@@ -145,6 +156,9 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 }) => {
   const { profile } = useAuthStore();
 
+  // Focus trap for accessibility
+  const modalRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -168,6 +182,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
             <div
+              ref={modalRef}
               className="w-full max-w-md ui-card ui-card-elevated p-6 relative"
               role="dialog"
               aria-modal="true"

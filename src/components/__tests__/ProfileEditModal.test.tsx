@@ -4,6 +4,11 @@ import userEvent from "@testing-library/user-event";
 import { ProfileEditModal } from "../ProfileEditModal";
 import { useAuthStore } from "../../store/authStore";
 
+// Mock useFocusTrap to avoid focus interference in tests
+vi.mock("../../utils/useFocusTrap", () => ({
+  useFocusTrap: () => ({ current: null }),
+}));
+
 describe("ProfileEditModal", () => {
   const mockUpdateProfile = vi.fn();
   const mockOnClose = vi.fn();

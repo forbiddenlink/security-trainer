@@ -4,6 +4,7 @@ import { X, Mail, Lock, User, AlertCircle, Loader2 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useGameStore } from "../store/gameStore";
 import { isSupabaseConfigured } from "../lib/supabase";
+import { useFocusTrap } from "../utils/useFocusTrap";
 import { Button, Input } from "./ui";
 
 export const AuthModal: React.FC = () => {
@@ -117,6 +118,9 @@ export const AuthModal: React.FC = () => {
     closeAuthModal();
   };
 
+  // Focus trap for accessibility - must be after handleClose is defined
+  const modalRef = useFocusTrap<HTMLDivElement>(isAuthModalOpen, handleClose);
+
   if (!isSupabaseConfigured()) {
     return null;
   }
@@ -137,6 +141,7 @@ export const AuthModal: React.FC = () => {
 
           {/* Modal */}
           <motion.div
+            ref={modalRef}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}

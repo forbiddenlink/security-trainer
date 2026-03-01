@@ -11,6 +11,27 @@ vi.mock("../../lib/supabase", () => ({
   supabase: null,
 }));
 
+// Mock framer-motion to avoid animation timing issues
+vi.mock("framer-motion", () => ({
+  motion: {
+    div: ({
+      children,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      [key: string]: unknown;
+    }) => <div {...props}>{children}</div>,
+  },
+  AnimatePresence: ({ children }: { children?: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
+// Mock useFocusTrap to avoid focus interference in tests
+vi.mock("../../utils/useFocusTrap", () => ({
+  useFocusTrap: () => ({ current: null }),
+}));
+
 describe("AuthModal", () => {
   const mockSignIn = vi.fn();
   const mockSignUp = vi.fn();

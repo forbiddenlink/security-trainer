@@ -47,32 +47,69 @@ const DAILY_CHALLENGE_BONUS_XP = 50;
 /** Milliseconds to debounce cloud sync operations */
 const SYNC_DEBOUNCE_MS = 2000;
 
+/** Maximum retry attempts for failed syncs */
+const MAX_SYNC_RETRIES = 3;
+
+/** Base delay for exponential backoff (ms) */
+const SYNC_RETRY_BASE_DELAY = 1000;
+
 // ============================================
 // CLOUD SYNC
 // ============================================
 
 // Debounce helper for cloud sync
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+let syncRetryCount = 0;
 
-// Sync progress to cloud (debounced)
+// Sync progress to cloud (debounced) with retry logic
 const syncToCloud = async () => {
   const { user, syncProgressToCloud } = useAuthStore.getState();
 
   if (!user) return;
 
   const state = useGameStore.getState();
-  await syncProgressToCloud({
-    xp: state.xp,
-    level: state.level,
-    badges: state.badges,
-    completedModules: state.completedModules,
-    completedLessons: state.completedLessons,
-    streakDays: state.streakDays,
-    lastLoginDate: state.lastLoginDate,
-    dailyChallengeId: state.dailyChallengeId,
-    dailyChallengeDate: state.dailyChallengeDate,
-    dailyChallengeCompleted: state.dailyChallengeCompleted,
-  });
+
+  try {
+    // Update sync status to syncing
+    useGameStore.setState({ syncStatus: "syncing" });
+
+    await syncProgressToCloud({
+      xp: state.xp,
+      level: state.level,
+      badges: state.badges,
+      completedModules: state.completedModules,
+      completedLessons: state.completedLessons,
+      streakDays: state.streakDays,
+      lastLoginDate: state.lastLoginDate,
+      dailyChallengeId: state.dailyChallengeId,
+      dailyChallengeDate: state.dailyChallengeDate,
+      dailyChallengeCompleted: state.dailyChallengeCompleted,
+    });
+
+    // Success - reset retry count and update status
+    syncRetryCount = 0;
+    useGameStore.setState({ syncStatus: "synced", lastSyncError: null });
+  } catch (error) {
+    console.error("Cloud sync failed:", error);
+
+    // Retry with exponential backoff
+    if (syncRetryCount < MAX_SYNC_RETRIES) {
+      syncRetryCount++;
+      const delay = SYNC_RETRY_BASE_DELAY * Math.pow(2, syncRetryCount - 1);
+      console.log(
+        `Retrying sync in ${delay}ms (attempt ${syncRetryCount}/${MAX_SYNC_RETRIES})`,
+      );
+      setTimeout(syncToCloud, delay);
+      useGameStore.setState({ syncStatus: "retrying" });
+    } else {
+      // Max retries reached
+      syncRetryCount = 0;
+      useGameStore.setState({
+        syncStatus: "error",
+        lastSyncError: error instanceof Error ? error.message : "Sync failed",
+      });
+    }
+  }
 };
 
 const debouncedSyncToCloud = () => {
@@ -82,9 +119,13 @@ const debouncedSyncToCloud = () => {
   syncTimeout = setTimeout(syncToCloud, SYNC_DEBOUNCE_MS);
 };
 
+type SyncStatus = "idle" | "syncing" | "synced" | "retrying" | "error";
+
 interface GameStore extends UserState {
   showLevelUpToast: boolean;
   achievementQueue: AchievementNotification[];
+  syncStatus: SyncStatus;
+  lastSyncError: string | null;
   addXp: (amount: number, moduleId?: string) => void;
   completeModule: (moduleId: string) => void;
   completeLesson: (lessonId: string, moduleId: string) => void;
@@ -167,6 +208,8 @@ export const useGameStore = create<GameStore>()(
       ...INITIAL_STATE,
       showLevelUpToast: false,
       achievementQueue: [],
+      syncStatus: "idle" as SyncStatus,
+      lastSyncError: null,
 
       getStreakMultiplier: () => {
         const { streakDays } = get();

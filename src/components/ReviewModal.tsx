@@ -2,6 +2,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Brain, Frown, Meh, Smile } from "lucide-react";
 import { useGameStore } from "../store/gameStore";
+import { useFocusTrap } from "../utils/useFocusTrap";
 import {
   REVIEW_XP_REWARDS,
   type ReviewQuality,
@@ -53,6 +54,9 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
 }) => {
   const { markLessonReviewed } = useGameStore();
 
+  // Focus trap for accessibility
+  const modalRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
+
   const handleRating = (quality: ReviewQuality) => {
     markLessonReviewed(lessonId, quality);
     onClose();
@@ -81,6 +85,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
             <div
+              ref={modalRef}
               className="w-full max-w-lg ui-card ui-card-elevated p-6 relative"
               role="dialog"
               aria-modal="true"

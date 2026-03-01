@@ -4,6 +4,11 @@ import userEvent from "@testing-library/user-event";
 import { ReviewModal } from "../ReviewModal";
 import { useGameStore } from "../../store/gameStore";
 
+// Mock useFocusTrap to avoid focus interference in tests
+vi.mock("../../utils/useFocusTrap", () => ({
+  useFocusTrap: () => ({ current: null }),
+}));
+
 describe("ReviewModal", () => {
   const mockOnClose = vi.fn();
   const mockMarkLessonReviewed = vi.fn();
