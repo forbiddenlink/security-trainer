@@ -134,6 +134,7 @@ export const IntelRefresher: React.FC = () => {
         className={`absolute -top-10 -right-10 w-32 h-32 blur-3xl rounded-full pointer-events-none ${
           overdueCount > 0 ? "bg-red-500/20" : "bg-primary/20"
         }`}
+        aria-hidden="true"
       />
 
       <div className="relative z-10">

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { DailyChallenge } from "../DailyChallenge";
 import { useGameStore } from "../../store/gameStore";
@@ -143,14 +143,16 @@ describe("DailyChallenge", () => {
   });
 
   describe("Timer updates", () => {
-    it("updates timer every second", () => {
+    it("updates timer every second", async () => {
       setupStore(mockChallenge);
       renderWithRouter(<DailyChallenge />);
 
       const initialTimer = screen.getByText(/\d{2}:\d{2}:\d{2}/).textContent;
 
-      // Advance time by 1 second
-      vi.advanceTimersByTime(1000);
+      // Advance time by 1 second (wrapped in act to handle state updates)
+      await act(async () => {
+        vi.advanceTimersByTime(1000);
+      });
 
       const updatedTimer = screen.getByText(/\d{2}:\d{2}:\d{2}/).textContent;
 

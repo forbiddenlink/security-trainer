@@ -36,18 +36,18 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Initialize auth on mount
+  // Initialize auth, then check streak/challenge (avoid race condition)
   useEffect(() => {
-    if (isSupabaseConfigured()) {
-      initialize();
-    }
-  }, [initialize]);
-
-  // Check streak and daily challenge on mount
-  useEffect(() => {
-    checkStreak();
-    checkDailyChallenge();
-  }, [checkStreak, checkDailyChallenge]);
+    const init = async () => {
+      if (isSupabaseConfigured()) {
+        await initialize();
+      }
+      // Check streak and daily challenge after auth is ready
+      checkStreak();
+      checkDailyChallenge();
+    };
+    init();
+  }, [initialize, checkStreak, checkDailyChallenge]);
 
   // Close menu on outside click
   useEffect(() => {

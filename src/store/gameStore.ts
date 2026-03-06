@@ -571,6 +571,12 @@ export const useGameStore = create<GameStore>()(
       },
 
       resetProgress: () => {
+        // Clear pending sync to prevent stale data sync after reset
+        if (syncTimeout) {
+          clearTimeout(syncTimeout);
+          syncTimeout = null;
+        }
+        syncRetryCount = 0;
         set({ ...INITIAL_STATE });
         debouncedSyncToCloud();
       },

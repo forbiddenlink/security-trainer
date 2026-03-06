@@ -51,6 +51,7 @@ export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
             ? "from-accent/10 to-transparent"
             : "from-primary/5 to-transparent"
         }`}
+        aria-hidden="true"
       />
 
       <div className="relative z-10 p-6">
@@ -102,8 +103,12 @@ export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
 
         {/* Action */}
         {!isUnlocked ? (
-          <div className="flex items-center justify-center gap-2 py-2.5 px-4 bg-muted/50 text-muted-foreground rounded-[var(--radius-sm)]">
-            <Lock className="w-4 h-4" />
+          <div
+            className="flex items-center justify-center gap-2 py-2.5 px-4 bg-muted/50 text-muted-foreground rounded-[var(--radius-sm)]"
+            role="status"
+            aria-label={`Locked. Complete ${path.requiredCompletions! - completedModules.length} more modules to unlock.`}
+          >
+            <Lock className="w-4 h-4" aria-hidden="true" />
             Complete {path.requiredCompletions! - completedModules.length} more
             modules to unlock
           </div>

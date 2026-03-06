@@ -29,6 +29,9 @@ const Paths = lazy(() =>
 const PathDetail = lazy(() =>
   import("./pages/PathDetail").then((m) => ({ default: m.PathDetail })),
 );
+const Reviews = lazy(() =>
+  import("./pages/Reviews").then((m) => ({ default: m.Reviews })),
+);
 const AuthModal = lazy(() =>
   import("./components/AuthModal").then((m) => ({ default: m.AuthModal })),
 );
@@ -71,6 +74,7 @@ function App() {
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/paths" element={<Paths />} />
               <Route path="/paths/:pathId" element={<PathDetail />} />
+              <Route path="/reviews" element={<Reviews />} />
               {/* Fallback route */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

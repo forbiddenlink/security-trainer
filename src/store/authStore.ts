@@ -52,7 +52,11 @@ interface AuthActions {
   clearError: () => void;
 }
 
-type AuthStore = AuthState & AuthActions;
+interface AuthCleanup {
+  cleanup: () => void;
+}
+
+type AuthStore = AuthState & AuthActions & AuthCleanup;
 
 // Store auth subscription for cleanup
 let authSubscription: { unsubscribe: () => void } | null = null;
@@ -362,4 +366,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isAuthModalOpen: true, authModalMode: mode, error: null }),
   closeAuthModal: () => set({ isAuthModalOpen: false, error: null }),
   clearError: () => set({ error: null }),
+
+  // Cleanup auth subscription to prevent memory leaks
+  cleanup: () => {
+    if (authSubscription) {
+      authSubscription.unsubscribe();
+      authSubscription = null;
+    }
+  },
 }));
