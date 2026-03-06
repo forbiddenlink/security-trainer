@@ -6,7 +6,7 @@ A gamified web-based interactive learning platform for teaching web security vul
 
 ## Features
 
-- **28 Security Modules** - OWASP Top 10, API Security, GraphQL, AI Security, Supply Chain, Container/K8s, Social Engineering, and more
+- **29 Security Modules** - OWASP Top 10, API Security, OAuth 2.0, GraphQL, AI Security, Supply Chain, Container/K8s, Social Engineering, and more
 - **Learning Paths** - 3 certification tracks: Web Fundamentals, API/Backend Security, Advanced Threats
 - **Spaced Repetition** - SM-2 algorithm "Intel Refresher" system for 150% better retention
 - **Hands-on Labs** - Interactive code editor with real-time verification

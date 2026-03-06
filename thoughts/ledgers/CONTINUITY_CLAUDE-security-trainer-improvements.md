@@ -1,10 +1,10 @@
 # Security Trainer - Improvements Session
 
-Updated: 2026-03-06T15:06:18.126Z
+Updated: 2026-03-06T15:14:21.000Z
 
 ## Goal
 
-✅ **COMPLETE** - Major enhancements including OWASP modules, testing, accessibility, gamification, dark mode, mobile navigation, and cloud-ready auth. Now with 28 modules covering AI security, supply chain, container/K8s, and social engineering.
+✅ **COMPLETE** - Major enhancements including OWASP modules, testing, accessibility, gamification, dark mode, mobile navigation, and cloud-ready auth. Now with 29 modules covering OAuth 2.0, AI security, supply chain, container/K8s, and social engineering.
 
 ## Constraints
 
@@ -52,9 +52,9 @@ Updated: 2026-03-06T15:06:18.126Z
   - [x] Spaced repetition system (150% better retention)
   - [x] Learning paths with certification tracks
   - [x] Configure Supabase project for live auth
-  - [ ] Content improvements (videos, diagrams)
   - [x] PWA/offline support
   - [x] Content improvements (videos, diagrams)
+  - [x] OAuth 2.0 Security module (Advanced, 450 XP)
 
 ## Session Summary
 
@@ -256,6 +256,33 @@ Mar 6 audit & fixes session:
 - Mermaid (2.1MB) lazy-loaded separately from main vendor chunk
 - Main vendor chunk reduced from 3.3MB to 1.2MB
 - Diagrams only load when viewing lessons that contain them
+
+Mar 6 OAuth Security module session:
+
+**New Module Added:**
+
+1. **OAuth 2.0 Security** (Advanced, 450 XP) - 12 lessons covering:
+   - OAuth 2.0 attack surface overview
+   - Redirect URI manipulation attacks
+   - Authorization code interception
+   - PKCE (Proof Key for Code Exchange) defense
+   - OAuth CSRF attacks and state parameter
+   - Token leakage vectors (URL fragments, localStorage, referrer headers)
+   - Implicit flow deprecation and migration to authorization code + PKCE
+   - Hands-on lab: Implement secure OAuth with PKCE and state parameter
+
+**Files Created/Modified:**
+
+- `src/data/modules/oauth-security.ts` - New module with 12 comprehensive lessons
+- `src/data/modules/index.ts` - Added module export
+- `src/utils/labVerification.ts` - Added OAuth lab verifier with PKCE validation
+
+**Stats:**
+
+- 29 total modules (was 28)
+- 341 tests passing
+- Lint clean
+- Build successful
 
 ## Working Set
 

@@ -174,6 +174,18 @@ const PATTERNS = {
   SESSION_SECURE: "secure: true",
   SESSION_SAMESITE: "sameSite:",
   SESSION_MAXAGE: "maxAge:",
+
+  // OAuth Security patterns
+  OAUTH_STATE_PARAM: "state",
+  OAUTH_RANDOM_UUID: "crypto.randomUUID()",
+  OAUTH_SESSION_STORAGE: "sessionStorage.setItem",
+  OAUTH_PKCE_VERIFIER: "codeVerifier",
+  OAUTH_PKCE_CHALLENGE: "codeChallenge",
+  OAUTH_GET_RANDOM_VALUES: "crypto.getRandomValues",
+  OAUTH_SHA256: "SHA-256",
+  OAUTH_SUBTLE_DIGEST: "crypto.subtle.digest",
+  OAUTH_CHALLENGE_METHOD: "code_challenge_method",
+  OAUTH_S256: "S256",
 };
 
 /**
@@ -1302,6 +1314,77 @@ export const labVerifiers: Record<string, VerificationFn> = {
       hasDropAll &&
       hasNoPrivEsc &&
       hasReadOnly;
+    return { passed, hints };
+  },
+
+  // OAuth Security Lab: Check for PKCE and state parameter implementation
+  "oauth-lab": (code: string) => {
+    const hints: string[] = [];
+
+    // Must generate state parameter for CSRF protection
+    const hasStateParam =
+      code.includes(PATTERNS.OAUTH_STATE_PARAM) &&
+      code.includes("searchParams.set");
+    const hasRandomUUID = code.includes(PATTERNS.OAUTH_RANDOM_UUID);
+
+    // Must store state and verifier in sessionStorage
+    const hasSessionStorage = code.includes(PATTERNS.OAUTH_SESSION_STORAGE);
+    const storesState =
+      code.includes("oauth_state") || code.includes("'state'");
+    const storesVerifier =
+      code.includes("pkce_verifier") || code.includes("'verifier'");
+
+    // Must generate PKCE code_verifier
+    const hasCodeVerifier = code.includes(PATTERNS.OAUTH_PKCE_VERIFIER);
+    const hasGetRandomValues = code.includes(PATTERNS.OAUTH_GET_RANDOM_VALUES);
+
+    // Must generate code_challenge (SHA-256 hash)
+    const hasCodeChallenge = code.includes(PATTERNS.OAUTH_PKCE_CHALLENGE);
+    const hasSHA256 = code.includes(PATTERNS.OAUTH_SHA256);
+    const hasSubtleDigest = code.includes(PATTERNS.OAUTH_SUBTLE_DIGEST);
+
+    // Must set code_challenge_method=S256
+    const hasChallengeMethod = code.includes(PATTERNS.OAUTH_CHALLENGE_METHOD);
+    const hasS256 = code.includes(PATTERNS.OAUTH_S256);
+
+    if (!hasRandomUUID)
+      hints.push("Generate random state using crypto.randomUUID()");
+    if (!hasStateParam)
+      hints.push(
+        "Add state parameter to authorization URL with searchParams.set",
+      );
+    if (!hasSessionStorage)
+      hints.push("Use sessionStorage.setItem to store state and verifier");
+    if (!storesState)
+      hints.push("Store the state value in sessionStorage as 'oauth_state'");
+    if (!storesVerifier)
+      hints.push(
+        "Store the code_verifier in sessionStorage as 'pkce_verifier'",
+      );
+    if (!hasCodeVerifier || !hasGetRandomValues)
+      hints.push(
+        "Generate code_verifier using crypto.getRandomValues() with Uint8Array",
+      );
+    if (!hasCodeChallenge || !hasSHA256 || !hasSubtleDigest)
+      hints.push(
+        "Create code_challenge by hashing verifier with crypto.subtle.digest('SHA-256', ...)",
+      );
+    if (!hasChallengeMethod || !hasS256)
+      hints.push("Add code_challenge_method=S256 to the authorization URL");
+
+    const passed =
+      hasStateParam &&
+      hasRandomUUID &&
+      hasSessionStorage &&
+      storesState &&
+      storesVerifier &&
+      hasCodeVerifier &&
+      hasGetRandomValues &&
+      hasCodeChallenge &&
+      hasSHA256 &&
+      hasSubtleDigest &&
+      hasChallengeMethod &&
+      hasS256;
     return { passed, hints };
   },
 };

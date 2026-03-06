@@ -28,6 +28,7 @@ import { aiSecurity } from "./ai-security";
 import { supplyChainSecurity } from "./supply-chain-security";
 import { containerSecurity } from "./container-security";
 import { socialEngineering } from "./social-engineering";
+import { oauthSecurity } from "./oauth-security";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -58,6 +59,7 @@ export const MODULES: Module[] = [
   supplyChainSecurity,
   containerSecurity,
   socialEngineering,
+  oauthSecurity,
 ];
 
 // Re-export individual modules for direct imports
@@ -90,4 +92,5 @@ export {
   supplyChainSecurity,
   containerSecurity,
   socialEngineering,
+  oauthSecurity,
 };
