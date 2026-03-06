@@ -20,10 +20,37 @@ The **Open Web Application Security Project (OWASP)** is a non-profit foundation
 
 It is best known for the **OWASP Top 10**, a regularly updated report outlining security concerns for web application security, focusing on the 10 most critical risks.
 
+::video[https://www.youtube.com/watch?v=mnBFkrS4ZDI]{title="OWASP Top 10 Overview" caption="Introduction to the OWASP Top 10 vulnerabilities"}
+
 ## Why it matters
 Understanding these vulnerabilities is crucial for developers because they are frequently exploited by attackers to steal data, take over accounts, or compromise systems.
 
 ## The OWASP Top 10 Categories
+
+\`\`\`mermaid
+mindmap
+  root((OWASP Top 10))
+    Injection
+      SQL Injection
+      NoSQL Injection
+      Command Injection
+    Authentication
+      Session Hijacking
+      Credential Stuffing
+    Data Exposure
+      Weak Encryption
+      Clear Text Storage
+    Access Control
+      IDOR
+      Privilege Escalation
+    XSS
+      Reflected
+      Stored
+      DOM-based
+    Misconfiguration
+      Default Credentials
+      Verbose Errors
+\`\`\`
 
 1. **Injection** - SQL, NoSQL, OS command injection
 2. **Broken Authentication** - Session hijacking, credential stuffing

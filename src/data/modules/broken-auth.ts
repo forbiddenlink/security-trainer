@@ -18,6 +18,40 @@ export const brokenAuth: Module = {
 
 Authentication vulnerabilities allowed attackers to compromise passwords, keys, or session tokens, or to exploit other implementation flaws to assume other users' identities temporarily or permanently.
 
+## The Authentication Attack Surface
+
+\`\`\`mermaid
+flowchart TB
+    subgraph Attacks
+        A1[Credential Stuffing]
+        A2[Brute Force]
+        A3[Session Hijacking]
+        A4[Weak Passwords]
+    end
+
+    subgraph Defenses
+        D1[Rate Limiting]
+        D2[MFA]
+        D3[Secure Sessions]
+        D4[Strong Policies]
+    end
+
+    A1 --> D1
+    A1 --> D2
+    A2 --> D1
+    A3 --> D3
+    A4 --> D4
+
+    style A1 fill:#ef4444,color:#fff
+    style A2 fill:#ef4444,color:#fff
+    style A3 fill:#ef4444,color:#fff
+    style A4 fill:#ef4444,color:#fff
+    style D1 fill:#22c55e,color:#fff
+    style D2 fill:#22c55e,color:#fff
+    style D3 fill:#22c55e,color:#fff
+    style D4 fill:#22c55e,color:#fff
+\`\`\`
+
 ## Mission Briefing: The Threat Landscape
 
 Authentication is the front door to your application. When compromised, attackers gain full access to user accounts, sensitive data, and potentially administrative functions.

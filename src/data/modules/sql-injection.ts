@@ -18,7 +18,33 @@ export const sqlInjection: Module = {
 
 SQL Injection (SQLi) is a web security vulnerability that allows an attacker to interfere with the queries that an application makes to its database.
 
-## How it works
+## How SQL Injection Works
+
+\`\`\`mermaid
+flowchart LR
+    A[User Input] --> B{App builds query}
+    B --> C[String Concatenation]
+    C --> D[Unsafe Query]
+    D --> E[(Database)]
+    E --> F[Data Leak!]
+
+    A2[User Input] --> B2{App builds query}
+    B2 --> C2[Parameterized Query]
+    C2 --> D2[Safe Query]
+    D2 --> E2[(Database)]
+    E2 --> F2[Protected]
+
+    style C fill:#ef4444,color:#fff
+    style D fill:#ef4444,color:#fff
+    style F fill:#ef4444,color:#fff
+    style C2 fill:#22c55e,color:#fff
+    style D2 fill:#22c55e,color:#fff
+    style F2 fill:#22c55e,color:#fff
+\`\`\`
+
+::video[https://www.youtube.com/watch?v=ciNHn38EyRc]{title="SQL Injection Explained" caption="Understanding SQL injection attacks and defenses"}
+
+## The Attack
 Untrusted user input is directly concatenated into a SQL query string without validation or escaping.
 
 \`\`\`sql

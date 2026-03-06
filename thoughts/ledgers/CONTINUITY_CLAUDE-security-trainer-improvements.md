@@ -1,6 +1,6 @@
 # Security Trainer - Improvements Session
 
-Updated: 2026-02-26T04:50:00.000Z
+Updated: 2026-03-06T09:52:00.000Z
 
 ## Goal
 
@@ -42,16 +42,19 @@ Updated: 2026-02-26T04:50:00.000Z
   - [x] API Security module (7 lessons: BOLA, rate limiting, JWT, mass assignment)
   - [x] Certificate theme fix (proper dark/light mode support)
   - [x] README with proper documentation and Supabase setup guide
-- Now: [→] Adding new modules
-- Remaining (optional, from research):
+- Now: [→] Maintenance mode - all core features complete
+- Remaining (optional enhancements):
   - [x] Container & Kubernetes Security module
   - [x] Modern Social Engineering module
-  - [ ] Spaced repetition system (150% better retention)
-  - [ ] Learning paths with certification tracks
-  - [ ] Leaderboard feature (currently shows placeholder)
-  - [ ] Configure Supabase project for live auth
+  - [x] Security audit and fixes (XSS, memory leaks)
+  - [x] Profile editing feature
+  - [x] OWASP Intro lab exercise
+  - [x] Spaced repetition system (150% better retention)
+  - [x] Learning paths with certification tracks
+  - [x] Configure Supabase project for live auth
   - [ ] Content improvements (videos, diagrams)
-  - [ ] PWA/offline support
+  - [x] PWA/offline support
+  - [x] Content improvements (videos, diagrams)
 
 ## Session Summary
 
@@ -122,6 +125,137 @@ Feb 26 session:
 - 28 total modules (was 26)
 - All 202 tests passing
 - Build successful
+
+Feb 28 comprehensive audit session:
+
+**Security Fixes (3 issues):**
+
+1. **CRITICAL: XSS in Leaderboard** - Avatar URLs rendered without validation - FIXED (Leaderboard.tsx now uses getSafeAvatarUrl)
+2. **HIGH: Theme store memory leak** - Media query listener not cleaned up - FIXED (themeStore.ts now stores and cleans up listener)
+3. **HIGH: Avatar URL validation on profile update** - Profile updates accepted any URL - FIXED (authStore.ts now validates avatar_url)
+
+**New Features (2):**
+
+1. **OWASP Intro Lab** - Added interactive vulnerability identification exercise to the intro module
+2. **Profile Editing Modal** - Users can now edit their display name via Profile page
+
+**Code Quality Improvements:**
+
+1. Improved error handling in LabView (now shows actual error messages)
+2. Created gameUtils.ts utility for XP calculations
+3. Created userUtils.ts utility for display name handling
+4. Removed non-functional notification bell from Header
+5. Fixed lint error in ProfileEditModal (setState in useEffect)
+
+**Stats:**
+
+- 28 total modules
+- All 202 tests passing
+- Lint clean
+- Build successful
+
+Feb 28 follow-up session:
+
+**Commits Created (3):**
+
+1. `92ff582` - Fix security vulnerabilities and improve code quality
+2. `7f6ed16` - Add OWASP intro lab and profile editing feature
+3. `29ac71e` - Update README module count and add ProfileEditModal tests
+
+**Quick Wins Completed:**
+
+- Updated README to reflect 28 modules (was 24)
+- Added 17 tests for ProfileEditModal component
+
+**Stats:**
+
+- 28 total modules
+- 219 tests passing (was 202)
+- Lint clean
+- Build successful
+
+Feb 28 PWA session:
+
+**PWA Support Added:**
+
+- `public/manifest.json` - Web app manifest with icons and theme colors
+- `public/sw.js` - Service worker with network-first caching strategy
+- Updated `index.html` with manifest link, theme-color meta, apple-touch-icon
+
+**Bug Fix:**
+
+- Fixed grammar in IntelRefresher: "1 lesson need review" → "1 lesson needs review"
+
+**Stats:**
+
+- 28 total modules
+- 304 tests passing
+- PWA installable with offline support
+- Build successful
+
+Feb 28 test coverage session:
+
+**Tests Added (85 new tests):**
+
+1. **spacedRepetition.test.ts** (42 tests) - SM-2 algorithm, date helpers, review scheduling
+2. **ReviewModal.test.tsx** (15 tests) - Rating buttons, XP display, accessibility
+3. **PathCard.test.tsx** (16 tests) - Progress, locked/unlocked states, completion badges
+4. **IntelRefresher.test.tsx** (12 tests) - Due reviews, empty states, lesson display
+
+**Quick Wins:**
+
+- Updated README with Learning Paths and Spaced Repetition features
+- Updated ledger to mark spaced repetition and learning paths as complete
+
+**Stats:**
+
+- 28 total modules
+- 304 tests passing (was 219)
+- Lint clean
+- Build successful
+
+Mar 6 audit & fixes session:
+
+**Critical Bugs Fixed (3):**
+
+1. **Memory leak in gameStore** - `syncTimeout` not cleared on `resetProgress()`, causing stale data sync after reset - FIXED
+2. **Memory leak in authStore** - Auth subscription had no cleanup function - FIXED (added `cleanup()` method)
+3. **Race condition in Header** - `checkStreak()`/`checkDailyChallenge()` running before auth `initialize()` completed - FIXED (chained effects)
+
+**Features Added (1):**
+
+1. **Reviews page** (`/reviews`) - Full page view of all spaced repetition reviews, with stats dashboard - FIXED broken IntelRefresher "View All" link
+
+**Accessibility Improvements (3):**
+
+1. PathCard - Added `aria-hidden="true"` to decorative gradient, `role="status"` and `aria-label` to lock message
+2. IntelRefresher - Added `aria-hidden="true"` to decorative glow element
+3. DailyChallenge test - Fixed `act()` warning by wrapping timer advancement
+
+**Stats:**
+
+- 28 total modules
+- 341 tests passing (was 304)
+- Lint clean
+- Build successful
+
+**Content Improvements Added:**
+
+1. **Mermaid Diagram Support** - New `MermaidDiagram` component with lazy loading for performance
+2. **Video Embed Support** - New `VideoEmbed` component with YouTube privacy mode and click-to-play
+3. **Enhanced TheoryView** - Supports `mermaid` code blocks and `::video[url]{title="..." caption="..."}` syntax
+4. **Added diagrams to key modules:**
+   - OWASP Intro: Mind map of Top 10 categories + intro video
+   - XSS Basics: Sequence diagram of attack flow + explainer video
+   - SQL Injection: Flowchart comparing safe vs unsafe queries + tutorial video
+   - CSRF Attacks: Sequence diagram of attack flow + explainer video
+   - Broken Authentication: Attack/defense mapping diagram
+
+**Bundle Optimization:**
+
+- Mermaid (2.1MB) lazy-loaded separately from main vendor chunk
+- Main vendor chunk reduced from 3.3MB to 1.2MB
+- Diagrams only load when viewing lessons that contain them
 
 ## Working Set
 
