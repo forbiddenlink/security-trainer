@@ -41,3 +41,9 @@ dist-ssr
 
 # Playwright MCP screenshots
 .playwright-mcp/
+
+# Build output
+.next/
+dist/
+build/
+out/
