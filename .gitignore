@@ -47,3 +47,5 @@ dist-ssr
 dist/
 build/
 out/
+
+# Next.js
