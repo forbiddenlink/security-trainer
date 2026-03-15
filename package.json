@@ -71,8 +71,9 @@
     "vite": "^7.2.4",
     "vitest": "^4.0.18"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=20.0.0"
-  }
+  },
+  "description": "Gamified web-based interactive learning platform for teaching web security vulnerabilities and defensive coding practices"
 }
