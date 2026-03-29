@@ -20,7 +20,7 @@
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "downloadjs": "^1.4.7",
-    "framer-motion": "^12.26.2",
+    "framer-motion": "^12.38.0",
     "html-to-image": "^1.11.13",
     "lucide-react": "^0.577.0",
     "mermaid": "^11.12.3",
