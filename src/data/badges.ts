@@ -43,6 +43,28 @@ export const BADGES: Badge[] = [
         icon: 'Crown',
         condition: 'Reach Level 5'
     },
+    // CTF Badges
+    {
+        id: 'badge-ctf-first',
+        name: 'Flag Hunter',
+        description: 'Captured your first CTF flag',
+        icon: 'Flag',
+        condition: 'Solve 1 CTF challenge'
+    },
+    {
+        id: 'badge-ctf-hunter',
+        name: 'Flag Collector',
+        description: 'A seasoned CTF competitor',
+        icon: 'Target',
+        condition: 'Solve 5 CTF challenges'
+    },
+    {
+        id: 'badge-ctf-500',
+        name: 'CTF Champion',
+        description: 'Earned 500+ CTF points',
+        icon: 'Trophy',
+        condition: 'Earn 500 CTF points'
+    },
 ];
 
 // Helper to get badge by ID

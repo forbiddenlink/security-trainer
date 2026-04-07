@@ -156,6 +156,11 @@ interface GameStore extends UserState {
   getPathProgress: (pathId: string) => { completed: number; total: number };
   isPathUnlocked: (pathId: string) => boolean;
   completePath: (pathId: string) => void;
+  // CTF Challenges
+  submitFlag: (challengeId: string, flag: string, challenge: { points: number; hints: { id: string; cost: number }[]; flag: string }) => Promise<{ correct: boolean; pointsEarned: number }>;
+  revealHint: (challengeId: string, hintId: string) => void;
+  getCTFProgress: (challengeId: string) => { solved: boolean; hintsRevealed: string[]; attempts: number; solvedAt?: string; pointsEarned?: number } | null;
+  isCTFSolved: (challengeId: string) => boolean;
 }
 
 const INITIAL_STATE: UserState = {
@@ -172,6 +177,8 @@ const INITIAL_STATE: UserState = {
   dailyChallengeCompleted: false,
   lessonReviews: {},
   completedPaths: [],
+  ctfProgress: {},
+  ctfTotalPoints: 0,
 };
 
 // Helper to get today's date string
@@ -591,6 +598,128 @@ export const useGameStore = create<GameStore>()(
       syncToCloud: () => {
         debouncedSyncToCloud();
       },
+
+      // ============================================
+      // CTF CHALLENGES
+      // ============================================
+
+      submitFlag: async (challengeId, flag, challenge) => {
+        const { ctfProgress, ctfTotalPoints, achievementQueue, unlockBadge } = get();
+        const existing = ctfProgress[challengeId];
+
+        // Already solved - no points
+        if (existing?.solved) {
+          return { correct: false, pointsEarned: 0 };
+        }
+
+        // Hash the input flag and compare
+        const { validateFlag } = await import('../lib/ctf');
+        const isCorrect = await validateFlag(flag, challenge.flag);
+
+        const hintsRevealed = existing?.hintsRevealed || [];
+        const attempts = (existing?.attempts || 0) + 1;
+
+        if (isCorrect) {
+          // Calculate points after hint deductions
+          const hintCost = challenge.hints
+            .filter(h => hintsRevealed.includes(h.id))
+            .reduce((total, hint) => total + hint.cost, 0);
+          const pointsEarned = Math.max(0, challenge.points - hintCost);
+
+          const notification: AchievementNotification = {
+            id: `ctf-${challengeId}-${Date.now()}`,
+            type: 'badge',
+            title: 'Flag Captured!',
+            message: `+${pointsEarned} CTF points`,
+          };
+
+          set({
+            ctfProgress: {
+              ...ctfProgress,
+              [challengeId]: {
+                challengeId,
+                solved: true,
+                hintsRevealed,
+                attempts,
+                solvedAt: new Date().toISOString(),
+                pointsEarned,
+              },
+            },
+            ctfTotalPoints: ctfTotalPoints + pointsEarned,
+            achievementQueue: [...achievementQueue, notification],
+          });
+
+          // Check for CTF badges
+          const newTotal = ctfTotalPoints + pointsEarned;
+          const solvedCount = Object.values(ctfProgress).filter(p => p.solved).length + 1;
+
+          if (solvedCount === 1) {
+            unlockBadge('badge-ctf-first');
+          }
+          if (solvedCount >= 5) {
+            unlockBadge('badge-ctf-hunter');
+          }
+          if (newTotal >= 500) {
+            unlockBadge('badge-ctf-500');
+          }
+
+          // Also award XP based on CTF points (streak multiplier applies)
+          get().addXp(pointsEarned);
+
+          debouncedSyncToCloud();
+          return { correct: true, pointsEarned };
+        } else {
+          // Wrong answer - record attempt
+          set({
+            ctfProgress: {
+              ...ctfProgress,
+              [challengeId]: {
+                challengeId,
+                solved: false,
+                hintsRevealed,
+                attempts,
+              },
+            },
+          });
+
+          return { correct: false, pointsEarned: 0 };
+        }
+      },
+
+      revealHint: (challengeId, hintId) => {
+        const { ctfProgress } = get();
+        const existing = ctfProgress[challengeId];
+
+        // Don't reveal if already solved
+        if (existing?.solved) return;
+
+        const hintsRevealed = existing?.hintsRevealed || [];
+        if (hintsRevealed.includes(hintId)) return;
+
+        set({
+          ctfProgress: {
+            ...ctfProgress,
+            [challengeId]: {
+              challengeId,
+              solved: false,
+              hintsRevealed: [...hintsRevealed, hintId],
+              attempts: existing?.attempts || 0,
+            },
+          },
+        });
+
+        debouncedSyncToCloud();
+      },
+
+      getCTFProgress: (challengeId) => {
+        const { ctfProgress } = get();
+        return ctfProgress[challengeId] || null;
+      },
+
+      isCTFSolved: (challengeId) => {
+        const { ctfProgress } = get();
+        return ctfProgress[challengeId]?.solved ?? false;
+      },
     }),
     {
       name: "security-trainer-storage",
@@ -609,6 +738,8 @@ export const useGameStore = create<GameStore>()(
         dailyChallengeCompleted: state.dailyChallengeCompleted,
         lessonReviews: state.lessonReviews,
         completedPaths: state.completedPaths,
+        ctfProgress: state.ctfProgress,
+        ctfTotalPoints: state.ctfTotalPoints,
       }),
     },
   ),

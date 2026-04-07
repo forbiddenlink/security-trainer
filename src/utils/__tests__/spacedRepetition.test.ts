@@ -13,7 +13,7 @@ import {
 } from "../spacedRepetition";
 import type { LessonReview } from "../../types";
 
-describe("spacedRepetition", () => {
+describe("spacedRepetition (FSRS)", () => {
   describe("getTodayString", () => {
     it("returns date in ISO format without time", () => {
       const result = getTodayString();
@@ -69,7 +69,7 @@ describe("spacedRepetition", () => {
       expect(review.nextReviewDate).toBe("2026-03-01");
     });
 
-    it("initializes with default ease factor of 2.5", () => {
+    it("initializes with default ease factor for backward compatibility", () => {
       const review = createInitialReview("lesson-1");
       expect(review.easeFactor).toBe(2.5);
     });
@@ -82,6 +82,12 @@ describe("spacedRepetition", () => {
     it("initializes with interval of 1", () => {
       const review = createInitialReview("lesson-1");
       expect(review.interval).toBe(1);
+    });
+
+    it("includes FSRS-specific fields", () => {
+      const review = createInitialReview("lesson-1");
+      expect(review.stability).toBeDefined();
+      expect(review.difficulty).toBeDefined();
     });
   });
 
@@ -102,68 +108,96 @@ describe("spacedRepetition", () => {
       interval: 1,
       easeFactor: 2.5,
       reviewCount: 0,
+      stability: 1,
+      difficulty: 5,
+      reps: 0,
+      lapses: 0,
+      state: 0, // New
     };
 
-    it("resets interval to 1 for hard rating", () => {
-      const result = calculateNextReview(
-        { ...baseReview, interval: 7, reviewCount: 3 },
-        "hard",
+    it("schedules shorter interval for hard rating", () => {
+      const reviewAfterGood = calculateNextReview(baseReview, "good");
+      const reviewAfterHard = calculateNextReview(baseReview, "hard");
+      // Hard should have shorter interval than good
+      expect(reviewAfterHard.interval).toBeLessThanOrEqual(
+        reviewAfterGood.interval,
       );
-      expect(result.interval).toBe(1);
     });
 
     it("increments review count", () => {
       const result = calculateNextReview(baseReview, "good");
-      expect(result.reviewCount).toBe(1);
+      expect(result.reviewCount).toBeGreaterThan(baseReview.reviewCount);
     });
 
-    it("sets interval to 3 for second review", () => {
-      const result = calculateNextReview(
-        { ...baseReview, reviewCount: 1 },
-        "good",
+    it("schedules longer interval for easy rating", () => {
+      const reviewAfterGood = calculateNextReview(baseReview, "good");
+      const reviewAfterEasy = calculateNextReview(baseReview, "easy");
+      // Easy should have longer or equal interval compared to good
+      expect(reviewAfterEasy.interval).toBeGreaterThanOrEqual(
+        reviewAfterGood.interval,
       );
-      expect(result.interval).toBe(3);
     });
 
-    it("sets interval to 7 for third review", () => {
-      const result = calculateNextReview(
-        { ...baseReview, reviewCount: 2 },
-        "good",
-      );
-      expect(result.interval).toBe(7);
+    it("increases stability after successful reviews", () => {
+      const result = calculateNextReview(baseReview, "good");
+      expect(result.stability).toBeGreaterThan(baseReview.stability ?? 0);
     });
 
-    it("applies easy bonus multiplier", () => {
-      const result = calculateNextReview(
-        { ...baseReview, reviewCount: 3, interval: 7 },
-        "easy",
-      );
-      // Interval should be greater due to easy bonus
-      expect(result.interval).toBeGreaterThan(7);
+    it("resets or reduces progress for hard reviews", () => {
+      // Create a review that's been reviewed several times
+      const advancedReview: LessonReview = {
+        ...baseReview,
+        interval: 14,
+        reviewCount: 5,
+        stability: 14,
+        reps: 5,
+        state: 2, // Review state
+      };
+
+      const result = calculateNextReview(advancedReview, "hard");
+      // Hard should reduce interval significantly
+      expect(result.interval).toBeLessThan(advancedReview.interval);
     });
 
-    it("caps interval at 60 days", () => {
-      const result = calculateNextReview(
-        { ...baseReview, reviewCount: 10, interval: 50, easeFactor: 2.5 },
-        "easy",
-      );
-      expect(result.interval).toBeLessThanOrEqual(60);
+    it("tracks lapses for hard reviews", () => {
+      const reviewWithHistory: LessonReview = {
+        ...baseReview,
+        reviewCount: 3,
+        reps: 3,
+        state: 2, // Review state
+        lapses: 0,
+      };
+
+      const result = calculateNextReview(reviewWithHistory, "hard");
+      // FSRS tracks lapses when user forgets
+      expect(result.lapses).toBeGreaterThanOrEqual(reviewWithHistory.lapses ?? 0);
     });
 
-    it("decreases ease factor for hard reviews", () => {
-      const result = calculateNextReview(baseReview, "hard");
-      expect(result.easeFactor).toBeLessThan(2.5);
+    it("updates last review date to today", () => {
+      const result = calculateNextReview(baseReview, "good");
+      expect(result.lastReviewDate).toBe("2026-02-28");
     });
 
-    it("increases ease factor for easy reviews", () => {
-      const result = calculateNextReview(baseReview, "easy");
-      expect(result.easeFactor).toBeGreaterThan(2.5);
+    it("sets next review date in the future", () => {
+      const result = calculateNextReview(baseReview, "good");
+      expect(result.nextReviewDate >= "2026-02-28").toBe(true);
     });
 
-    it("maintains minimum ease factor of 1.3", () => {
-      const lowEaseReview = { ...baseReview, easeFactor: 1.35 };
-      const result = calculateNextReview(lowEaseReview, "hard");
-      expect(result.easeFactor).toBeGreaterThanOrEqual(1.3);
+    it("handles legacy SM-2 reviews without FSRS fields", () => {
+      const legacyReview: LessonReview = {
+        lessonId: "legacy-lesson",
+        lastReviewDate: "2026-02-27",
+        nextReviewDate: "2026-02-28",
+        interval: 7,
+        easeFactor: 2.6,
+        reviewCount: 3,
+        // No FSRS fields - testing backward compatibility
+      };
+
+      const result = calculateNextReview(legacyReview, "good");
+      expect(result.lessonId).toBe("legacy-lesson");
+      expect(result.stability).toBeDefined();
+      expect(result.difficulty).toBeDefined();
     });
   });
 

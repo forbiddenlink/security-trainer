@@ -77,7 +77,11 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, index }) => {
               <Clock className="w-3.5 h-3.5" aria-hidden="true" />
               {review.reviewCount} reviews
             </span>
-            <span>Ease: {(review.easeFactor * 100).toFixed(0)}%</span>
+            {review.stability !== undefined ? (
+              <span>Stability: {Math.round(review.stability)}d</span>
+            ) : (
+              <span>Ease: {(review.easeFactor * 100).toFixed(0)}%</span>
+            )}
           </div>
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">

@@ -8,6 +8,7 @@ import {
   Trophy,
   ShieldCheck,
   GraduationCap,
+  Flag,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard },
   { label: "Modules", path: "/modules", icon: BookOpen },
   { label: "Paths", path: "/paths", icon: GraduationCap },
+  { label: "CTF Challenges", path: "/ctf", icon: Flag },
   { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
   { label: "Profile", path: "/profile", icon: User },
   { label: "Final Exam", path: "/challenge", icon: ShieldAlert },

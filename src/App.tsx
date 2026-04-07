@@ -32,6 +32,9 @@ const PathDetail = lazy(() =>
 const Reviews = lazy(() =>
   import("./pages/Reviews").then((m) => ({ default: m.Reviews })),
 );
+const CTFChallenges = lazy(() =>
+  import("./pages/CTFChallenges").then((m) => ({ default: m.CTFChallenges })),
+);
 const AuthModal = lazy(() =>
   import("./components/AuthModal").then((m) => ({ default: m.AuthModal })),
 );
@@ -75,6 +78,7 @@ function App() {
               <Route path="/paths" element={<Paths />} />
               <Route path="/paths/:pathId" element={<PathDetail />} />
               <Route path="/reviews" element={<Reviews />} />
+              <Route path="/ctf" element={<CTFChallenges />} />
               {/* Fallback route */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
