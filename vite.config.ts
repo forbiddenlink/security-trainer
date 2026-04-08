@@ -52,22 +52,28 @@ export default defineConfig({
             return "icons-vendor";
           }
 
-          // Mermaid and its large dependencies (D3, etc.) - loaded on demand
-          // NOTE: dompurify is intentionally excluded here because posthog-js
-          // also depends on it, which would force the entire mermaid chunk to
-          // load eagerly at startup and cause a runtime crash.
+          // Mermaid and its large dependencies (D3, etc.) must NOT be placed
+          // in a named manualChunk. When forced into "mermaid-vendor", Rollup
+          // creates a circular static dependency:
+          //   vendor  ──→  mermaid-vendor  (for Vite's __vitePreload helper)
+          //   mermaid-vendor ──→  vendor   (for dompurify, @mermaid-js/parser)
+          // The circular eval order causes `kr (= Array.isArray)` to be
+          // undefined when mermaid's init runs → "kr is not a function" crash.
+          //
+          // Solution: return undefined so Rollup auto-splits these packages
+          // into their own async chunk, loaded only when MermaidDiagram renders.
           if (
-            id.includes("/node_modules/mermaid/") ||
+            id.includes("/node_modules/mermaid") ||
             id.includes("/node_modules/d3") ||
             id.includes("/node_modules/dagre") ||
-            id.includes("/node_modules/khroma/") ||
+            id.includes("/node_modules/khroma") ||
             id.includes("/node_modules/cytoscape") ||
-            id.includes("/node_modules/lodash-es/") ||
-            id.includes("/node_modules/elkjs/") ||
-            id.includes("/node_modules/katex/") ||
-            id.includes("/node_modules/stylis/")
+            id.includes("/node_modules/lodash-es") ||
+            id.includes("/node_modules/elkjs") ||
+            id.includes("/node_modules/katex") ||
+            id.includes("/node_modules/stylis")
           ) {
-            return "mermaid-vendor";
+            return undefined; // auto-split async chunk, never eager
           }
 
           if (id.includes("node_modules")) {
