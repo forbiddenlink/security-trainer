@@ -108,6 +108,7 @@ function lessonReviewToCard(review: LessonReview): Card {
       scheduled_days: review.interval,
       reps: review.reps ?? review.reviewCount,
       lapses: review.lapses ?? 0,
+      learning_steps: 0,
       state: review.state ?? 0,
       last_review: new Date(review.lastReviewDate),
     };
