@@ -1,6 +1,6 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -53,13 +53,15 @@ export default defineConfig({
           }
 
           // Mermaid and its large dependencies (D3, etc.) - loaded on demand
+          // NOTE: dompurify is intentionally excluded here because posthog-js
+          // also depends on it, which would force the entire mermaid chunk to
+          // load eagerly at startup and cause a runtime crash.
           if (
             id.includes("/node_modules/mermaid/") ||
             id.includes("/node_modules/d3") ||
             id.includes("/node_modules/dagre") ||
             id.includes("/node_modules/khroma/") ||
             id.includes("/node_modules/cytoscape") ||
-            id.includes("/node_modules/dompurify/") ||
             id.includes("/node_modules/lodash-es/") ||
             id.includes("/node_modules/elkjs/") ||
             id.includes("/node_modules/katex/") ||
