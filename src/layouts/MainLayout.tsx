@@ -32,11 +32,11 @@ export const MainLayout: React.FC = () => {
 
       <div className="flex-1 flex flex-col relative overflow-hidden lg:ml-0">
         <div
-          className="absolute inset-0 pointer-events-none opacity-60"
+          className="absolute inset-0 pointer-events-none opacity-30"
           aria-hidden="true"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.12),transparent_45%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(128,145,170,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,145,170,0.08)_1px,transparent_1px)] bg-[size:26px_26px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-primary)_0%,transparent_45%)] opacity-[0.07]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-muted-foreground)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-muted-foreground)_1px,transparent_1px)] bg-[size:24px_24px] opacity-[0.06]" />
         </div>
         <Header onMenuClick={toggleSidebar} />
         <main className="flex-1 overflow-auto relative z-0">

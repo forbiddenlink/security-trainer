@@ -25,11 +25,11 @@ export const Leaderboard: React.FC = () => {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="w-6 h-6 text-yellow-500" />;
+        return <Crown className="w-6 h-6 text-warning" />;
       case 2:
-        return <Medal className="w-6 h-6 text-gray-400" />;
+        return <Medal className="w-6 h-6 text-muted-foreground" />;
       case 3:
-        return <Medal className="w-6 h-6 text-amber-600" />;
+        return <Medal className="w-6 h-6 text-warning" />;
       default:
         return (
           <span className="w-6 h-6 flex items-center justify-center text-muted-foreground font-bold">
@@ -45,11 +45,11 @@ export const Leaderboard: React.FC = () => {
     }
     switch (rank) {
       case 1:
-        return "bg-yellow-500/10 border-yellow-500/30";
+        return "bg-warning/10 border-warning/30";
       case 2:
-        return "bg-gray-400/10 border-gray-400/30";
+        return "bg-muted/30 border-border";
       case 3:
-        return "bg-amber-600/10 border-amber-600/30";
+        return "bg-warning/5 border-warning/20";
       default:
         return "bg-card border-border";
     }
@@ -157,14 +157,14 @@ export const Leaderboard: React.FC = () => {
 
                 {/* Avatar */}
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                     entry.rank === 1
-                      ? "bg-gradient-to-br from-yellow-400 to-amber-600"
+                      ? "bg-warning text-card"
                       : entry.rank === 2
-                        ? "bg-gradient-to-br from-gray-300 to-gray-500"
+                        ? "bg-muted text-muted-foreground"
                         : entry.rank === 3
-                          ? "bg-gradient-to-br from-amber-400 to-amber-700"
-                          : "bg-gradient-to-br from-blue-500 to-cyan-500"
+                          ? "bg-warning/70 text-card"
+                          : "bg-primary text-primary-foreground"
                   }`}
                 >
                   {getSafeAvatarUrl(entry.avatar_url) ? (

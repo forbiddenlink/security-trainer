@@ -85,7 +85,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
         >
           <Menu className="w-5 h-5" aria-hidden="true" />
         </button>
-        <h1 className="text-[1.05rem] font-semibold tracking-tight text-foreground">
+        <h1 className="text-h4 tracking-tight text-foreground">
           Mission Control
         </h1>
       </div>
@@ -110,7 +110,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
             indicatorClassName="bg-linear-to-r from-primary to-accent"
           />
           <span
-            className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1"
+            className="text-caption text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1"
             aria-hidden="true"
           >
             {xp} / {nextLevelXp} XP

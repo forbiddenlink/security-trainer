@@ -140,7 +140,7 @@ export const Reviews: React.FC = () => {
             <RefreshCw className="w-6 h-6" aria-hidden="true" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="text-h1">
               Intel Refresher
             </h1>
             <p className="text-muted-foreground">
@@ -166,19 +166,19 @@ export const Reviews: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-primary">{totalReviews}</p>
+          <p className="text-h2 text-primary">{totalReviews}</p>
           <p className="text-sm text-muted-foreground">Total Tracked</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-warning">{reviewsDue.length}</p>
+          <p className="text-h2 text-warning">{reviewsDue.length}</p>
           <p className="text-sm text-muted-foreground">Due Now</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-destructive">{overdueCount}</p>
+          <p className="text-h2 text-destructive">{overdueCount}</p>
           <p className="text-sm text-muted-foreground">Overdue</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-accent">
+          <p className="text-h2 text-accent">
             {totalReviews - reviewsDue.length}
           </p>
           <p className="text-sm text-muted-foreground">Up to Date</p>
@@ -202,7 +202,7 @@ export const Reviews: React.FC = () => {
             className="w-12 h-12 text-accent mx-auto mb-4"
             aria-hidden="true"
           />
-          <h2 className="text-xl font-semibold mb-2">All Caught Up!</h2>
+          <h2 className="text-h3 mb-2">All Caught Up!</h2>
           <p className="text-muted-foreground mb-4">
             No reviews due right now. Your next review is scheduled for{" "}
             <span className="font-medium text-foreground">
@@ -223,7 +223,7 @@ export const Reviews: React.FC = () => {
             className="w-12 h-12 text-muted-foreground mx-auto mb-4"
             aria-hidden="true"
           />
-          <h2 className="text-xl font-semibold mb-2">No Reviews Yet</h2>
+          <h2 className="text-h3 mb-2">No Reviews Yet</h2>
           <p className="text-muted-foreground mb-4">
             Complete some lessons to start building your review schedule.
           </p>

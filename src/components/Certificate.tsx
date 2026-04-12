@@ -31,7 +31,7 @@ export const Certificate: React.FC = () => {
       <div className="flex justify-end">
         <button
           onClick={handleDownload}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition-colors"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-[var(--radius-sm)] font-medium text-sm flex items-center gap-2 transition-colors"
         >
           <Award className="w-4 h-4" />
           Download Certificate
@@ -46,11 +46,11 @@ export const Certificate: React.FC = () => {
         >
           {/* Background Pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(45deg,var(--color-muted)_25%,transparent_25%,transparent_75%,var(--color-muted)_75%,var(--color-muted)),linear-gradient(45deg,var(--color-muted)_25%,transparent_25%,transparent_75%,var(--color-muted)_75%,var(--color-muted))] bg-[size:60px_60px] opacity-20 pointer-events-none" />
-          <div className="absolute inset-0 border-[20px] border-border/50 pointer-events-none" />
+          <div className="absolute inset-0 border-[16px] border-border/50 pointer-events-none" />
 
           <Shield className="w-24 h-24 text-primary mb-6" />
 
-          <h1 className="text-4xl font-bold tracking-wider uppercase mb-2 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+          <h1 className="text-4xl font-bold tracking-wider uppercase mb-2 text-center text-primary font-display">
             Certificate of Completion
           </h1>
 
@@ -59,7 +59,7 @@ export const Certificate: React.FC = () => {
           </p>
 
           <p className="text-lg text-center mb-2">This certifies that</p>
-          <p className="text-3xl font-serif italic text-primary mb-8 border-b-2 border-primary/20 pb-2 px-12">
+          <p className="text-3xl font-display italic text-primary mb-8 border-b-2 border-primary/20 pb-2 px-12">
             {name}
           </p>
 
@@ -75,7 +75,7 @@ export const Certificate: React.FC = () => {
               <p className="text-xs text-muted-foreground uppercase">Date</p>
             </div>
             <div className="flex flex-col items-center">
-              <CheckCircle className="w-10 h-10 text-emerald-500 mb-2 opacity-80" />
+              <CheckCircle className="w-10 h-10 text-accent mb-2 opacity-80" />
               <p className="text-xs text-muted-foreground uppercase opacity-80">
                 Verified Secure
               </p>

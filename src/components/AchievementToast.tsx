@@ -7,30 +7,45 @@ import type { AchievementNotification } from '../types';
 const getIconForType = (type: AchievementNotification['type']) => {
     switch (type) {
         case 'badge':
-            return <Award className="w-10 h-10 text-purple-500" />;
+            return <Award className="w-10 h-10 text-primary" />;
         case 'streak':
-            return <Flame className="w-10 h-10 text-orange-500" />;
+            return <Flame className="w-10 h-10 text-warning" />;
         case 'module_complete':
-            return <CheckCircle className="w-10 h-10 text-emerald-500" />;
+            return <CheckCircle className="w-10 h-10 text-accent" />;
         case 'daily_challenge':
-            return <Star className="w-10 h-10 text-yellow-500" />;
+            return <Star className="w-10 h-10 text-warning" />;
         default:
             return <Award className="w-10 h-10 text-primary" />;
     }
 };
 
-const getGradientForType = (type: AchievementNotification['type']) => {
+const getBorderForType = (type: AchievementNotification['type']) => {
     switch (type) {
         case 'badge':
-            return 'from-purple-500 to-pink-500';
+            return 'border-primary';
         case 'streak':
-            return 'from-orange-500 to-red-500';
+            return 'border-warning';
         case 'module_complete':
-            return 'from-emerald-500 to-cyan-500';
+            return 'border-accent';
         case 'daily_challenge':
-            return 'from-yellow-500 to-amber-500';
+            return 'border-warning';
         default:
-            return 'from-primary to-purple-500';
+            return 'border-primary';
+    }
+};
+
+const getTitleColorForType = (type: AchievementNotification['type']) => {
+    switch (type) {
+        case 'badge':
+            return 'text-primary';
+        case 'streak':
+            return 'text-warning';
+        case 'module_complete':
+            return 'text-accent';
+        case 'daily_challenge':
+            return 'text-warning';
+        default:
+            return 'text-primary';
     }
 };
 
@@ -57,31 +72,29 @@ export const AchievementToast: React.FC = () => {
                     initial={{ opacity: 0, x: 50, scale: 0.8 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     exit={{ opacity: 0, x: 50, scale: 0.8 }}
-                    className={`fixed bottom-24 right-8 z-50 bg-gradient-to-r ${getGradientForType(currentAchievement.type)} p-1 rounded-xl shadow-2xl`}
+                    className={`fixed bottom-24 right-8 z-50 ui-card border-l-4 ${getBorderForType(currentAchievement.type)} p-5 flex items-center gap-4 min-w-[280px]`}
                     role="alert"
                     aria-live="polite"
                 >
-                    <div className="bg-background rounded-lg p-5 flex items-center gap-4 min-w-[280px]">
-                        <button
-                            onClick={dismissAchievement}
-                            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
-                            aria-label="Dismiss notification"
-                        >
-                            <X className="w-4 h-4" aria-hidden="true" />
-                        </button>
+                    <button
+                        onClick={dismissAchievement}
+                        className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+                        aria-label="Dismiss notification"
+                    >
+                        <X className="w-4 h-4" aria-hidden="true" />
+                    </button>
 
-                        <div className="p-3 bg-muted/50 rounded-full">
-                            {getIconForType(currentAchievement.type)}
-                        </div>
+                    <div className="p-3 bg-muted/50 rounded-full">
+                        {getIconForType(currentAchievement.type)}
+                    </div>
 
-                        <div>
-                            <h3 className={`text-lg font-bold bg-gradient-to-r ${getGradientForType(currentAchievement.type)} bg-clip-text text-transparent`}>
-                                {currentAchievement.title}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                                {currentAchievement.message}
-                            </p>
-                        </div>
+                    <div>
+                        <h3 className={`text-lg font-bold ${getTitleColorForType(currentAchievement.type)}`}>
+                            {currentAchievement.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                            {currentAchievement.message}
+                        </p>
                     </div>
                 </motion.div>
             )}

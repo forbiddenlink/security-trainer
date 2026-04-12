@@ -6,7 +6,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 let supabaseInstance: SupabaseClient<Database> | null = null;
 
-if (supabaseUrl && supabaseAnonKey) {
+if (supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith('http')) {
     supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey);
 } else {
     console.warn(

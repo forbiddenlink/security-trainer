@@ -43,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
         </div>
         <span className="font-semibold text-xl tracking-tight text-foreground flex flex-col leading-none">
           <span>SecTrainer</span>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-[0.18em] opacity-90">
+          <span className="text-caption text-muted-foreground">
             v1.0.0
           </span>
         </span>
@@ -57,33 +57,20 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
             onClick={onNavigate}
             className={({ isActive }) =>
               clsx(
-                "group relative flex h-11 items-center gap-3 rounded-[var(--radius-sm)] px-3.5 text-sm font-medium transition-all duration-200",
+                "group relative flex h-10 items-center gap-3 rounded-[var(--radius-sm)] px-3.5 text-body-sm font-medium transition-colors",
                 isActive
-                  ? "bg-primary/10 text-primary shadow-[var(--shadow-glow)]"
-                  : "text-muted-foreground hover:bg-muted/55 hover:text-foreground",
+                  ? "bg-primary/8 text-primary"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )
             }
           >
             {({ isActive }) => (
               <>
-                <span
-                  className={clsx(
-                    "absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full transition-opacity",
-                    isActive ? "bg-primary opacity-100" : "opacity-0",
-                  )}
-                  aria-hidden="true"
-                />
-                {isActive && (
-                  <div className="absolute inset-0 bg-linear-to-r from-primary/12 to-transparent opacity-70" />
-                )}
                 <item.icon
-                  className={clsx(
-                    "w-4 h-4 transition-transform duration-200",
-                    isActive ? "scale-105" : "group-hover:scale-105",
-                  )}
+                  className="w-4 h-4"
                   aria-hidden="true"
                 />
-                <span className="relative z-10">{item.label}</span>
+                <span>{item.label}</span>
                 {isActive && <span className="sr-only">(current page)</span>}
               </>
             )}
@@ -94,14 +81,14 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
       <div className="m-3 mt-0 ui-card" aria-label="System information">
         <div className="flex justify-between items-center mb-2.5">
           <span className="ui-label">Status</span>
-          <span className="flex h-2 w-2 rounded-full bg-accent animate-pulse" />
+          <span className="flex h-2 w-2 rounded-full bg-accent" />
         </div>
         <p className="text-mono text-muted-foreground tracking-tight">
           Clearance:{" "}
           <span className="text-primary font-semibold">Classified</span>
         </p>
         <div className="mt-2.5 h-1.5 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-primary w-[75%] transition-all duration-500" />
+          <div className="h-full bg-primary transition-all duration-500" style={{ width: '75%' }} />
         </div>
       </div>
     </aside>

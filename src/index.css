@@ -8,14 +8,14 @@
   --font-mono: "IBM Plex Mono", "JetBrains Mono", monospace;
 
   /* Typography Scale (Minor Third 1.2 ratio) */
-  --text-display: 3rem; /* 48px - Page heroes */
-  --text-h1: 2.5rem; /* 40px - Page titles */
-  --text-h2: 2rem; /* 32px - Section headers */
-  --text-h3: 1.5rem; /* 24px - Card titles */
-  --text-h4: 1.25rem; /* 20px - Subsections */
-  --text-body: 1rem; /* 16px - Body text */
-  --text-body-sm: 0.875rem; /* 14px - Secondary text */
-  --text-caption: 0.75rem; /* 12px - Labels, chips */
+  --text-display: 2.5rem; /* 40px - Challenge start only */
+  --text-h1: 2rem; /* 32px - Page titles */
+  --text-h2: 1.5rem; /* 24px - Section headers */
+  --text-h3: 1.25rem; /* 20px - Card titles */
+  --text-h4: 1rem; /* 16px - Subsections */
+  --text-body: 0.9375rem; /* 15px - Body text */
+  --text-body-sm: 0.8125rem; /* 13px - Secondary text */
+  --text-caption: 0.6875rem; /* 11px - Labels, chips */
 
   /* Line Heights */
   --leading-tight: 1.1;
@@ -36,23 +36,22 @@
   --space-16: 64px;
 
   /* Border Radius */
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
-  --shadow-md: 0 4px 12px rgb(15 23 42 / 0.08);
-  --shadow-lg: 0 8px 24px rgb(15 23 42 / 0.1);
-  --shadow-glow:
-    0 0 0 1px rgb(37 99 235 / 0.22), 0 12px 30px rgb(37 99 235 / 0.16);
+  --shadow-sm: 0 1px 3px rgb(15 23 42 / 0.06);
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-glow: none;
 
   /* Timing */
   --duration-fast: 150ms;
-  --duration-normal: 200ms;
-  --duration-slow: 300ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
   --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   /* Primary */
@@ -72,7 +71,7 @@
   --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
   --color-success: #15803d;
-  --color-warning: #d97706;
+  --color-warning: #b45309;
   --color-terminal: #22c55e;
 
   --color-background: #f3f6fb;
@@ -90,17 +89,17 @@
   --color-border: #d8e1ee;
   --color-input: #f7f9fc;
   --color-ring: #1d4ed8;
+  --color-border-subtle: #e8edf5;
 
   color-scheme: light;
 }
 
 .dark {
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.32);
-  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.38);
-  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.46);
-  --shadow-glow:
-    0 0 0 1px rgb(56 189 248 / 0.34), 0 12px 30px rgb(56 189 248 / 0.2);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.3);
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-glow: none;
 
   /* Primary (Cyan) */
   --color-primary: #38bdf8;
@@ -137,6 +136,7 @@
   --color-border: #243247;
   --color-input: #131e2d;
   --color-ring: #38bdf8;
+  --color-border-subtle: #1b2535;
 
   color-scheme: dark;
 }
@@ -252,7 +252,6 @@ h2 {
   .ui-card {
     @apply bg-card text-card-foreground border border-border/70;
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
     padding: var(--space-4);
   }
 
@@ -261,25 +260,20 @@ h2 {
   }
 
   .ui-card-lg {
-    padding: var(--space-8);
+    padding: var(--space-6);
     border-radius: var(--radius-lg);
   }
 
   .ui-card-elevated {
-    box-shadow: var(--shadow-lg);
+    border-color: var(--color-border);
   }
 
   .ui-card-interactive {
-    transition:
-      border-color var(--duration-fast) var(--ease-smooth),
-      box-shadow var(--duration-fast) var(--ease-smooth),
-      transform var(--duration-fast) var(--ease-smooth);
+    transition: border-color var(--duration-fast) linear;
   }
 
   .ui-card-interactive:hover {
     border-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
   }
 
   /* Button System */
@@ -339,10 +333,10 @@ h2 {
   }
 
   .text-h3 {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-size: var(--text-h3);
     font-weight: 600;
-    line-height: var(--leading-snug);
+    line-height: 1.3;
     letter-spacing: -0.005em;
   }
 
@@ -359,8 +353,8 @@ h2 {
 
   .text-caption {
     font-size: var(--text-caption);
-    font-weight: 600;
-    line-height: 1.4;
+    font-weight: 500;
+    line-height: 1.35;
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
@@ -381,11 +375,12 @@ h2 {
 
   /* Stat Value Pattern */
   .ui-stat-value {
-    font-family: var(--font-display);
+    font-family: var(--font-mono);
     font-size: var(--text-h2);
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.1;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Icon Container */
