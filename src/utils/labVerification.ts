@@ -186,6 +186,33 @@ const PATTERNS = {
   OAUTH_SUBTLE_DIGEST: "crypto.subtle.digest",
   OAUTH_CHALLENGE_METHOD: "code_challenge_method",
   OAUTH_S256: "S256",
+
+  // Prototype Pollution patterns
+  PROTO_BLACKLIST_ARRAY: "BLACKLISTED_KEYS",
+  PROTO_DUNDER_PROTO: "__proto__",
+  PROTO_CONSTRUCTOR: "constructor",
+  PROTO_PROTOTYPE: "prototype",
+  PROTO_INCLUDES_CHECK: ".includes(key)",
+  PROTO_CONTINUE: "continue",
+
+  // Subdomain Takeover patterns
+  SUBDOMAIN_CNAME_CHECK: 'type !== "CNAME"',
+  SUBDOMAIN_SERVICE_ACTIVE: "serviceActive",
+  SUBDOMAIN_ENDS_WITH: ".endsWith(",
+  SUBDOMAIN_SOME_CHECK: ".some(",
+  SUBDOMAIN_PUSH: "vulnerableSubdomains.push",
+
+  // WebSocket Security patterns
+  WS_ALLOWED_ORIGINS: "ALLOWED_ORIGINS",
+  WS_ORIGIN_CHECK: "req.headers.origin",
+  WS_CLOSE_4001: "4001",
+  WS_RATE_LIMIT_MAP: "rateLimitMap",
+  WS_MAX_MESSAGES: "MAX_MESSAGES_PER_SECOND",
+  WS_VALID_TOKEN: "isValidToken",
+  WS_CLOSE_4002: "4002",
+  WS_SANITIZE_LT: ".replace(/</g",
+  WS_SANITIZE_GT: ".replace(/>/g",
+  WS_MAX_PAYLOAD: "maxPayload",
 };
 
 /**
@@ -1385,6 +1412,694 @@ export const labVerifiers: Record<string, VerificationFn> = {
       hasSubtleDigest &&
       hasChallengeMethod &&
       hasS256;
+    return { passed, hints };
+  },
+
+  // Prototype Pollution Lab: Fix the merge function
+  "proto-lab": (code: string) => {
+    const hints: string[] = [];
+    const hasBlacklist = code.includes(PATTERNS.PROTO_BLACKLIST_ARRAY);
+    const hasProto = code.includes(PATTERNS.PROTO_DUNDER_PROTO);
+    const hasConstructor =
+      code.includes(`'${PATTERNS.PROTO_CONSTRUCTOR}'`) ||
+      code.includes(`"${PATTERNS.PROTO_CONSTRUCTOR}"`);
+    const hasPrototype =
+      code.includes(`'${PATTERNS.PROTO_PROTOTYPE}'`) ||
+      code.includes(`"${PATTERNS.PROTO_PROTOTYPE}"`);
+    const hasIncludesCheck = code.includes(PATTERNS.PROTO_INCLUDES_CHECK);
+    const hasContinue = code.includes(PATTERNS.PROTO_CONTINUE);
+
+    if (!hasBlacklist)
+      hints.push(
+        "Define a BLACKLISTED_KEYS array containing the dangerous key names",
+      );
+    if (!hasProto)
+      hints.push("Include '__proto__' in the blacklisted keys");
+    if (!hasConstructor)
+      hints.push("Include 'constructor' in the blacklisted keys");
+    if (!hasPrototype)
+      hints.push("Include 'prototype' in the blacklisted keys");
+    if (!hasIncludesCheck)
+      hints.push(
+        "Use .includes(key) to check if the current key is in the blacklist",
+      );
+    if (!hasContinue)
+      hints.push("Use 'continue' to skip blacklisted keys in the loop");
+
+    const passed =
+      hasBlacklist &&
+      hasProto &&
+      hasConstructor &&
+      hasPrototype &&
+      hasIncludesCheck &&
+      hasContinue;
+    return { passed, hints };
+  },
+
+  // Subdomain Takeover Lab: DNS configuration audit
+  "subdomain-lab": (code: string) => {
+    const hints: string[] = [];
+    const hasCnameCheck = code.includes(PATTERNS.SUBDOMAIN_CNAME_CHECK);
+    const hasServiceCheck = code.includes(PATTERNS.SUBDOMAIN_SERVICE_ACTIVE);
+    const hasEndsWith = code.includes(PATTERNS.SUBDOMAIN_ENDS_WITH);
+    const hasSomeCheck = code.includes(PATTERNS.SUBDOMAIN_SOME_CHECK);
+    const hasPush = code.includes(PATTERNS.SUBDOMAIN_PUSH);
+
+    if (!hasCnameCheck)
+      hints.push('Filter records to only check CNAME type entries');
+    if (!hasServiceCheck)
+      hints.push(
+        "Check the serviceActive flag to identify deprovisioned services",
+      );
+    if (!hasSomeCheck)
+      hints.push(
+        "Use .some() to check if the target matches any vulnerable service",
+      );
+    if (!hasEndsWith)
+      hints.push(
+        "Use .endsWith() to match target domains against vulnerable services",
+      );
+    if (!hasPush)
+      hints.push(
+        "Push vulnerable subdomains to the results array with subdomain, target, and risk info",
+      );
+
+    const passed =
+      hasCnameCheck && hasServiceCheck && hasEndsWith && hasSomeCheck && hasPush;
+    return { passed, hints };
+  },
+
+  // WebSocket Security Lab: Secure the WebSocket server
+  "ws-lab": (code: string) => {
+    const hints: string[] = [];
+    const hasAllowedOrigins = code.includes(PATTERNS.WS_ALLOWED_ORIGINS);
+    const hasOriginCheck = code.includes(PATTERNS.WS_ORIGIN_CHECK);
+    const hasClose4001 = code.includes(PATTERNS.WS_CLOSE_4001);
+    const hasRateLimitMap = code.includes(PATTERNS.WS_RATE_LIMIT_MAP);
+    const hasMaxMessages = code.includes(PATTERNS.WS_MAX_MESSAGES);
+    const hasValidToken = code.includes(PATTERNS.WS_VALID_TOKEN);
+    const hasClose4002 = code.includes(PATTERNS.WS_CLOSE_4002);
+    const hasSanitizeLt = code.includes(PATTERNS.WS_SANITIZE_LT);
+    const hasSanitizeGt = code.includes(PATTERNS.WS_SANITIZE_GT);
+    const hasMaxPayload = code.includes(PATTERNS.WS_MAX_PAYLOAD);
+
+    if (!hasAllowedOrigins)
+      hints.push("Define an ALLOWED_ORIGINS array with trusted origins");
+    if (!hasOriginCheck)
+      hints.push(
+        "Check req.headers.origin during the connection handshake",
+      );
+    if (!hasClose4001)
+      hints.push(
+        "Close connections from unauthorized origins with code 4001",
+      );
+    if (!hasRateLimitMap)
+      hints.push("Create a rateLimitMap to track message rates per client");
+    if (!hasMaxMessages)
+      hints.push(
+        "Define MAX_MESSAGES_PER_SECOND to cap message frequency",
+      );
+    if (!hasValidToken)
+      hints.push(
+        "Add an isValidToken function to validate authentication tokens",
+      );
+    if (!hasClose4002)
+      hints.push("Close connections with invalid tokens using code 4002");
+    if (!hasSanitizeLt || !hasSanitizeGt)
+      hints.push(
+        "Sanitize message text by replacing < and > with HTML entities",
+      );
+    if (!hasMaxPayload)
+      hints.push("Set maxPayload on WebSocket.Server to limit message size");
+
+    const passed =
+      hasAllowedOrigins &&
+      hasOriginCheck &&
+      hasClose4001 &&
+      hasRateLimitMap &&
+      hasMaxMessages &&
+      hasValidToken &&
+      hasClose4002 &&
+      hasSanitizeLt &&
+      hasSanitizeGt &&
+      hasMaxPayload;
+    return { passed, hints };
+  },
+  // Incident Response Simulation Lab
+  "ir-simulation-lab": (code: string): VerificationResult => {
+    const hints: string[] = [];
+    const lower = code.toLowerCase();
+
+    const hasClassification = lower.includes("p1") && (lower.includes("critical") || lower.includes("exfiltration"));
+    if (!hasClassification) hints.push("Classify this as P1 Critical — active data exfiltration with PII is confirmed.");
+
+    const hasNetworkIsolation = lower.includes("isolat") && (lower.includes("network") || lower.includes("firewall") || lower.includes("quarantine"));
+    if (!hasNetworkIsolation) hints.push("Containment should include isolating the compromised server from the network.");
+
+    const hasBlockC2 = lower.includes("block") && (lower.includes("198.51.100.77") || lower.includes("203.0.113.50") || lower.includes("c2"));
+    if (!hasBlockC2) hints.push("Block the attacker's C2 and source IP addresses at the perimeter.");
+
+    const hasAccountAction = lower.includes("disable") || lower.includes("lock") || (lower.includes("deploy-svc") && lower.includes("account"));
+    if (!hasAccountAction) hints.push("Disable the compromised 'deploy-svc' account.");
+
+    const hasEvidence = lower.includes("forensic") || lower.includes("evidence") || lower.includes("image") || lower.includes("chain of custody");
+    if (!hasEvidence) hints.push("Preserve forensic evidence (memory dump, disk image) before remediation.");
+
+    const hasCredRotation = lower.includes("rotat") && (lower.includes("credential") || lower.includes("password") || lower.includes("key"));
+    if (!hasCredRotation) hints.push("Eradication should include rotating all credentials, not just the compromised account.");
+
+    const hasBackdoorCheck = lower.includes("backdoor") || lower.includes("cron") || lower.includes("authorized_keys") || lower.includes("persistence");
+    if (!hasBackdoorCheck) hints.push("Check for additional persistence mechanisms (cron jobs, SSH keys, backdoors).");
+
+    const hasNotification = lower.includes("gdpr") || lower.includes("notification") || lower.includes("regulat") || lower.includes("breach notification");
+    if (!hasNotification) hints.push("2.3M PII records were exfiltrated — include regulatory notification requirements (GDPR 72hrs, state breach laws).");
+
+    const passed =
+      hasClassification &&
+      hasNetworkIsolation &&
+      hasBlockC2 &&
+      hasAccountAction &&
+      hasEvidence &&
+      hasCredRotation &&
+      hasBackdoorCheck &&
+      hasNotification;
+    return { passed, hints };
+  },
+
+  // Cloud Configuration Audit Lab
+  "cloud-config-audit-lab": (code: string): VerificationResult => {
+    const hints: string[] = [];
+    const lower = code.toLowerCase();
+
+    const hasPublicAccessBlock = code.includes("blockPublicAcls: true") || code.includes("blockPublicAcls:true") || (lower.includes("blockpublicacls") && lower.includes("true"));
+    if (!hasPublicAccessBlock) hints.push("Enable S3 public access blocks (blockPublicAcls, ignorePublicAcls, blockPublicPolicy, restrictPublicBuckets).");
+
+    const hasRestrictedPrincipal = code.includes("arn:aws:iam") || code.includes("role/") || !code.includes('Principal: "*"');
+    if (!hasRestrictedPrincipal) hints.push("Restrict the S3 bucket policy Principal from '*' (public) to a specific IAM role.");
+
+    const hasRestrictedActions = !code.includes('"s3:*"') && !code.includes("'s3:*'") && !code.includes('Action: "*"') && !code.includes("Action: '*'");
+    if (!hasRestrictedActions) hints.push("Replace wildcard actions (s3:*, *) with specific actions like s3:GetObject, s3:PutObject.");
+
+    const hasEncryption = lower.includes("encryption") && (lower.includes("true") || lower.includes("kms") || lower.includes("sse"));
+    if (!hasEncryption) hints.push("Enable server-side encryption on the S3 bucket.");
+
+    const hasSSHRestricted = !code.includes('port: 22, source: "0.0.0.0/0"') && !code.includes("port: 22, source: '0.0.0.0/0'");
+    if (!hasSSHRestricted) hints.push("SSH (port 22) should not be open to 0.0.0.0/0 — restrict to bastion host or VPN.");
+
+    const hasMySQLRestricted = !code.includes('port: 3306, source: "0.0.0.0/0"') && !code.includes("port: 3306, source: '0.0.0.0/0'");
+    if (!hasMySQLRestricted) hints.push("MySQL (port 3306) must not be open to the internet — restrict to application subnet.");
+
+    const hasNoAllowAll = !code.includes('protocol: "-1"') || lower.includes("removed") || lower.includes("// fix");
+    if (!hasNoAllowAll) hints.push("Remove the allow-all inbound rule (protocol -1, all ports, 0.0.0.0/0).");
+
+    const passed =
+      hasPublicAccessBlock &&
+      hasRestrictedPrincipal &&
+      hasRestrictedActions &&
+      hasEncryption &&
+      hasSSHRestricted &&
+      hasMySQLRestricted &&
+      hasNoAllowAll;
+    return { passed, hints };
+  },
+
+  // Phishing Awareness - Email Triage Exercise
+  "phishing-lab-triage": (code: string): VerificationResult => {
+    const hints: string[] = [];
+
+    const hasSuspiciousDomain = code.includes("suspiciousSenderDomain: true");
+    if (!hasSuspiciousDomain) hints.push("The sender domain 'your-company-ithelp.net' is not the real company domain — flag suspiciousSenderDomain.");
+
+    const hasMismatchedReply = code.includes("mismatchedReplyTo: true");
+    if (!hasMismatchedReply) hints.push("The reply-to address goes to a Gmail account, not the sender — flag mismatchedReplyTo.");
+
+    const hasUrgency = code.includes("urgencyTactics: true");
+    if (!hasUrgency) hints.push("The subject says 'URGENT' and '24 Hours' — flag urgencyTactics.");
+
+    const hasSuspiciousLink = code.includes("suspiciousLink: true");
+    if (!hasSuspiciousLink) hints.push("The link uses HTTP (not HTTPS) and a .tk domain — flag suspiciousLink.");
+
+    const hasGenericGreeting = code.includes("genericGreeting: true");
+    if (!hasGenericGreeting) hints.push("'Dear Employee' is generic, not personalized — flag genericGreeting.");
+
+    const hasThreat = code.includes("threatOfConsequences: true");
+    if (!hasThreat) hints.push("'permanently suspended and all data will be lost' is a fear tactic — flag threatOfConsequences.");
+
+    const hasDangerousAttachment = code.includes("dangerousAttachment: true");
+    if (!hasDangerousAttachment) hints.push("An .html attachment can contain a local phishing form — flag dangerousAttachment.");
+
+    const hasBroadDist = code.includes("broadDistribution: true");
+    if (!hasBroadDist) hints.push("Sent to 'all-staff' rather than you specifically — flag broadDistribution.");
+
+    const passed =
+      hasSuspiciousDomain &&
+      hasMismatchedReply &&
+      hasUrgency &&
+      hasSuspiciousLink &&
+      hasGenericGreeting &&
+      hasThreat &&
+      hasDangerousAttachment &&
+      hasBroadDist;
+    return { passed, hints };
+  },
+
+  // Password & Data Hygiene - Security Policy Review
+  "password-lab-policy": (code: string): VerificationResult => {
+    const hints: string[] = [];
+
+    const hasPasswordShort = code.includes("passwordTooShort: true");
+    if (!hasPasswordShort) hints.push("Minimum 6 characters is far too short — industry standard is 12+. Flag passwordTooShort.");
+
+    const hasNoComplexity = code.includes("noComplexityRequirements: true");
+    if (!hasNoComplexity) hints.push("No uppercase, numbers, or special character requirements — flag noComplexityRequirements.");
+
+    const hasExpiryLong = code.includes("passwordExpiryTooLong: true");
+    if (!hasExpiryLong) hints.push("365-day password expiry with no other protections is too long — flag passwordExpiryTooLong.");
+
+    const hasNoReuse = code.includes("noReuseProtection: true");
+    if (!hasNoReuse) hints.push("Zero previous passwords blocked means users can reuse forever — flag noReuseProtection.");
+
+    const hasUnencrypted = code.includes("sensitiveDataUnencrypted: true");
+    if (!hasUnencrypted) hints.push("Sensitive files must be encrypted — flag sensitiveDataUnencrypted.");
+
+    const hasUSB = code.includes("usbDrivesUnrestricted: true");
+    if (!hasUSB) hints.push("Unrestricted personal USB drives can introduce malware — flag usbDrivesUnrestricted.");
+
+    const hasCloud = code.includes("personalCloudAllowed: true");
+    if (!hasCloud) hints.push("Work data on personal cloud storage is a breach risk — flag personalCloudAllowed.");
+
+    const hasVPN = code.includes("noVPNRequirement: true");
+    if (!hasVPN) hints.push("No VPN on public WiFi exposes all traffic — flag noVPNRequirement.");
+
+    const hasMFA = code.includes("mfaNotRequired: true");
+    if (!hasMFA) hints.push("MFA should be mandatory, not optional — flag mfaNotRequired.");
+
+    const hasScreenLock = code.includes("noScreenLock: true");
+    if (!hasScreenLock) hints.push("'Never' auto-lock means unattended machines are exposed — flag noScreenLock.");
+
+    const hasSharedPW = code.includes("sharedPasswords: true");
+    if (!hasSharedPW) hints.push("Shared passwords destroy accountability — flag sharedPasswords.");
+
+    const hasWifi = code.includes("wifiNotSegmented: true");
+    if (!hasWifi) hints.push("Guest and corporate WiFi should be separated — flag wifiNotSegmented.");
+
+    const hasShred = code.includes("noDocumentShredding: true");
+    if (!hasShred) hints.push("Documents with sensitive data must be shredded — flag noDocumentShredding.");
+
+    const passed =
+      hasPasswordShort &&
+      hasNoComplexity &&
+      hasExpiryLong &&
+      hasNoReuse &&
+      hasUnencrypted &&
+      hasUSB &&
+      hasCloud &&
+      hasVPN &&
+      hasMFA &&
+      hasScreenLock &&
+      hasSharedPW &&
+      hasWifi &&
+      hasShred;
+    return { passed, hints };
+  },
+
+  // Safe Browsing & Remote Work - Workspace Security Audit
+  "remote-lab-audit": (code: string): VerificationResult => {
+    const hints: string[] = [];
+
+    const hasRouterPW = code.includes("defaultRouterPassword: true");
+    if (!hasRouterPW) hints.push("'admin' is the default router password — flag defaultRouterPassword.");
+
+    const hasWeakWifi = code.includes("weakWifiPassword: true");
+    if (!hasWeakWifi) hints.push("Using a home address as WiFi password is easily guessable — flag weakWifiPassword.");
+
+    const hasDefaultSSID = code.includes("defaultNetworkName: true");
+    if (!hasDefaultSSID) hints.push("Default SSID reveals the router model — flag defaultNetworkName.");
+
+    const hasNoSegment = code.includes("noNetworkSegmentation: true");
+    if (!hasNoSegment) hints.push("No separate guest network means all devices share access — flag noNetworkSegmentation.");
+
+    const hasIoT = code.includes("iotOnWorkNetwork: true");
+    if (!hasIoT) hints.push("IoT devices on the work network are potential entry points — flag iotOnWorkNetwork.");
+
+    const hasScreenVisible = code.includes("screenVisibleFromOutside: true");
+    if (!hasScreenVisible) hints.push("Desk by a street-facing window exposes screen content — flag screenVisibleFromOutside.");
+
+    const hasNoPrivacy = code.includes("noPrivacyFilter: true");
+    if (!hasNoPrivacy) hints.push("No privacy filter on a window-facing screen — flag noPrivacyFilter.");
+
+    const hasNoAutoLock = code.includes("noAutoLock: true");
+    if (!hasNoAutoLock) hints.push("No auto-lock leaves the machine accessible — flag noAutoLock.");
+
+    const hasDocs = code.includes("documentsExposed: true");
+    if (!hasDocs) hints.push("Printed client reports on the desk are visible to visitors — flag documentsExposed.");
+
+    const hasWebcam = code.includes("noWebcamCover: true");
+    if (!hasWebcam) hints.push("Uncovered webcam can be activated by malware — flag noWebcamCover.");
+
+    const hasSharedPC = code.includes("sharedComputerNoSeparation: true");
+    if (!hasSharedPC) hints.push("Shared computer with no separate work account — flag sharedComputerNoSeparation.");
+
+    const hasSharedBrowser = code.includes("passwordsInSharedBrowser: true");
+    if (!hasSharedBrowser) hints.push("Saved passwords in a shared browser profile — flag passwordsInSharedBrowser.");
+
+    const hasUSBData = code.includes("workDataOnPersonalUSB: true");
+    if (!hasUSBData) hints.push("Work files on personal USB can be lost or stolen — flag workDataOnPersonalUSB.");
+
+    const hasPersonalApps = code.includes("personalAppsOnWorkDevice: true");
+    if (!hasPersonalApps) hints.push("Personal apps increase the attack surface — flag personalAppsOnWorkDevice.");
+
+    const hasVPN = code.includes("inconsistentVPN: true");
+    if (!hasVPN) hints.push("VPN should always be on outside the office — flag inconsistentVPN.");
+
+    const hasPublicWifi = code.includes("publicWifiForWork: true");
+    if (!hasPublicWifi) hints.push("Public WiFi for work without reliable VPN — flag publicWifiForWork.");
+
+    const hasAutoConnect = code.includes("autoConnectEnabled: true");
+    if (!hasAutoConnect) hints.push("Auto-connect can join rogue 'evil twin' networks — flag autoConnectEnabled.");
+
+    const hasBluetooth = code.includes("bluetoothAlwaysOn: true");
+    if (!hasBluetooth) hints.push("Bluetooth always on enables proximity attacks — flag bluetoothAlwaysOn.");
+
+    const passed =
+      hasRouterPW &&
+      hasWeakWifi &&
+      hasDefaultSSID &&
+      hasNoSegment &&
+      hasIoT &&
+      hasScreenVisible &&
+      hasNoPrivacy &&
+      hasNoAutoLock &&
+      hasDocs &&
+      hasWebcam &&
+      hasSharedPC &&
+      hasSharedBrowser &&
+      hasUSBData &&
+      hasPersonalApps &&
+      hasVPN &&
+      hasPublicWifi &&
+      hasAutoConnect &&
+      hasBluetooth;
+    return { passed, hints };
+  },
+
+  // GDPR Fundamentals - Privacy Policy Audit
+  "gdpr-lab-privacy-audit": (code: string): VerificationResult => {
+    const lower = code.toLowerCase();
+    const hints: string[] = [];
+
+    // All six sections should be marked as compliant: false
+    const sections = [
+      "dataCollection",
+      "consent",
+      "dataRetention",
+      "thirdPartySharing",
+      "userRights",
+      "consentWithdrawal",
+    ];
+
+    let allMarkedNonCompliant = true;
+    for (const section of sections) {
+      // Check that the section has compliant: false
+      const sectionPattern = new RegExp(
+        `${section}[\\s\\S]*?compliant\\s*:\\s*false`,
+      );
+      if (!sectionPattern.test(code)) {
+        allMarkedNonCompliant = false;
+        hints.push(
+          `Mark the "${section}" section as compliant: false — it contains a GDPR violation.`,
+        );
+      }
+    }
+
+    // Check that violations include meaningful descriptions
+    const hasViolationDescriptions =
+      (code.match(/violation\s*:\s*["'`][^"'`]{10,}/g) || []).length >= 4;
+    if (!hasViolationDescriptions)
+      hints.push(
+        "Add meaningful violation descriptions explaining which GDPR article or principle is violated.",
+      );
+
+    // Check for key GDPR concepts in violation descriptions
+    const hasMinimization =
+      lower.includes("minimization") || lower.includes("minimis");
+    if (!hasMinimization)
+      hints.push(
+        "Identify the data minimization violation in the data collection section.",
+      );
+
+    const hasConsentIssue =
+      lower.includes("affirmative") ||
+      lower.includes("freely given") ||
+      lower.includes("implied consent") ||
+      lower.includes("specific");
+    if (!hasConsentIssue)
+      hints.push(
+        "Explain why implied consent through website usage is not valid under GDPR.",
+      );
+
+    const hasRetentionIssue =
+      lower.includes("storage limitation") ||
+      lower.includes("indefinite") ||
+      lower.includes("retention");
+    if (!hasRetentionIssue)
+      hints.push(
+        "Address the storage limitation principle violation in the data retention section.",
+      );
+
+    const passed =
+      allMarkedNonCompliant && hasViolationDescriptions && hasMinimization && hasConsentIssue && hasRetentionIssue;
+    return { passed, hints };
+  },
+
+  // PCI-DSS Essentials - Payment Flow Security Review
+  "pci-lab-payment-flow": (code: string): VerificationResult => {
+    const lower = code.toLowerCase();
+    const hints: string[] = [];
+
+    // Should use tokenization instead of raw card data
+    const hasToken =
+      lower.includes("token") || lower.includes("paymenttoken") || lower.includes("payment_token");
+    if (!hasToken)
+      hints.push(
+        "Use tokenization (e.g., Stripe tokens) instead of handling raw card numbers server-side.",
+      );
+
+    // Should NOT log full card numbers or CVV
+    const logsCardData =
+      /console\.log.*card(number|Number)/.test(code) ||
+      /console\.log.*cvv/i.test(code);
+    if (logsCardData)
+      hints.push(
+        "Remove card numbers and CVV from log statements -- never log sensitive cardholder data.",
+      );
+
+    // Should NOT store CVV after authorization
+    const storesCvv =
+      /insert\s*\([\s\S]*?cvv/i.test(code) ||
+      /db\..*cvv/i.test(code);
+    if (storesCvv)
+      hints.push(
+        "Never store CVV/CVC after authorization -- this is strictly prohibited by PCI-DSS Requirement 3.",
+      );
+
+    // Should NOT store full PAN
+    const storesFullPan =
+      /insert\s*\([\s\S]*?cardNumber\s*:\s*cardNumber/i.test(code);
+    if (storesFullPan)
+      hints.push(
+        "Do not store the full PAN. Store only the last 4 digits or a token reference.",
+      );
+
+    // Should NOT send card data in analytics
+    const analyticsCardData =
+      /analytics.*cardNumber/i.test(code) ||
+      /track.*cardNumber/i.test(code);
+    if (analyticsCardData)
+      hints.push(
+        "Remove card data from analytics tracking -- only track transaction metadata.",
+      );
+
+    // Should NOT return card data in response
+    const responseCardData =
+      /res\.json\s*\([\s\S]*?cardNumber/i.test(code);
+    if (responseCardData)
+      hints.push(
+        "Do not return card data in API responses -- only return transaction ID and masked info.",
+      );
+
+    // Should reference last4 or masked card
+    const hasMasking =
+      lower.includes("last4") ||
+      lower.includes("last_four") ||
+      lower.includes("lastfour") ||
+      lower.includes("mask") ||
+      lower.includes("****");
+    if (!hasMasking)
+      hints.push(
+        "Use masked card data (last 4 digits) when displaying or storing card references.",
+      );
+
+    const passed =
+      hasToken &&
+      !logsCardData &&
+      !storesCvv &&
+      !storesFullPan &&
+      !analyticsCardData &&
+      !responseCardData &&
+      hasMasking;
+    return { passed, hints };
+  },
+
+  // HIPAA Basics - HIPAA Violation Finder
+  "hipaa-lab-violation-finder": (code: string): VerificationResult => {
+    const lower = code.toLowerCase();
+    const hints: string[] = [];
+
+    // Should have authentication middleware
+    const hasAuth =
+      lower.includes("requireauth") ||
+      lower.includes("authenticate") ||
+      lower.includes("verifysession") ||
+      lower.includes("authorization");
+    if (!hasAuth)
+      hints.push(
+        "Add authentication/authorization middleware -- all PHI endpoints must verify user identity.",
+      );
+
+    // Should have audit logging
+    const hasAuditLog =
+      lower.includes("auditlog") ||
+      lower.includes("audit_log") ||
+      lower.includes("audit") && lower.includes("log");
+    if (!hasAuditLog)
+      hints.push(
+        "Add audit logging for all PHI access -- HIPAA requires tracking who accessed what and when.",
+      );
+
+    // Should NOT log PHI (SSN, diagnosis, etc.)
+    const logsPhi =
+      /console\.log.*ssn/i.test(code) ||
+      /console\.log.*diagnosis/i.test(code) ||
+      /console\.log.*patient.*\$\{/i.test(code);
+    if (logsPhi)
+      hints.push(
+        "Remove PHI (SSN, diagnosis, patient IDs) from console.log statements.",
+      );
+
+    // Should have encryption for PHI at rest
+    const hasEncryption =
+      lower.includes("encrypt") || lower.includes("crypto");
+    if (!hasEncryption)
+      hints.push(
+        "Encrypt PHI at rest -- use encryption for sensitive fields like diagnosis and notes.",
+      );
+
+    // Should implement minimum necessary principle
+    const hasMinimumNecessary =
+      lower.includes("minimum necessary") ||
+      lower.includes("select: fields") ||
+      lower.includes("getfieldsbyrole") ||
+      lower.includes("select:");
+    if (!hasMinimumNecessary)
+      hints.push(
+        "Implement the minimum necessary principle -- only return fields needed for the user's role.",
+      );
+
+    // Should restrict bulk export
+    const hasBulkRestriction =
+      /export.*role|role.*export|admin.*export|export.*admin/i.test(code) ||
+      lower.includes("403") ||
+      lower.includes("access denied");
+    if (!hasBulkRestriction)
+      hints.push(
+        "Restrict bulk patient data exports to authorized roles only.",
+      );
+
+    const passed =
+      hasAuth &&
+      hasAuditLog &&
+      !logsPhi &&
+      hasEncryption &&
+      hasMinimumNecessary &&
+      hasBulkRestriction;
+    return { passed, hints };
+  },
+
+  // SOC 2 Awareness - Control Gap Assessment
+  "soc2-lab-gap-assessment": (code: string): VerificationResult => {
+    const lower = code.toLowerCase();
+    const hints: string[] = [];
+
+    const categories = [
+      "security",
+      "availability",
+      "processingintegrity",
+      "confidentiality",
+      "privacy",
+    ];
+
+    // All 5 categories should be marked as hasGap: true
+    let allMarkedAsGap = true;
+    for (const cat of categories) {
+      const pattern = new RegExp(
+        `${cat}[\\s\\S]*?hasGap\\s*:\\s*true`,
+        "i",
+      );
+      if (!pattern.test(code)) {
+        allMarkedAsGap = false;
+        hints.push(
+          `Mark the "${cat}" category as hasGap: true -- all categories have gaps given the missing controls.`,
+        );
+      }
+    }
+
+    // Should list existing controls
+    const hasExistingControls =
+      (code.match(/existingControls\s*:\s*["'`][^"'`]{10,}/g) || []).length >= 3;
+    if (!hasExistingControls)
+      hints.push(
+        "List the existing controls that apply to each category from the inventory.",
+      );
+
+    // Should list missing controls
+    const hasMissingControls =
+      (code.match(/missingControls\s*:\s*["'`][^"'`]{10,}/g) || []).length >= 3;
+    if (!hasMissingControls)
+      hints.push(
+        "Identify the missing controls relevant to each category.",
+      );
+
+    // Should assign risk levels
+    const hasRiskLevels =
+      (code.match(/riskLevel\s*:\s*["'`](low|medium|high|critical)["'`]/gi) || []).length >= 4;
+    if (!hasRiskLevels)
+      hints.push(
+        "Assign a riskLevel (low, medium, high, or critical) to each category.",
+      );
+
+    // Check for key concepts
+    const hasIncidentResponse =
+      lower.includes("incident response");
+    if (!hasIncidentResponse)
+      hints.push(
+        "The missing incident response plan is a key security gap -- mention it.",
+      );
+
+    const hasDisasterRecovery =
+      lower.includes("disaster recovery") || lower.includes("business continuity");
+    if (!hasDisasterRecovery)
+      hints.push(
+        "The missing disaster recovery/business continuity plan is a critical availability gap.",
+      );
+
+    const passed =
+      allMarkedAsGap &&
+      hasExistingControls &&
+      hasMissingControls &&
+      hasRiskLevels &&
+      hasIncidentResponse &&
+      hasDisasterRecovery;
     return { passed, hints };
   },
 };

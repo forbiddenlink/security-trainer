@@ -67,6 +67,56 @@ export const LEARNING_PATHS: LearningPath[] = [
     icon: "Target",
     requiredCompletions: 8,
   },
+  {
+    id: "security-everyone",
+    title: "Security for Everyone",
+    codename: "Operation Awareness",
+    description:
+      "Essential security awareness for all staff. Covers phishing, passwords, data handling, incident reporting, and safe remote work practices.",
+    difficulty: "Beginner",
+    modules: [
+      "phishing-awareness",
+      "password-data-hygiene",
+      "incident-reporting",
+      "safe-browsing-remote",
+    ],
+    certificateXp: 300,
+    icon: "Users",
+  },
+  {
+    id: "compliance-essentials",
+    title: "Compliance & Regulatory",
+    codename: "Operation Clearance",
+    description:
+      "Navigate regulatory requirements with confidence. Covers GDPR, PCI-DSS, SOC 2, and HIPAA fundamentals for technical and non-technical teams.",
+    difficulty: "Intermediate",
+    modules: [
+      "gdpr-fundamentals",
+      "pci-dss-essentials",
+      "soc2-awareness",
+      "hipaa-basics",
+    ],
+    certificateXp: 600,
+    icon: "FileCheck",
+    requiredCompletions: 2,
+  },
+  {
+    id: "cloud-infrastructure",
+    title: "Cloud & Infrastructure Security",
+    codename: "Operation Skyline",
+    description:
+      "Secure modern cloud deployments and respond to incidents. Covers cloud security fundamentals, incident response, and container security.",
+    difficulty: "Advanced",
+    modules: [
+      "cloud-security",
+      "incident-response",
+      "container-security",
+      "supply-chain-security",
+    ],
+    certificateXp: 800,
+    icon: "Cloud",
+    requiredCompletions: 5,
+  },
 ];
 
 export const getPathById = (id: string): LearningPath | undefined =>

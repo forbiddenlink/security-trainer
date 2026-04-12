@@ -6,6 +6,7 @@ export interface Module {
   xpReward: number;
   lessons: Lesson[];
   locked: boolean;
+  category?: 'web-security' | 'api-backend' | 'advanced' | 'awareness' | 'compliance' | 'infrastructure';
 }
 
 export interface Lesson {
@@ -58,6 +59,8 @@ export interface UserState {
   // CTF Challenges
   ctfProgress: Record<string, CTFProgressState>;
   ctfTotalPoints: number;
+  // Onboarding
+  userRole: string | null;
 }
 
 export interface CTFProgressState {

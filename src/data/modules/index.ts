@@ -29,6 +29,19 @@ import { supplyChainSecurity } from "./supply-chain-security";
 import { containerSecurity } from "./container-security";
 import { socialEngineering } from "./social-engineering";
 import { oauthSecurity } from "./oauth-security";
+import { prototypePollution } from "./prototype-pollution";
+import { subdomainTakeover } from "./subdomain-takeover";
+import { websocketSecurity } from "./websocket-security";
+import { incidentResponse } from "./incident-response";
+import { cloudSecurity } from "./cloud-security";
+import { gdprFundamentals } from "./gdpr-fundamentals";
+import { pciDssEssentials } from "./pci-dss-essentials";
+import { soc2Awareness } from "./soc2-awareness";
+import { hipaaBasics } from "./hipaa-basics";
+import { phishingAwareness } from "./phishing-awareness";
+import { passwordDataHygiene } from "./password-data-hygiene";
+import { incidentReporting } from "./incident-reporting";
+import { safeBrowsingRemote } from "./safe-browsing-remote";
 
 export const MODULES: Module[] = [
   owaspIntro,
@@ -60,6 +73,19 @@ export const MODULES: Module[] = [
   containerSecurity,
   socialEngineering,
   oauthSecurity,
+  prototypePollution,
+  subdomainTakeover,
+  websocketSecurity,
+  incidentResponse,
+  cloudSecurity,
+  gdprFundamentals,
+  pciDssEssentials,
+  soc2Awareness,
+  hipaaBasics,
+  phishingAwareness,
+  passwordDataHygiene,
+  incidentReporting,
+  safeBrowsingRemote,
 ];
 
 // Re-export individual modules for direct imports
@@ -93,4 +119,17 @@ export {
   containerSecurity,
   socialEngineering,
   oauthSecurity,
+  prototypePollution,
+  subdomainTakeover,
+  websocketSecurity,
+  incidentResponse,
+  cloudSecurity,
+  gdprFundamentals,
+  pciDssEssentials,
+  soc2Awareness,
+  hipaaBasics,
+  phishingAwareness,
+  passwordDataHygiene,
+  incidentReporting,
+  safeBrowsingRemote,
 };
