@@ -1,0 +1,215 @@
+- generic [ref=e5]:
+  - complementary "Main navigation" [ref=e7]:
+    - generic [ref=e8]:
+      - img [ref=e10]
+      - generic [ref=e13]:
+        - generic [ref=e14]: SecTrainer
+        - generic [ref=e15]: v1.0.0
+    - navigation "Primary" [ref=e16]:
+      - link "Dashboard" [ref=e17] [cursor=pointer]:
+        - /url: /
+        - img [ref=e18]
+        - generic [ref=e23]: Dashboard
+      - link "Modules (current page)" [ref=e24] [cursor=pointer]:
+        - /url: /modules
+        - img [ref=e25]
+        - generic [ref=e27]: Modules
+        - generic [ref=e28]: (current page)
+      - link "Paths" [ref=e29] [cursor=pointer]:
+        - /url: /paths
+        - img [ref=e30]
+        - generic [ref=e33]: Paths
+      - link "CTF Challenges" [ref=e34] [cursor=pointer]:
+        - /url: /ctf
+        - img [ref=e35]
+        - generic [ref=e37]: CTF Challenges
+      - link "Leaderboard" [ref=e38] [cursor=pointer]:
+        - /url: /leaderboard
+        - img [ref=e39]
+        - generic [ref=e45]: Leaderboard
+      - link "Profile" [ref=e46] [cursor=pointer]:
+        - /url: /profile
+        - img [ref=e47]
+        - generic [ref=e50]: Profile
+      - link "Final Exam" [ref=e51] [cursor=pointer]:
+        - /url: /challenge
+        - img [ref=e52]
+        - generic [ref=e54]: Final Exam
+    - generic "System information" [ref=e55]:
+      - generic [ref=e57]: Status
+      - paragraph [ref=e59]: "Clearance: Classified"
+  - generic [ref=e62]:
+    - banner [ref=e63]:
+      - heading "Mission Control" [level=1] [ref=e65]
+      - generic "User stats" [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - img [ref=e69]
+            - generic [ref=e75]: Level 1
+            - generic [ref=e76]: "|"
+            - generic [ref=e77]: 0 XP
+          - progressbar "0 of 1000 XP to next level" [ref=e78]
+          - generic [ref=e79]: 0 / 1000 XP
+          - generic [ref=e80]: 0 of 1000 XP to next level
+        - generic "1-day streak! +10% XP bonus" [ref=e81]:
+          - img [ref=e83]
+          - generic [ref=e85]: "1"
+          - generic [ref=e86]: +10%
+          - generic [ref=e87]: 1-day streak with 10% XP bonus
+        - button "System preference. Click to switch to light mode." [ref=e88]:
+          - img [ref=e90]
+        - img "User avatar" [ref=e92]
+    - main [ref=e93]:
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - heading "Active Operations" [level=1] [ref=e97]
+          - paragraph [ref=e98]: Select a mission to upgrade your security clearance level.
+        - generic [ref=e99]:
+          - button "All 42" [ref=e100]:
+            - text: All
+            - generic [ref=e101]: "42"
+          - button "Web Security 12" [ref=e102]:
+            - text: Web Security
+            - generic [ref=e103]: "12"
+          - button "API & Backend 9" [ref=e104]:
+            - text: API & Backend
+            - generic [ref=e105]: "9"
+          - button "Advanced 9" [ref=e106]:
+            - text: Advanced
+            - generic [ref=e107]: "9"
+          - button "Infrastructure 4" [ref=e108]:
+            - text: Infrastructure
+            - generic [ref=e109]: "4"
+          - button "Awareness 4" [ref=e110]:
+            - text: Awareness
+            - generic [ref=e111]: "4"
+          - button "Compliance 4" [ref=e112]:
+            - text: Compliance
+            - generic [ref=e113]: "4"
+        - generic [ref=e114]:
+          - generic [ref=e116]:
+            - generic [ref=e117]
+            - generic [ref=e127]
+          - generic [ref=e134]:
+            - generic [ref=e135]
+            - generic [ref=e145]
+          - generic [ref=e152]:
+            - generic [ref=e153]
+            - generic [ref=e163]
+          - generic [ref=e170]:
+            - generic [ref=e171]
+            - generic [ref=e181]
+          - generic [ref=e188]:
+            - generic [ref=e189]
+            - generic [ref=e199]
+          - generic [ref=e206]:
+            - generic [ref=e207]
+            - generic [ref=e217]
+          - generic [ref=e224]:
+            - generic [ref=e225]
+            - generic [ref=e235]
+          - generic [ref=e242]:
+            - generic [ref=e243]
+            - generic [ref=e253]
+          - generic [ref=e260]:
+            - generic [ref=e261]
+            - generic [ref=e271]
+          - generic [ref=e278]:
+            - generic [ref=e279]
+            - generic [ref=e289]
+          - generic [ref=e296]:
+            - generic [ref=e297]
+            - generic [ref=e307]
+          - generic [ref=e314]:
+            - generic [ref=e315]
+            - generic [ref=e325]
+          - generic [ref=e332]:
+            - generic [ref=e333]
+            - generic [ref=e343]
+          - generic [ref=e350]:
+            - generic [ref=e351]
+            - generic [ref=e361]
+          - generic [ref=e368]:
+            - generic [ref=e369]
+            - generic [ref=e379]
+          - generic [ref=e386]:
+            - generic [ref=e387]
+            - generic [ref=e397]
+          - generic [ref=e404]:
+            - generic [ref=e405]
+            - generic [ref=e415]
+          - generic [ref=e422]:
+            - generic [ref=e423]
+            - generic [ref=e433]
+          - generic [ref=e440]:
+            - generic [ref=e441]
+            - generic [ref=e451]
+          - generic [ref=e458]:
+            - generic [ref=e459]
+            - generic [ref=e469]
+          - generic [ref=e476]:
+            - generic [ref=e477]
+            - generic [ref=e487]
+          - generic [ref=e494]:
+            - generic [ref=e495]
+            - generic [ref=e505]
+          - generic [ref=e512]:
+            - generic [ref=e513]
+            - generic [ref=e523]
+          - generic [ref=e530]:
+            - generic [ref=e531]
+            - generic [ref=e541]
+          - generic [ref=e548]:
+            - generic [ref=e549]
+            - generic [ref=e559]
+          - generic [ref=e566]:
+            - generic [ref=e567]
+            - generic [ref=e577]
+          - generic [ref=e584]:
+            - generic [ref=e585]
+            - generic [ref=e595]
+          - generic [ref=e602]:
+            - generic [ref=e603]
+            - generic [ref=e613]
+          - generic [ref=e620]:
+            - generic [ref=e621]
+            - generic [ref=e631]
+          - generic [ref=e638]:
+            - generic [ref=e639]
+            - generic [ref=e649]
+          - generic [ref=e656]:
+            - generic [ref=e657]
+            - generic [ref=e667]
+          - generic [ref=e674]:
+            - generic [ref=e675]
+            - generic [ref=e685]
+          - generic [ref=e692]:
+            - generic [ref=e693]
+            - generic [ref=e703]
+          - generic [ref=e710]:
+            - generic [ref=e711]
+            - generic [ref=e721]
+          - generic [ref=e728]:
+            - generic [ref=e729]
+            - generic [ref=e739]
+          - generic [ref=e746]:
+            - generic [ref=e747]
+            - generic [ref=e757]
+          - generic [ref=e764]:
+            - generic [ref=e765]
+            - generic [ref=e775]
+          - generic [ref=e782]:
+            - generic [ref=e783]
+            - generic [ref=e793]
+          - generic [ref=e800]:
+            - generic [ref=e801]
+            - generic [ref=e811]
+          - generic [ref=e818]:
+            - generic [ref=e819]
+            - generic [ref=e829]
+          - generic [ref=e836]:
+            - generic [ref=e837]
+            - generic [ref=e847]
+          - generic [ref=e854]:
+            - generic [ref=e855]
+            - generic [ref=e865]
