@@ -30,6 +30,7 @@ export const setupGameStore = (state: Partial<{
     currentModuleId: string | null;
     streakDays: number;
     lastLoginDate: string | null;
+    userRole: string | null;
 }>) => {
     resetGameStore();
     useGameStore.setState(state);

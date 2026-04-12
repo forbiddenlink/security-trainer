@@ -50,11 +50,11 @@ describe("Sidebar", () => {
       expect(leaderboardLink).toHaveAttribute("href", "/leaderboard");
     });
 
-    it("renders all six navigation items", () => {
+    it("renders all seven navigation items", () => {
       renderWithRouter(<Sidebar />);
 
       const navLinks = screen.getAllByRole("link");
-      expect(navLinks).toHaveLength(6);
+      expect(navLinks).toHaveLength(7);
     });
   });
 
@@ -117,7 +117,7 @@ describe("Sidebar", () => {
 
       const dashboardLink = screen.getByRole("link", { name: /dashboard/i });
       // Check that it has the active class
-      expect(dashboardLink).toHaveClass("bg-primary/10");
+      expect(dashboardLink).toHaveClass("bg-primary/8");
     });
   });
 

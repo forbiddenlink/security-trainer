@@ -161,6 +161,7 @@ interface GameStore extends UserState {
   revealHint: (challengeId: string, hintId: string) => void;
   getCTFProgress: (challengeId: string) => { solved: boolean; hintsRevealed: string[]; attempts: number; solvedAt?: string; pointsEarned?: number } | null;
   isCTFSolved: (challengeId: string) => boolean;
+  setUserRole: (role: string) => void;
 }
 
 const INITIAL_STATE: UserState = {
@@ -179,6 +180,7 @@ const INITIAL_STATE: UserState = {
   completedPaths: [],
   ctfProgress: {},
   ctfTotalPoints: 0,
+  userRole: null,
 };
 
 // Helper to get today's date string
@@ -577,6 +579,8 @@ export const useGameStore = create<GameStore>()(
         debouncedSyncToCloud();
       },
 
+      setUserRole: (role) => set({ userRole: role }),
+
       resetProgress: () => {
         // Clear pending sync to prevent stale data sync after reset
         if (syncTimeout) {
@@ -740,6 +744,7 @@ export const useGameStore = create<GameStore>()(
         completedPaths: state.completedPaths,
         ctfProgress: state.ctfProgress,
         ctfTotalPoints: state.ctfTotalPoints,
+        userRole: state.userRole,
       }),
     },
   ),
