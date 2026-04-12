@@ -30,6 +30,7 @@ interface LabOutput {
 const createLabTerminalCommands = (
   _lessonId: string,
   getCode: () => string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _setOutput: (output: LabOutput | null) => void
 ): TerminalCommand[] => [
   {

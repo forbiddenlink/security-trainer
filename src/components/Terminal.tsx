@@ -207,9 +207,9 @@ export const Terminal: React.FC<TerminalProps> = memo(
     const terminalRef = useRef<HTMLDivElement>(null);
     const xtermRef = useRef<XTerm | null>(null);
     const fitAddonRef = useRef<FitAddon | null>(null);
-    const [_currentLine, setCurrentLine] = useState("");
-    const [_commandHistory, setCommandHistory] = useState<string[]>([]);
-    const [_historyIndex, setHistoryIndex] = useState(-1);
+    const [, setCurrentLine] = useState("");
+    const [, setCommandHistory] = useState<string[]>([]);
+    const [, setHistoryIndex] = useState(-1);
     const promptRef = useRef(initialPrompt);
     const cursorPositionRef = useRef(0);
 
