@@ -33,7 +33,7 @@
     "groq-sdk": "^1.1.2",
     "html-to-image": "^1.11.13",
     "lucide-react": "^0.562.0",
-    "mermaid": "^11.12.3",
+    "mermaid": "^11.15.0",
     "posthog-js": "^1.364.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
