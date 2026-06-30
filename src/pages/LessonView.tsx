@@ -55,6 +55,7 @@ export const LessonView: React.FC = () => {
 
   // Reset completion state when lesson changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional reset on lesson navigation, not a cascade
     setQuizCompleted(false);
     setLabCompleted(false);
   }, [currentLessonIndex]);
