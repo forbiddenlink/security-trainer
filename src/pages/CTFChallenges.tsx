@@ -34,7 +34,10 @@ import {
 } from "../lib/ctf";
 
 // Category icon mapping
-const categoryIcons: Record<CTFCategory, React.ComponentType<{ className?: string }>> = {
+const categoryIcons: Record<
+  CTFCategory,
+  React.ComponentType<{ className?: string }>
+> = {
   web: Globe,
   crypto: Lock,
   forensics: Search,
@@ -83,7 +86,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
         "w-full text-left p-4 rounded-[var(--radius-sm)] border transition-all duration-200",
         isSelected
           ? "bg-primary/10 border-primary/50 shadow-[var(--shadow-glow)]"
-          : "bg-card/60 border-border/50 hover:border-primary/30 hover:bg-card/80"
+          : "bg-card/60 border-border/50 hover:border-primary/30 hover:bg-card/80",
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -91,7 +94,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
           <div
             className={clsx(
               "w-10 h-10 rounded-[var(--radius-sm)] flex items-center justify-center",
-              solved ? "bg-accent/20" : "bg-muted/60"
+              solved ? "bg-accent/20" : "bg-muted/60",
             )}
           >
             {solved ? (
@@ -104,7 +107,9 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
             <h3
               className={clsx(
                 "font-semibold text-sm",
-                solved ? "text-muted-foreground line-through" : "text-foreground"
+                solved
+                  ? "text-muted-foreground line-through"
+                  : "text-foreground",
               )}
             >
               {challenge.title}
@@ -114,7 +119,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
                 className={clsx(
                   "text-xs px-2 py-0.5 rounded-full border",
                   difficultyBgColors[challenge.difficulty || "easy"],
-                  difficultyColors[challenge.difficulty || "easy"]
+                  difficultyColors[challenge.difficulty || "easy"],
                 )}
               >
                 {challenge.difficulty || "easy"}
@@ -129,7 +134,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
           <div
             className={clsx(
               "font-mono font-bold",
-              solved ? "text-accent" : "text-primary"
+              solved ? "text-accent" : "text-primary",
             )}
           >
             {solved ? progress?.pointsEarned : challenge.points} pts
@@ -152,7 +157,7 @@ interface ChallengeDetailProps {
 // Terminal commands for CTF challenges
 const createCTFTerminalCommands = (
   challenge: CTFChallenge,
-  onFlagSubmit: (flag: string) => void
+  onFlagSubmit: (flag: string) => void,
 ): TerminalCommand[] => [
   {
     name: "submit",
@@ -174,9 +179,13 @@ const createCTFTerminalCommands = (
     handler: (_, terminal) => {
       terminal.writeLine("\r\n\x1b[1;36m=== Challenge Info ===\x1b[0m");
       terminal.writeLine(`\x1b[1;33mTitle:\x1b[0m ${challenge.title}`);
-      terminal.writeLine(`\x1b[1;33mCategory:\x1b[0m ${getCategoryLabel(challenge.category)}`);
+      terminal.writeLine(
+        `\x1b[1;33mCategory:\x1b[0m ${getCategoryLabel(challenge.category)}`,
+      );
       terminal.writeLine(`\x1b[1;33mPoints:\x1b[0m ${challenge.points}`);
-      terminal.writeLine(`\x1b[1;33mDifficulty:\x1b[0m ${challenge.difficulty || "easy"}`);
+      terminal.writeLine(
+        `\x1b[1;33mDifficulty:\x1b[0m ${challenge.difficulty || "easy"}`,
+      );
       terminal.writeLine("");
     },
   },
@@ -186,7 +195,9 @@ const createCTFTerminalCommands = (
     handler: (args, terminal) => {
       const input = args.join(" ");
       if (!input) {
-        terminal.writeLine("\r\n\x1b[1;31mUsage: decode <base64_string>\x1b[0m");
+        terminal.writeLine(
+          "\r\n\x1b[1;31mUsage: decode <base64_string>\x1b[0m",
+        );
         terminal.writeLine("");
         return;
       }
@@ -218,7 +229,11 @@ const createCTFTerminalCommands = (
     name: "hex",
     description: "Convert hex to ASCII",
     handler: (args, terminal) => {
-      const input = args.join("").replace(/\\x/g, "").replace(/0x/g, "").replace(/\s/g, "");
+      const input = args
+        .join("")
+        .replace(/\\x/g, "")
+        .replace(/0x/g, "")
+        .replace(/\s/g, "");
       if (!input) {
         terminal.writeLine("\r\n\x1b[1;31mUsage: hex <hex_string>\x1b[0m");
         terminal.writeLine("\x1b[0;37mExample: hex 464c4147\x1b[0m");
@@ -268,13 +283,17 @@ const createCTFTerminalCommands = (
       const shift = parseInt(args[0], 10);
       const input = args.slice(1).join(" ");
       if (isNaN(shift)) {
-        terminal.writeLine("\r\n\x1b[1;31mError: Shift must be a number\x1b[0m");
+        terminal.writeLine(
+          "\r\n\x1b[1;31mError: Shift must be a number\x1b[0m",
+        );
         terminal.writeLine("");
         return;
       }
       const result = input.replace(/[a-zA-Z]/g, (c) => {
         const base = c <= "Z" ? 65 : 97;
-        return String.fromCharCode(((c.charCodeAt(0) - base + shift + 26) % 26) + base);
+        return String.fromCharCode(
+          ((c.charCodeAt(0) - base + shift + 26) % 26) + base,
+        );
       });
       terminal.writeLine(`\r\n\x1b[1;32mShifted by ${shift}:\x1b[0m ${result}`);
       terminal.writeLine("");
@@ -323,10 +342,9 @@ const createCTFTerminalCommands = (
   },
 ];
 
-const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
-  challenge,
-}) => {
-  const { submitFlag, revealHint, getCTFProgress, isCTFSolved } = useGameStore();
+const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
+  const { submitFlag, revealHint, getCTFProgress, isCTFSolved } =
+    useGameStore();
   const [flagInput, setFlagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
@@ -337,9 +355,14 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
 
   const solved = isCTFSolved(challenge.id);
   const progress = getCTFProgress(challenge.id);
-  const hintsRevealed = progress?.hintsRevealed || [];
   const Icon = categoryIcons[challenge.category];
   const colorClass = getCategoryColor(challenge.category);
+
+  // Stabilize hintsRevealed so it doesn't create a new array reference each render
+  const hintsRevealed = useMemo(
+    () => progress?.hintsRevealed || [],
+    [progress?.hintsRevealed],
+  );
 
   // Calculate potential points after hint deductions
   const potentialPoints = useMemo(() => {
@@ -408,7 +431,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
     if (
       hint &&
       window.confirm(
-        `Revealing this hint will cost ${hint.cost} points. Continue?`
+        `Revealing this hint will cost ${hint.cost} points. Continue?`,
       )
     ) {
       revealHint(challenge.id, hintId);
@@ -428,7 +451,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
           <div
             className={clsx(
               "w-12 h-12 rounded-[var(--radius-sm)] flex items-center justify-center",
-              solved ? "bg-accent/20" : "bg-muted/60"
+              solved ? "bg-accent/20" : "bg-muted/60",
             )}
           >
             {solved ? (
@@ -444,7 +467,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
                 className={clsx(
                   "text-xs px-2 py-0.5 rounded-full border",
                   difficultyBgColors[challenge.difficulty || "easy"],
-                  difficultyColors[challenge.difficulty || "easy"]
+                  difficultyColors[challenge.difficulty || "easy"],
                 )}
               >
                 {challenge.difficulty || "easy"}
@@ -464,7 +487,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
           <div
             className={clsx(
               "text-h2 font-mono font-bold",
-              solved ? "text-accent" : "text-primary"
+              solved ? "text-accent" : "text-primary",
             )}
           >
             {solved ? progress?.pointsEarned : potentialPoints}
@@ -485,10 +508,16 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
         <div className="mb-6 p-4 rounded-[var(--radius-sm)] bg-accent/10 border border-accent/30 flex items-center gap-3">
           <Trophy className="w-5 h-5 text-accent" />
           <div>
-            <div className="font-semibold text-accent">Challenge Completed!</div>
+            <div className="font-semibold text-accent">
+              Challenge Completed!
+            </div>
             <div className="text-sm text-muted-foreground">
-              Solved on {progress?.solvedAt ? new Date(progress.solvedAt).toLocaleDateString() : 'N/A'}
-              {progress?.attempts && ` in ${progress.attempts} attempt${progress.attempts > 1 ? 's' : ''}`}
+              Solved on{" "}
+              {progress?.solvedAt
+                ? new Date(progress.solvedAt).toLocaleDateString()
+                : "N/A"}
+              {progress?.attempts &&
+                ` in ${progress.attempts} attempt${progress.attempts > 1 ? "s" : ""}`}
             </div>
           </div>
         </div>
@@ -533,7 +562,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
                     "p-3 rounded-[var(--radius-sm)] border",
                     isRevealed
                       ? "bg-warning/5 border-warning/30"
-                      : "bg-muted/30 border-border/50"
+                      : "bg-muted/30 border-border/50",
                   )}
                 >
                   {isRevealed ? (
@@ -573,7 +602,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
             "w-full flex items-center justify-between p-3 rounded-[var(--radius-sm)] border transition-all duration-200",
             showTerminal
               ? "bg-primary/10 border-primary/50"
-              : "bg-muted/30 border-border/50 hover:border-primary/30"
+              : "bg-muted/30 border-border/50 hover:border-primary/30",
           )}
         >
           <span className="flex items-center gap-2 text-sm font-medium">
@@ -656,10 +685,12 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
                 feedback.type === "error" &&
                   "bg-destructive/10 border border-destructive/30 text-destructive",
                 feedback.type === "info" &&
-                  "bg-primary/10 border border-primary/30 text-primary"
+                  "bg-primary/10 border border-primary/30 text-primary",
               )}
             >
-              {feedback.type === "success" && <CheckCircle className="w-4 h-4" />}
+              {feedback.type === "success" && (
+                <CheckCircle className="w-4 h-4" />
+              )}
               {feedback.type === "error" && <AlertCircle className="w-4 h-4" />}
               {feedback.type === "info" && <AlertCircle className="w-4 h-4" />}
               {feedback.message}
@@ -670,7 +701,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
         {/* Attempt counter */}
         {progress?.attempts && !solved && (
           <div className="mt-2 text-xs text-muted-foreground">
-            {progress.attempts} attempt{progress.attempts > 1 ? 's' : ''} made
+            {progress.attempts} attempt{progress.attempts > 1 ? "s" : ""} made
           </div>
         )}
       </div>
@@ -680,9 +711,13 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({
 
 export const CTFChallenges: React.FC = () => {
   const { ctfTotalPoints, ctfProgress } = useGameStore();
-  const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
+  const [selectedChallenge, setSelectedChallenge] = useState<string | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<CTFCategory | "all">("all");
+  const [categoryFilter, setCategoryFilter] = useState<CTFCategory | "all">(
+    "all",
+  );
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -776,7 +811,7 @@ export const CTFChallenges: React.FC = () => {
             <ChevronDown
               className={clsx(
                 "w-4 h-4 transition-transform",
-                showFilters && "rotate-180"
+                showFilters && "rotate-180",
               )}
             />
           </button>
@@ -837,31 +872,36 @@ export const CTFChallenges: React.FC = () => {
 
         {/* Challenge list */}
         <div className="flex-1 overflow-auto p-4 space-y-6">
-          {Object.entries(challengesByCategory).map(([category, challenges]) => (
-            <div key={category}>
-              <div className="flex items-center gap-2 mb-3">
-                {React.createElement(categoryIcons[category as CTFCategory], {
-                  className: clsx("w-4 h-4", getCategoryColor(category as CTFCategory)),
-                })}
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {getCategoryLabel(category as CTFCategory)}
-                </h3>
-                <span className="text-xs text-muted-foreground">
-                  ({challenges.length})
-                </span>
+          {Object.entries(challengesByCategory).map(
+            ([category, challenges]) => (
+              <div key={category}>
+                <div className="flex items-center gap-2 mb-3">
+                  {React.createElement(categoryIcons[category as CTFCategory], {
+                    className: clsx(
+                      "w-4 h-4",
+                      getCategoryColor(category as CTFCategory),
+                    ),
+                  })}
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    {getCategoryLabel(category as CTFCategory)}
+                  </h3>
+                  <span className="text-xs text-muted-foreground">
+                    ({challenges.length})
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {challenges.map((challenge) => (
+                    <ChallengeCard
+                      key={challenge.id}
+                      challenge={challenge}
+                      onSelect={setSelectedChallenge}
+                      isSelected={selectedChallenge === challenge.id}
+                    />
+                  ))}
+                </div>
               </div>
-              <div className="space-y-2">
-                {challenges.map((challenge) => (
-                  <ChallengeCard
-                    key={challenge.id}
-                    challenge={challenge}
-                    onSelect={setSelectedChallenge}
-                    isSelected={selectedChallenge === challenge.id}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+            ),
+          )}
 
           {filteredChallenges.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
@@ -900,10 +940,14 @@ export const CTFChallenges: React.FC = () => {
                   <div className="text-h1 font-mono text-primary">
                     {totalChallenges}
                   </div>
-                  <div className="text-sm text-muted-foreground">Challenges</div>
+                  <div className="text-sm text-muted-foreground">
+                    Challenges
+                  </div>
                 </div>
                 <div>
-                  <div className="text-h1 font-mono text-accent">{solvedCount}</div>
+                  <div className="text-h1 font-mono text-accent">
+                    {solvedCount}
+                  </div>
                   <div className="text-sm text-muted-foreground">Solved</div>
                 </div>
                 <div>

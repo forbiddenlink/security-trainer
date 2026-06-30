@@ -37,6 +37,7 @@ export const Challenge: React.FC = () => {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init on mount, not a cascade
     setQuestions(shuffled.slice(0, 5));
   }, []);
 
