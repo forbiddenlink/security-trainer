@@ -161,6 +161,41 @@ Phishing:    https://www.microsoft-secure.com/login
 4. Never provide credentials via email/phone`,
     },
     {
+      id: "vishing-voicemail",
+      title: "Vishing: Hear a Voice Scam",
+      type: "theory",
+      content: `# Vishing (Voice Phishing)
+
+Vishing is phishing over a phone call or voicemail. Attackers use urgency and authority to make you act before you think.
+
+## Hear a real example
+
+Below is an AI-generated sample of a classic "IT Security" vishing call. Listen for the red flags.
+
+<audio controls preload="none" src="/audio/vishing-voicemail.mp3"></audio>
+
+> "Hi, this is Mike from IT Security. We flagged unusual login activity on your account. I need to verify it is really you. Can you read me the one-time code we just texted to your phone?"
+
+## The red flags in that call
+
+1. **Authority** - claims to be IT / Security
+2. **Urgency** - "unusual activity", act right now
+3. **The ask** - your one-time MFA code. No legitimate IT team will ever ask you to read this out.
+
+## Common vishing scenarios
+
+- **Fake IT support** - asks for your MFA code or password to "verify" you
+- **Fake executive** - "I'm stuck in a meeting, process this urgent wire transfer"
+- **Fake bank fraud alert** - robocall pressure: "press 1 to stop this charge"
+
+## How to defend
+
+1. Never read an MFA or one-time code to anyone who calls you
+2. Hang up and call back on a number YOU look up, not the one they gave you
+3. Verify any urgent money or access request through a second known channel
+4. Slow down. The urgency is the attack, not the emergency.`,
+    },
+    {
       id: "social-quiz-1",
       title: "Spot the Phish",
       type: "quiz",
