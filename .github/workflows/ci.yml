@@ -23,9 +23,9 @@ jobs:
         with:
           node-version: "22"
 
+      # Version comes from package.json "packageManager"; action-setup@v6
+      # errors if a version is also pinned here (ERR_PNPM_BAD_PM_VERSION).
       - uses: pnpm/action-setup@v6
-        with:
-          version: 10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
