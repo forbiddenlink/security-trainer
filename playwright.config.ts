@@ -13,8 +13,11 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
+    // Use `pnpm exec` (not `pnpm run preview --`) so --host reaches Vite;
+    // the extra `--` was swallowing it, leaving Vite bound to IPv6 ::1 only
+    // while this config polls IPv4 127.0.0.1 → 120s startup timeout locally.
     command:
-      "pnpm run build && pnpm run preview -- --host 127.0.0.1 --port 4173",
+      "pnpm run build && pnpm exec vite preview --host 127.0.0.1 --port 4173",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
