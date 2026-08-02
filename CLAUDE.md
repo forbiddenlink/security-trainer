@@ -21,7 +21,7 @@ src/
 ├── pages/         # Route page components
 ├── layouts/       # Layout wrappers
 ├── store/         # Zustand state management
-├── data/modules/  # Static module/lesson content (24 modules)
+├── data/modules/  # Static module/lesson content (42 modules)
 ├── types/         # TypeScript interfaces
 ├── utils/         # Utility functions (lab verification)
 ├── lib/           # External service clients (Supabase)

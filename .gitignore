@@ -49,3 +49,7 @@ build/
 out/
 
 # Next.js
+
+# Playwright test output
+test-results/
+playwright-report/
