@@ -74,8 +74,7 @@ export const Leaderboard: React.FC = () => {
       className="max-w-4xl mx-auto animate-in fade-in duration-500"
       role="main"
     >
-      <section className="ui-card ui-card-lg ui-card-elevated relative overflow-hidden mb-8">
-        <div className="absolute inset-0 pointer-events-none bg-linear-to-r from-warning/10 to-transparent" />
+      <section className="ui-card ui-card-lg ops-briefing relative overflow-hidden mb-8">
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <Trophy className="w-8 h-8 text-warning" />
@@ -95,7 +94,7 @@ export const Leaderboard: React.FC = () => {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-semibold text-body">
+              <div className="w-12 h-12 rounded-full border border-primary/40 bg-muted flex items-center justify-center text-foreground font-semibold text-body">
                 {profile.display_name?.[0]?.toUpperCase() || "A"}
               </div>
               <div>

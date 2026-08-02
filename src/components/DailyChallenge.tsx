@@ -55,19 +55,15 @@ export const DailyChallenge: React.FC = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
       className={`ui-card relative overflow-hidden p-6 ${
         dailyChallengeCompleted
           ? "bg-accent/10 border-accent/30"
-          : "bg-linear-to-br from-warning/10 to-warning/5 border-warning/30"
+          : "border-warning/35 border-l-[3px] border-l-warning"
       }`}
     >
-      {/* Decorative glow */}
-      {!dailyChallengeCompleted && (
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-yellow-500/20 blur-3xl rounded-full pointer-events-none" />
-      )}
-
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">

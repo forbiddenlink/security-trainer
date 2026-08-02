@@ -4,8 +4,8 @@
   "description": "Level up your security skills with interactive modules on OWASP Top 10, XSS, SQLi, and more.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#6366f1",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
   "orientation": "portrait-primary",
   "icons": [
     {

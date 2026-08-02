@@ -150,7 +150,7 @@ export const AuthModal: React.FC = () => {
             aria-modal="true"
             aria-labelledby="auth-modal-title"
           >
-            <div className="relative p-6 border-b border-border/70 bg-linear-to-r from-primary/10 to-accent/10">
+            <div className="relative p-6 border-b border-border/70 border-l-[3px] border-l-primary">
               <button
                 onClick={handleClose}
                 className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/70 transition-colors"

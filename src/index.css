@@ -42,101 +42,108 @@
   --radius-lg: 16px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgb(15 23 42 / 0.06);
-  --shadow-md: none;
-  --shadow-lg: none;
+  /* Shadows — restrained; no glow blobs */
+  --shadow-sm: 0 1px 2px rgb(28 25 23 / 0.05);
+  --shadow-md: 0 4px 12px rgb(28 25 23 / 0.06);
+  --shadow-lg: 0 12px 28px rgb(28 25 23 / 0.08);
   --shadow-glow: none;
 
-  /* Timing */
-  --duration-fast: 150ms;
-  --duration-normal: 150ms;
-  --duration-slow: 250ms;
-  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Timing — ease-out-quart for natural deceleration */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 
-  /* Primary */
-  --color-primary: #1d4ed8;
-  --color-primary-hover: #1e40af;
-  --color-primary-foreground: #ffffff;
+  /* Primary — steel navy (ops console, not indigo/purple) */
+  --color-primary: #1e4a8c;
+  --color-primary-hover: #163a6e;
+  --color-primary-foreground: #f8fafc;
 
   /* Secondary */
-  --color-secondary: #f1f5f9;
-  --color-secondary-foreground: #0f172a;
+  --color-secondary: #ece8e1;
+  --color-secondary-foreground: #1c1917;
 
-  /* Accent (Success/Completion) */
+  /* Accent (clearance / success) — deep teal, not neon */
   --color-accent: #0f766e;
-  --color-accent-foreground: #ffffff;
+  --color-accent-foreground: #f0fdfa;
 
   /* Semantic */
-  --color-destructive: #dc2626;
+  --color-destructive: #b91c1c;
   --color-destructive-foreground: #ffffff;
   --color-success: #15803d;
   --color-warning: #b45309;
-  --color-terminal: #22c55e;
+  --color-terminal: #3f7d4e;
 
-  --color-background: #f3f6fb;
-  --color-foreground: #0f172a;
+  /* Warm-tinted neutrals (dossier paper, not flat slate SaaS) */
+  --color-background: #f4f1eb;
+  --color-foreground: #1c1917;
 
-  --color-card: #ffffff;
-  --color-card-foreground: #0f172a;
+  --color-card: #fbfaf7;
+  --color-card-foreground: #1c1917;
 
-  --color-popover: #ffffff;
-  --color-popover-foreground: #0f172a;
+  --color-popover: #fbfaf7;
+  --color-popover-foreground: #1c1917;
 
-  --color-muted: #e8edf5;
-  --color-muted-foreground: #52627a;
+  --color-muted: #e8e2d8;
+  --color-muted-foreground: #57534e;
 
-  --color-border: #d8e1ee;
-  --color-input: #f7f9fc;
-  --color-ring: #1d4ed8;
-  --color-border-subtle: #e8edf5;
+  --color-border: #d6d0c4;
+  --color-input: #f7f5f0;
+  --color-ring: #1e4a8c;
+  --color-border-subtle: #e8e2d8;
+
+  /* Ops stamp / classified accent (sparingly) */
+  --color-stamp: #a16207;
 
   color-scheme: light;
 }
 
 .dark {
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.3);
-  --shadow-md: none;
-  --shadow-lg: none;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-md: 0 4px 14px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.45);
   --shadow-glow: none;
 
-  /* Primary (Cyan) */
-  --color-primary: #38bdf8;
-  --color-primary-hover: #0ea5e9;
-  --color-primary-foreground: #05243a;
+  /* Primary — brass / classified stamp (not cyan-on-dark) */
+  --color-primary: #c9a227;
+  --color-primary-hover: #dbb43a;
+  --color-primary-foreground: #14110b;
 
   /* Secondary */
-  --color-secondary: #141d2a;
-  --color-secondary-foreground: #d0dded;
+  --color-secondary: #1a1f27;
+  --color-secondary-foreground: #d6d3cd;
 
-  /* Accent (Green) */
-  --color-accent: #22c55e;
-  --color-accent-foreground: #05240f;
+  /* Accent — phosphor green used only for success/online */
+  --color-accent: #3d9a5f;
+  --color-accent-foreground: #06140c;
 
   /* Semantic */
-  --color-destructive: #f87171;
-  --color-destructive-foreground: #ffffff;
+  --color-destructive: #e57373;
+  --color-destructive-foreground: #1a0a0a;
   --color-success: #4ade80;
-  --color-warning: #f59e0b;
-  --color-terminal: #9fef00;
+  --color-warning: #e8a838;
+  --color-terminal: #6fbf73;
 
-  --color-background: #090d14;
-  --color-foreground: #e6ebf5;
+  --color-background: #0b0d10;
+  --color-foreground: #e7e5e0;
 
-  --color-card: #101722;
-  --color-card-foreground: #e6ebf5;
+  --color-card: #12151a;
+  --color-card-foreground: #e7e5e0;
 
-  --color-popover: #101722;
-  --color-popover-foreground: #e6ebf5;
+  --color-popover: #12151a;
+  --color-popover-foreground: #e7e5e0;
 
-  --color-muted: #1b2535;
-  --color-muted-foreground: #9aa8bf;
+  --color-muted: #1c2129;
+  --color-muted-foreground: #a8a29e;
 
-  --color-border: #243247;
-  --color-input: #131e2d;
-  --color-ring: #38bdf8;
-  --color-border-subtle: #1b2535;
+  --color-border: #2a303a;
+  --color-input: #161a20;
+  --color-ring: #c9a227;
+  --color-border-subtle: #1c2129;
+
+  --color-stamp: #c9a227;
 
   color-scheme: dark;
 }
@@ -174,6 +181,7 @@
   --color-border: var(--color-border);
   --color-input: var(--color-input);
   --color-ring: var(--color-ring);
+  --color-stamp: var(--color-stamp);
 
   /* Typography */
   --text-display: var(--text-display);
@@ -197,16 +205,31 @@ body {
 
 html {
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+    background-color var(--duration-slow) var(--ease-smooth),
+    color var(--duration-slow) var(--ease-smooth);
 }
 
-html * {
+/* Scoped theme transitions — avoid global * which blunts intentional motion */
+a,
+button,
+input,
+textarea,
+select,
+[role="button"],
+.ui-card,
+.ui-card-interactive,
+.ui-chip,
+.ui-button-primary,
+.ui-button-secondary,
+.ui-input,
+.mission-card {
   transition:
-    background-color 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-    border-color 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-    color 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-out-quart),
+    opacity var(--duration-fast) var(--ease-smooth);
 }
 
 html.no-transitions,
@@ -269,11 +292,86 @@ h2 {
   }
 
   .ui-card-interactive {
-    transition: border-color var(--duration-fast) linear;
+    transition:
+      border-color var(--duration-normal) var(--ease-smooth),
+      transform var(--duration-normal) var(--ease-out-quart),
+      box-shadow var(--duration-normal) var(--ease-smooth);
   }
 
   .ui-card-interactive:hover {
-    border-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+    border-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Mission / ops card — Uiverse-inspired lift without neon glow */
+  .mission-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mission-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: transparent;
+    transition: background-color var(--duration-normal) var(--ease-smooth);
+  }
+
+  .mission-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--color-primary) 50%, transparent);
+    box-shadow: var(--shadow-md);
+  }
+
+  .mission-card:hover::before {
+    background: var(--color-primary);
+  }
+
+  .mission-card:active {
+    transform: translateY(0);
+  }
+
+  /* Dossier briefing block */
+  .ops-briefing {
+    position: relative;
+    border-left: 3px solid var(--color-stamp);
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-stamp) 6%, transparent),
+        transparent 48%
+      ),
+      var(--color-card);
+  }
+
+  .ops-briefing::after {
+    content: "CLASSIFIED";
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: color-mix(in oklab, var(--color-stamp) 55%, transparent);
+    pointer-events: none;
+  }
+
+  /* Subtle ops grid for CTF / mission panes */
+  .ops-grid-bg {
+    background-image:
+      linear-gradient(
+        color-mix(in oklab, var(--color-border) 45%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--color-border) 45%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 24px 24px;
+    background-position: -1px -1px;
   }
 
   /* Button System */

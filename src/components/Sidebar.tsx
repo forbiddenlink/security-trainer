@@ -9,15 +9,18 @@ import {
   ShieldCheck,
   GraduationCap,
   Flag,
+  RefreshCw,
 } from "lucide-react";
 import { clsx } from "clsx";
+import { useGameStore } from "../store/gameStore";
+import { Progress } from "./ui";
 
-// Static navigation items - defined outside component to avoid recreation
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard },
   { label: "Modules", path: "/modules", icon: BookOpen },
   { label: "Paths", path: "/paths", icon: GraduationCap },
   { label: "CTF Challenges", path: "/ctf", icon: Flag },
+  { label: "Intel Review", path: "/reviews", icon: RefreshCw },
   { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
   { label: "Profile", path: "/profile", icon: User },
   { label: "Final Exam", path: "/challenge", icon: ShieldAlert },
@@ -27,11 +30,11 @@ interface SidebarProps {
   onNavigate?: () => void;
 }
 
-/**
- * Main navigation sidebar - memoized since it contains static content
- * and only re-renders when NavLink active states change
- */
 export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
+  const { xp, level } = useGameStore();
+  const nextLevelXp = level * 1000;
+  const clearancePct = Math.min(100, Math.round((xp / nextLevelXp) * 100));
+
   return (
     <aside
       className="w-64 min-h-screen flex flex-col border-r border-border/70 bg-card/90 backdrop-blur relative z-10"
@@ -43,9 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
         </div>
         <span className="font-semibold text-xl tracking-tight text-foreground flex flex-col leading-none">
           <span>SecTrainer</span>
-          <span className="text-caption text-muted-foreground">
-            v1.0.0
-          </span>
+          <span className="text-caption text-muted-foreground">v1.0.0</span>
         </span>
       </div>
 
@@ -66,10 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
           >
             {({ isActive }) => (
               <>
-                <item.icon
-                  className="w-4 h-4"
-                  aria-hidden="true"
-                />
+                <item.icon className="w-4 h-4" aria-hidden="true" />
                 <span>{item.label}</span>
                 {isActive && <span className="sr-only">(current page)</span>}
               </>
@@ -81,15 +79,26 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
       <div className="m-3 mt-0 ui-card" aria-label="System information">
         <div className="flex justify-between items-center mb-2.5">
           <span className="ui-label">Status</span>
-          <span className="flex h-2 w-2 rounded-full bg-accent" />
+          <span
+            className="flex h-2 w-2 rounded-full bg-accent"
+            aria-label="Online"
+          />
         </div>
         <p className="text-mono text-muted-foreground tracking-tight">
           Clearance:{" "}
-          <span className="text-primary font-semibold">Classified</span>
+          <span className="text-primary font-semibold">Level {level}</span>
         </p>
-        <div className="mt-2.5 h-1.5 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-primary transition-all duration-500" style={{ width: '75%' }} />
-        </div>
+        <Progress
+          className="mt-2.5"
+          value={xp}
+          min={0}
+          max={nextLevelXp}
+          aria-label={`${clearancePct}% to next clearance level`}
+          indicatorClassName="bg-primary"
+        />
+        <p className="text-caption text-muted-foreground mt-1.5 normal-case tracking-normal">
+          {xp} / {nextLevelXp} XP
+        </p>
       </div>
     </aside>
   );

@@ -22,6 +22,28 @@ OS Command Injection (also known as shell injection) is a critical vulnerability
 
 When an application passes unsafe user data to a system shell, attackers can inject additional commands. Unlike SQL injection (which targets databases), command injection targets the **operating system itself**.
 
+\`\`\`mermaid
+flowchart LR
+    subgraph Vulnerable["Shell exec()"]
+        A[User input] --> B[String concat to shell]
+        B --> C[; rm -rf / injected]
+        C --> D[Arbitrary commands!]
+    end
+
+    subgraph Secure["execFile argv"]
+        A2[User input] --> B2[Args array - no shell]
+        B2 --> C2[Literal argument only]
+        C2 --> D2[Safe execution]
+    end
+
+    style C fill:#ef4444,color:#fff
+    style D fill:#ef4444,color:#fff
+    style C2 fill:#22c55e,color:#fff
+    style D2 fill:#22c55e,color:#fff
+\`\`\`
+
+::video[https://www.youtube.com/watch?v=HrQA4Nyo7hs]{title="Command Injection Explained" caption="OS command injection attacks and defenses"}
+
 \`\`\`javascript
 // VULNERABLE: User input passed directly to shell
 const filename = req.query.file;

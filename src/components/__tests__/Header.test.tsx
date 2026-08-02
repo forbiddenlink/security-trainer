@@ -116,11 +116,11 @@ describe("Header", () => {
     });
 
     it("renders user avatar element", () => {
-      const { container } = renderWithRouter(<Header />);
+      renderWithRouter(<Header />);
 
-      // Check for the avatar div with gradient background
-      const avatar = container.querySelector(".rounded-full.bg-gradient-to-br");
-      expect(avatar).toBeInTheDocument();
+      expect(
+        screen.getByRole("img", { name: /user avatar/i }),
+      ).toBeInTheDocument();
     });
   });
 

@@ -1,7 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, ArrowRight, Award, Shield, Server, Target } from "lucide-react";
+import {
+  Lock,
+  ArrowRight,
+  Award,
+  Shield,
+  Server,
+  Target,
+  Users,
+  FileCheck,
+  Cloud,
+} from "lucide-react";
 import { Progress } from "./ui";
 import { useGameStore } from "../store/gameStore";
 import type { LearningPath } from "../types";
@@ -10,6 +20,9 @@ const iconMap: Record<string, React.ElementType> = {
   Shield,
   Server,
   Target,
+  Users,
+  FileCheck,
+  Cloud,
 };
 
 interface PathCardProps {
@@ -40,20 +53,10 @@ export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className={`ui-card relative overflow-hidden ${
+      className={`mission-card ui-card relative overflow-hidden ${
         !isUnlocked ? "opacity-60" : ""
       } ${isCompleted ? "border-accent/50 bg-accent/5" : ""}`}
     >
-      {/* Decorative gradient */}
-      <div
-        className={`absolute inset-0 pointer-events-none bg-linear-to-br ${
-          isCompleted
-            ? "from-accent/10 to-transparent"
-            : "from-primary/5 to-transparent"
-        }`}
-        aria-hidden="true"
-      />
-
       <div className="relative z-10 p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">

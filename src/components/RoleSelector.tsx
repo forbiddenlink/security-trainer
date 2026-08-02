@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useGameStore } from "../store/gameStore";
-import { Code2, Server, Briefcase, Users } from "lucide-react";
+import { Code2, Server, Briefcase, Users, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ROLES = [
@@ -10,6 +10,7 @@ const ROLES = [
     description: "I write code and want to build secure applications",
     icon: Code2,
     recommendedPath: "Web Security Fundamentals",
+    recommendedPathId: "web-fundamentals",
   },
   {
     id: "devops",
@@ -17,6 +18,7 @@ const ROLES = [
     description: "I manage infrastructure, deployments, and systems",
     icon: Server,
     recommendedPath: "Cloud & Infrastructure Security",
+    recommendedPathId: "cloud-infrastructure",
   },
   {
     id: "manager",
@@ -24,6 +26,7 @@ const ROLES = [
     description: "I lead teams and need to understand security risks",
     icon: Briefcase,
     recommendedPath: "Compliance & Regulatory",
+    recommendedPathId: "compliance-essentials",
   },
   {
     id: "general",
@@ -31,6 +34,7 @@ const ROLES = [
     description: "I use company tools and want to stay security-aware",
     icon: Users,
     recommendedPath: "Security for Everyone",
+    recommendedPathId: "security-everyone",
   },
 ] as const;
 
@@ -46,12 +50,15 @@ export const RoleSelector: React.FC = () => {
   };
 
   return (
-    <section className="ui-card ui-card-lg" aria-label="Role selection">
+    <section
+      className="ui-card ui-card-lg ops-briefing"
+      aria-label="Role selection"
+    >
       {!selectedRole ? (
         <>
           <p className="ui-chip mb-3">Getting Started</p>
           <h2 className="text-h1 mb-2">Select Your Role</h2>
-          <p className="text-muted-foreground text-body-sm mb-6">
+          <p className="text-muted-foreground text-body-sm mb-6 max-w-xl">
             Choose your role to get personalized training recommendations.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -62,7 +69,7 @@ export const RoleSelector: React.FC = () => {
                   key={role.id}
                   type="button"
                   onClick={() => handleSelect(role)}
-                  className="ui-card p-4 flex items-start gap-4 text-left transition-colors hover:border-primary cursor-pointer"
+                  className="mission-card ui-card p-4 flex items-start gap-4 text-left cursor-pointer"
                 >
                   <Icon
                     className="w-5 h-5 text-primary mt-0.5 shrink-0"
@@ -100,10 +107,11 @@ export const RoleSelector: React.FC = () => {
           </div>
           <div className="flex items-center gap-4">
             <Link
-              to="/paths"
+              to={`/paths/${selectedRole.recommendedPathId}`}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-primary px-5 font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Start recommended path
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
             <button
               type="button"

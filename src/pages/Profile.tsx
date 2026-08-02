@@ -26,8 +26,8 @@ export const Profile: React.FC = () => {
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
         <div className="ui-card ui-card-lg flex flex-col items-center gap-4 min-w-[250px]">
-          <div className="w-32 h-32 rounded-full bg-linear-to-br from-primary to-accent p-1">
-            <div className="w-full h-full rounded-full bg-card flex items-center justify-center overflow-hidden">
+          <div className="w-32 h-32 rounded-full border-2 border-primary/40 p-1">
+            <div className="w-full h-full rounded-full bg-muted flex items-center justify-center overflow-hidden">
               <User className="w-16 h-16 text-muted-foreground" />
             </div>
           </div>
@@ -82,7 +82,7 @@ export const Profile: React.FC = () => {
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 1, ease: "easeOut" }}
-                  className="h-full bg-linear-to-r from-primary to-accent"
+                  className="h-full bg-primary"
                 />
               </div>
               <p className="text-body-sm text-muted-foreground text-right">

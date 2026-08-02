@@ -125,18 +125,10 @@ export const IntelRefresher: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className={`ui-card relative overflow-hidden p-6 ${
         overdueCount > 0
-          ? "bg-linear-to-br from-destructive/10 to-destructive/5 border-destructive/30"
-          : "bg-linear-to-br from-primary/10 to-primary/5 border-primary/30"
+          ? "border-destructive/35 border-l-[3px] border-l-destructive"
+          : "border-primary/35 border-l-[3px] border-l-primary"
       }`}
     >
-      {/* Decorative glow */}
-      <div
-        className={`absolute -top-10 -right-10 w-32 h-32 blur-3xl rounded-full pointer-events-none ${
-          overdueCount > 0 ? "bg-red-500/20" : "bg-primary/20"
-        }`}
-        aria-hidden="true"
-      />
-
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">

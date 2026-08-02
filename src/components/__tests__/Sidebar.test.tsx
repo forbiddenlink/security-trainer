@@ -50,11 +50,18 @@ describe("Sidebar", () => {
       expect(leaderboardLink).toHaveAttribute("href", "/leaderboard");
     });
 
-    it("renders all seven navigation items", () => {
+    it("renders all eight navigation items", () => {
       renderWithRouter(<Sidebar />);
 
       const navLinks = screen.getAllByRole("link");
-      expect(navLinks).toHaveLength(7);
+      expect(navLinks).toHaveLength(8);
+    });
+
+    it("has a link to Intel Review", () => {
+      renderWithRouter(<Sidebar />);
+
+      const reviewsLink = screen.getByRole("link", { name: /intel review/i });
+      expect(reviewsLink).toHaveAttribute("href", "/reviews");
     });
   });
 
@@ -97,10 +104,10 @@ describe("Sidebar", () => {
       expect(screen.getByText(/Clearance:/i)).toBeInTheDocument();
     });
 
-    it("displays Classified status", () => {
+    it("displays clearance level", () => {
       renderWithRouter(<Sidebar />);
 
-      expect(screen.getByText("Classified")).toBeInTheDocument();
+      expect(screen.getByText(/Level \d+/)).toBeInTheDocument();
     });
 
     it("displays system version", () => {

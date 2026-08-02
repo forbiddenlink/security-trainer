@@ -39,6 +39,19 @@ Session tokens were not properly invalidated after password changes, allowing at
 
 ## Session Fixation Attack
 
+\`\`\`mermaid
+sequenceDiagram
+    participant Attacker
+    participant Victim
+    participant Server
+
+    Attacker->>Server: Get session ID ABC
+    Attacker->>Victim: Trick into using ABC
+    Victim->>Server: Login with session ABC
+    Note over Server: No regeneration - same ID
+    Attacker->>Server: Use ABC - now authenticated!
+\`\`\`
+
 The attacker:
 1. Gets a valid session ID from the target site
 2. Tricks the victim into using that session ID (via URL or cookie)
@@ -47,7 +60,22 @@ The attacker:
 
 **Defense**: Regenerate session ID after login!
 
+::video[https://www.youtube.com/watch?v=UYLie3JEV2Y]{title="Session Fixation Explained" caption="How session fixation works and how to prevent it"}
+
 ## Secure Cookie Attributes
+
+\`\`\`mermaid
+flowchart TB
+    C[Session Cookie] --> H[HttpOnly - no JS access]
+    C --> S[Secure - HTTPS only]
+    C --> SS[SameSite - no cross-site send]
+    C --> E[maxAge - auto expire]
+
+    style H fill:#22c55e,color:#fff
+    style S fill:#22c55e,color:#fff
+    style SS fill:#22c55e,color:#fff
+    style E fill:#22c55e,color:#fff
+\`\`\`
 
 \`\`\`javascript
 // SECURE session cookie

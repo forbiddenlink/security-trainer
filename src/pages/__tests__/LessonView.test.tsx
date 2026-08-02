@@ -68,7 +68,7 @@ describe("LessonView", () => {
 
       renderWithRouter(<LessonView />);
 
-      expect(screen.getByText("Module not found")).toBeInTheDocument();
+      expect(screen.getByText("Mission not found")).toBeInTheDocument();
     });
   });
 

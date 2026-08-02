@@ -22,6 +22,26 @@ Path traversal vulnerabilities allow attackers to access files and directories o
 
 When an application uses user input to construct file paths without proper validation, attackers can use special characters to navigate the filesystem.
 
+\`\`\`mermaid
+flowchart LR
+    A[Input: ../../../etc/passwd] --> B[join with /uploads/]
+    B --> C[/var/www/uploads/../../../etc/passwd]
+    C --> D[Resolves to /etc/passwd]
+    D --> E[(Sensitive file leaked!)]
+
+    A2[Input: ../../../etc/passwd] --> B2[path.resolve + prefix check]
+    B2 --> F{Within /uploads/?}
+    F -->|No| G[403 Access denied]
+    F -->|Yes| H[Safe file read]
+
+    style A fill:#ef4444,color:#fff
+    style E fill:#ef4444,color:#fff
+    style G fill:#22c55e,color:#fff
+    style H fill:#22c55e,color:#fff
+\`\`\`
+
+::video[https://www.youtube.com/watch?v=bTtUidpFDos]{title="Path Traversal Explained" caption="How directory traversal attacks escape intended folders"}
+
 \`\`\`javascript
 // VULNERABLE: User controls the filename
 const file = req.query.file;

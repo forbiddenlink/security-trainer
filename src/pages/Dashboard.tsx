@@ -4,6 +4,7 @@ import { BadgeList } from "../components/BadgeList";
 import { DailyChallenge } from "../components/DailyChallenge";
 import { IntelRefresher } from "../components/IntelRefresher";
 import { RoleSelector } from "../components/RoleSelector";
+import { LiveLabTargets } from "../components/LiveLabTargets";
 import { MODULES } from "../data/modules";
 import { Card, Progress } from "../components/ui";
 import { ArrowRight } from "lucide-react";
@@ -28,36 +29,45 @@ export const Dashboard: React.FC = () => {
   const bonusPercent = Math.round((streakMultiplier - 1) * 100);
 
   return (
-    <div
-      className="space-y-8 max-w-6xl mx-auto"
-      role="main"
-    >
+    <div className="space-y-8 max-w-6xl mx-auto" role="main">
       {!userRole && xp === 0 && completedModules.length === 0 ? (
         <RoleSelector />
       ) : (
         <section
-          className="ui-card ui-card-lg relative overflow-hidden"
+          className="ui-card ui-card-lg ops-briefing relative overflow-hidden"
           aria-label="Welcome section"
         >
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <p className="ui-chip mb-3">Mission Status</p>
               <h2 className="text-h1 mb-2">Welcome back, Agent.</h2>
-              <p className="text-muted-foreground text-body-sm md:text-body">
+              <p className="text-muted-foreground text-body-sm md:text-body max-w-lg">
                 Current Clearance Level:{" "}
-                <span className="text-primary font-semibold">Level {level}</span>.
+                <span className="text-primary font-semibold">
+                  Level {level}
+                </span>
+                {currentModule ? (
+                  <>
+                    . Active dossier:{" "}
+                    <Link
+                      to={`/modules/${currentModule.id}`}
+                      className="text-foreground font-medium underline-offset-4 hover:underline"
+                    >
+                      {currentModule.title}
+                    </Link>
+                  </>
+                ) : (
+                  ". No active mission assigned."
+                )}
               </p>
             </div>
             <Link
-              to="/modules"
+              to={currentModule ? `/modules/${currentModule.id}` : "/modules"}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-primary px-5 font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
               aria-label="Resume training modules"
             >
-              Resume Training
-              <ArrowRight
-                className="w-4 h-4"
-                aria-hidden="true"
-              />
+              {currentModule ? "Continue Mission" : "Resume Training"}
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
         </section>
@@ -109,9 +119,19 @@ export const Dashboard: React.FC = () => {
           <p className="ui-label mb-2" id="mission-label">
             Active Mission
           </p>
-          <h3 className="text-h4 truncate" aria-labelledby="mission-label">
-            {currentModule?.title || "None assigned"}
-          </h3>
+          {currentModule ? (
+            <Link
+              to={`/modules/${currentModule.id}`}
+              className="text-h4 truncate block hover:text-primary transition-colors"
+              aria-labelledby="mission-label"
+            >
+              {currentModule.title}
+            </Link>
+          ) : (
+            <h3 className="text-h4 truncate" aria-labelledby="mission-label">
+              None assigned
+            </h3>
+          )}
         </Card>
 
         {/* Streak */}
@@ -145,6 +165,16 @@ export const Dashboard: React.FC = () => {
           Intel Refresher
         </h2>
         <IntelRefresher />
+      </section>
+
+      <section
+        aria-labelledby="live-range-heading"
+        className="ui-card ui-card-md"
+      >
+        <h2 id="live-range-heading" className="sr-only">
+          Live practice range
+        </h2>
+        <LiveLabTargets showAll />
       </section>
 
       <section aria-labelledby="achievements-heading">

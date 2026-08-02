@@ -70,16 +70,11 @@ export const PathDetail: React.FC = () => {
       {/* Header */}
       <section
         className={`ui-card ui-card-lg relative overflow-hidden ${
-          isCompleted ? "border-accent/50" : ""
+          isCompleted
+            ? "border-accent/50 border-l-[3px] border-l-accent"
+            : "ops-briefing"
         }`}
       >
-        <div
-          className={`absolute inset-0 pointer-events-none bg-linear-to-br ${
-            isCompleted
-              ? "from-accent/10 to-transparent"
-              : "from-primary/5 to-transparent"
-          }`}
-        />
         <div className="relative z-10">
           <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-1">
             {path.codename}

@@ -19,7 +19,8 @@ import {
   TerminalIcon,
   ChevronUp,
 } from "lucide-react";
-import { Button, Card, Input } from "../components/ui";
+import { Button, Card, EmptyState, Input } from "../components/ui";
+import { LiveLabTargets } from "../components/LiveLabTargets";
 import { Terminal, type TerminalCommand } from "../components/Terminal";
 import { useGameStore } from "../store/gameStore";
 import { CTF_CHALLENGES, getChallengeById } from "../data/ctfChallenges";
@@ -52,14 +53,14 @@ const difficultyColors = {
   easy: "text-accent",
   medium: "text-warning",
   hard: "text-destructive",
-  insane: "text-purple-500",
+  insane: "text-stamp",
 };
 
 const difficultyBgColors = {
   easy: "bg-accent/10 border-accent/30",
   medium: "bg-warning/10 border-warning/30",
   hard: "bg-destructive/10 border-destructive/30",
-  insane: "bg-purple-500/10 border-purple-500/30",
+  insane: "bg-stamp/10 border-stamp/30",
 };
 
 interface ChallengeCardProps {
@@ -85,8 +86,8 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
       className={clsx(
         "w-full text-left p-4 rounded-[var(--radius-sm)] border transition-all duration-200",
         isSelected
-          ? "bg-primary/10 border-primary/50 shadow-[var(--shadow-glow)]"
-          : "bg-card/60 border-border/50 hover:border-primary/30 hover:bg-card/80",
+          ? "bg-primary/10 border-primary/50"
+          : "bg-card/60 border-border/50 hover:border-primary/30 hover:bg-card/80 mission-card",
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -545,6 +546,14 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
         )}
       </Card>
 
+      {challenge.category === "web" && (
+        <div className="mb-6">
+          <LiveLabTargets
+            tags={[challenge.category, ...(challenge.tags ?? [])]}
+          />
+        </div>
+      )}
+
       {/* Hints */}
       {challenge.hints.length > 0 && (
         <Card className="mb-6 flex-shrink-0">
@@ -769,9 +778,14 @@ export const CTFChallenges: React.FC = () => {
     : null;
 
   return (
-    <div className="h-[calc(100vh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6 flex">
+    <div className="h-[calc(100vh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6 flex flex-col lg:flex-row">
       {/* Sidebar - Challenge list */}
-      <div className="w-96 border-r border-border/70 flex flex-col bg-card/50">
+      <div
+        className={clsx(
+          "border-r border-border/70 flex flex-col bg-card/50",
+          selectedChallenge ? "hidden lg:flex lg:w-96" : "flex w-full lg:w-96",
+        )}
+      >
         {/* Header with stats */}
         <div className="p-4 border-b border-border/70">
           <div className="flex items-center justify-between mb-4">
@@ -904,38 +918,51 @@ export const CTFChallenges: React.FC = () => {
           )}
 
           {filteredChallenges.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No challenges match your filters</p>
-            </div>
+            <EmptyState
+              className="py-12"
+              title="No challenges match"
+              description="Adjust search or filters to find a mission."
+              icon={<Search className="w-7 h-7" />}
+            />
           )}
         </div>
       </div>
 
       {/* Main content - Challenge detail */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div
+        className={clsx(
+          "flex-1 p-4 md:p-6 overflow-auto ops-grid-bg",
+          selectedChallenge ? "flex" : "hidden lg:flex",
+        )}
+      >
         <AnimatePresence mode="wait">
           {selectedChallengeData ? (
-            <ChallengeDetail
-              key={selectedChallengeData.id}
-              challenge={selectedChallengeData}
-            />
+            <div className="w-full">
+              <button
+                type="button"
+                className="lg:hidden mb-4 text-body-sm text-primary hover:underline"
+                onClick={() => setSelectedChallenge(null)}
+              >
+                ← Back to challenges
+              </button>
+              <ChallengeDetail
+                key={selectedChallengeData.id}
+                challenge={selectedChallengeData}
+              />
+            </div>
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-full flex flex-col items-center justify-center text-center"
+              className="h-full w-full flex flex-col items-center justify-center text-center"
             >
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <Flag className="w-10 h-10 text-primary" />
-              </div>
-              <h2 className="text-h2 mb-2">Select a Challenge</h2>
-              <p className="text-muted-foreground max-w-md">
-                Choose a challenge from the list to view its description, hints,
-                and submit your flag.
-              </p>
-              <div className="mt-8 grid grid-cols-3 gap-6 text-center">
+              <EmptyState
+                title="Select a Challenge"
+                description="Choose a challenge from the list to view its description, hints, and submit your flag."
+                icon={<Flag className="w-8 h-8 text-primary" />}
+              />
+              <div className="mt-2 grid grid-cols-3 gap-6 text-center">
                 <div>
                   <div className="text-h1 font-mono text-primary">
                     {totalChallenges}

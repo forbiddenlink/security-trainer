@@ -14,11 +14,10 @@ export const Paths: React.FC = () => {
       role="main"
     >
       {/* Header */}
-      <section className="ui-card ui-card-lg ui-card-elevated relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none bg-linear-to-r from-primary/6 via-transparent to-accent/6" />
+      <section className="ui-card ui-card-lg ops-briefing relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-[var(--radius-sm)] bg-primary/10 border border-primary/20 flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-primary" />
             </div>
             <div>
@@ -26,7 +25,7 @@ export const Paths: React.FC = () => {
             </div>
           </div>
           <h1 className="text-h1 mb-2">Learning Paths</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground max-w-2xl">
             Choose your mission track and earn certifications. Complete all
             modules in a path to become a certified specialist.
           </p>

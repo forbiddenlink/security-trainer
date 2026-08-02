@@ -4,7 +4,8 @@ import { MODULES } from "../data/modules";
 import { useGameStore } from "../store/gameStore";
 import { TheoryView, QuizView, LabView } from "../components/lesson";
 import { ReviewModal } from "../components/ReviewModal";
-import { Button, Progress } from "../components/ui";
+import { LiveLabTargets } from "../components/LiveLabTargets";
+import { Button, EmptyState, Progress } from "../components/ui";
 import {
   ChevronRight,
   ChevronLeft,
@@ -60,7 +61,20 @@ export const LessonView: React.FC = () => {
     setLabCompleted(false);
   }, [currentLessonIndex]);
 
-  if (!module || !currentLesson) return <div>Module not found</div>;
+  if (!module || !currentLesson) {
+    return (
+      <EmptyState
+        className="min-h-[50vh]"
+        title="Mission not found"
+        description="This module or lesson does not exist. Return to Active Operations."
+        action={
+          <Button onClick={() => navigate("/modules")} variant="primary">
+            Back to Modules
+          </Button>
+        }
+      />
+    );
+  }
 
   const getLessonIcon = (type: string) => {
     switch (type) {
@@ -232,7 +246,10 @@ export const LessonView: React.FC = () => {
             className="h-full overflow-auto px-4 py-6 md:px-8 md:py-8"
           >
             {currentLesson.type === "theory" && (
-              <TheoryView content={currentLesson.content || ""} />
+              <div className="space-y-6 max-w-3xl">
+                <TheoryView content={currentLesson.content || ""} />
+                <LiveLabTargets moduleId={module.id} />
+              </div>
             )}
 
             {currentLesson.type === "quiz" && currentLesson.quiz && (
@@ -244,12 +261,17 @@ export const LessonView: React.FC = () => {
             )}
 
             {currentLesson.type === "lab" && currentLesson.lab && (
-              <LabView
-                key={currentLesson.id}
-                lab={currentLesson.lab}
-                lessonId={currentLesson.id}
-                onSuccess={() => setLabCompleted(true)}
-              />
+              <div className="h-full flex flex-col gap-4">
+                <div className="flex-1 min-h-0">
+                  <LabView
+                    key={currentLesson.id}
+                    lab={currentLesson.lab}
+                    lessonId={currentLesson.id}
+                    onSuccess={() => setLabCompleted(true)}
+                  />
+                </div>
+                <LiveLabTargets moduleId={module.id} className="shrink-0" />
+              </div>
             )}
           </motion.div>
         </AnimatePresence>

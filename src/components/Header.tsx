@@ -21,6 +21,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
   // Use selectors for better performance - only re-render when specific values change
   const xp = useGameStore((state) => state.xp);
   const level = useGameStore((state) => state.level);
+  const syncStatus = useGameStore((state) => state.syncStatus);
   const checkStreak = useGameStore((state) => state.checkStreak);
   const checkDailyChallenge = useGameStore(
     (state) => state.checkDailyChallenge,
@@ -107,7 +108,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
             min={0}
             max={nextLevelXp}
             aria-label={`${xp} of ${nextLevelXp} XP to next level`}
-            indicatorClassName="bg-linear-to-r from-primary to-accent"
+            indicatorClassName="bg-primary"
           />
           <span
             className="text-caption text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1"
@@ -123,6 +124,25 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
         <StreakIndicator />
 
         <ThemeToggle />
+
+        {user && syncStatus !== "idle" && (
+          <span
+            className={`ui-chip hidden sm:inline-flex ${
+              syncStatus === "synced"
+                ? "border-accent/35 text-accent bg-accent/8"
+                : syncStatus === "error"
+                  ? "border-destructive/35 text-destructive bg-destructive/8"
+                  : "border-warning/35 text-warning bg-warning/8"
+            }`}
+            aria-live="polite"
+          >
+            {syncStatus === "syncing" || syncStatus === "retrying"
+              ? "Syncing"
+              : syncStatus === "synced"
+                ? "Synced"
+                : "Sync error"}
+          </span>
+        )}
 
         {isSupabaseConfigured() ? (
           loading ? (
@@ -142,7 +162,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
                     className="w-8 h-8 rounded-full object-cover border border-primary/20"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent border border-primary/30 flex items-center justify-center text-primary-foreground text-sm font-bold">
+                  <div className="w-8 h-8 rounded-full bg-muted border border-primary/30 flex items-center justify-center text-foreground text-sm font-bold">
                     {avatarInitial}
                   </div>
                 )}
@@ -189,7 +209,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
           )
         ) : (
           <div
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent border border-primary/20"
+            className="w-9 h-9 rounded-full bg-muted border border-primary/20"
             role="img"
             aria-label="User avatar"
           />
