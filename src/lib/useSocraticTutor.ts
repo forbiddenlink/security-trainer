@@ -1,24 +1,11 @@
 /**
  * useSocraticTutor — AI tutor using the Socratic method for security-trainer.
  *
- * WHY ADDED: security-trainer currently gives direct answers/hints. Research shows
- * learners retain security concepts significantly better when guided to discover
- * answers themselves (Socratic method). This hook intercepts "give me the answer"
- * requests and reformulates them as probing questions that push the learner to think.
- *
- * WHAT IT DOES:
- *  - Takes the current challenge context + learner's stuck point
- *  - Returns 3 levels of Socratic hints (gentle → moderate → strong)
- *  - Uses @ai-sdk/groq (already in deps) for real-time streaming hints
- *  - Tracks which hints were viewed (for analytics + FSRS scheduling)
- *  - Falls back to pre-authored hints if AI is unavailable
- *
- * USAGE:
- *   const { getHint, hints, hintLevel, isLoading } = useSocraticTutor(challenge)
- *   await getHint('Why can the attacker bypass this check?')
+ * Returns progressive probing hints (gentle → strong). Falls back to
+ * pre-authored staticHints when the AI endpoint is unavailable.
  */
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface SecurityChallenge {
   id: string;
@@ -30,7 +17,14 @@ export interface SecurityChallenge {
     | "path-traversal"
     | "auth-bypass"
     | "ssrf"
-    | "xxe";
+    | "xxe"
+    | "command-injection"
+    | "cors"
+    | "jwt"
+    | "deserialization"
+    | "file-upload"
+    | "misconfig"
+    | "general";
   vulnerableCode: string;
   /** Pre-authored fallback hints (no AI needed) */
   staticHints: [string, string, string];
@@ -43,16 +37,18 @@ export interface SocraticHint {
 }
 
 export interface UseSocraticTutorReturn {
-  /** Request the next hint level */
-  getHint: (learnerQuestion?: string) => Promise<void>;
+  /** Request the next hint level; returns the hint or null if exhausted/loading */
+  getHint: (learnerQuestion?: string) => Promise<SocraticHint | null>;
   /** All hints revealed so far (max 3) */
   hints: SocraticHint[];
   /** Current hint level reached (0 = none) */
   hintLevel: 0 | 1 | 2 | 3;
   isLoading: boolean;
-  /** Whether all 3 hints have been shown — suggest they view the solution */
+  /** Whether all 3 hints have been shown */
   isExhausted: boolean;
   error: string | null;
+  /** Clear revealed hints (e.g. on lab reset) */
+  resetHints: () => void;
 }
 
 const CATEGORY_CONCEPTS: Record<SecurityChallenge["category"], string[]> = {
@@ -91,6 +87,41 @@ const CATEGORY_CONCEPTS: Record<SecurityChallenge["category"], string[]> = {
     "What local files or network resources could be referenced via XXE?",
     "How does disabling DTD processing prevent this attack?",
   ],
+  "command-injection": [
+    "Is shell metacharacter interpretation possible with this input?",
+    "What's safer: shell string concat or argv array execution?",
+    "How do you validate/escape arguments before spawning a process?",
+  ],
+  cors: [
+    "What does Access-Control-Allow-Origin: * imply for credentialed requests?",
+    "Why reflecting the Origin header is dangerous?",
+    "How does an allowlist of trusted origins reduce risk?",
+  ],
+  jwt: [
+    "Why is algorithm confusion a risk for JWT verification?",
+    "What does accepting the 'none' algorithm enable?",
+    "How does pinning allowed algorithms protect verification?",
+  ],
+  deserialization: [
+    "What's the difference between data and executable payloads?",
+    "How does signature verification prove integrity of serialized state?",
+    "Why is Function/eval-based deserialization unsafe?",
+  ],
+  "file-upload": [
+    "What trust boundaries exist between filename, content-type, and bytes?",
+    "How can path or extension tricks bypass naive filters?",
+    "Why generate server-side filenames for uploads?",
+  ],
+  misconfig: [
+    "Which defaults are convenient for developers but unsafe in production?",
+    "What security headers reduce clickjacking and MIME sniffing?",
+    "How do you inventory and harden exposed debug endpoints?",
+  ],
+  general: [
+    "What trust boundary is being crossed in this code?",
+    "Where does untrusted input influence a privileged action?",
+    "What invariant should remain true even if the attacker controls inputs?",
+  ],
 };
 
 export function useSocraticTutor(
@@ -104,16 +135,52 @@ export function useSocraticTutor(
   const isExhausted = hintLevel >= 3;
 
   const abortRef = useRef<AbortController | null>(null);
+  const hintsLenRef = useRef(0);
+  // Keep the latest length in a ref (updated in an effect, never during render)
+  // so getHint reads a fresh count without re-creating on every hint.
+  useEffect(() => {
+    hintsLenRef.current = hints.length;
+  }, [hints.length]);
+
+  // Reset when switching labs (skip first mount — state is already empty).
+  const firstMountRef = useRef(true);
+  useEffect(() => {
+    if (firstMountRef.current) {
+      firstMountRef.current = false;
+      return;
+    }
+    abortRef.current?.abort();
+    setHints([]);
+    setError(null);
+    setIsLoading(false);
+  }, [challenge.id]);
+
+  const resetHints = useCallback(() => {
+    abortRef.current?.abort();
+    setHints([]);
+    setError(null);
+    setIsLoading(false);
+  }, []);
 
   const getHint = useCallback(
-    async (learnerQuestion?: string) => {
-      if (isExhausted || isLoading) return;
+    async (learnerQuestion?: string): Promise<SocraticHint | null> => {
+      if (hintsLenRef.current >= 3 || isLoading) return null;
 
-      const nextLevel = (hintLevel + 1) as 1 | 2 | 3;
+      const nextLevel = (hintsLenRef.current + 1) as 1 | 2 | 3;
       setIsLoading(true);
       setError(null);
 
-      // Try AI hint first
+      const fallbackHint = (): SocraticHint => {
+        const staticHint = challenge.staticHints[nextLevel - 1];
+        const concept =
+          CATEGORY_CONCEPTS[challenge.category]?.[nextLevel - 1] ?? "";
+        return {
+          level: nextLevel,
+          question: staticHint,
+          conceptPointer: concept,
+        };
+      };
+
       try {
         abortRef.current?.abort();
         abortRef.current = new AbortController();
@@ -137,39 +204,47 @@ export function useSocraticTutor(
 
         if (!res.ok) throw new Error("AI unavailable");
 
-        const { hint, conceptPointer } = await res.json();
+        const data = (await res.json()) as {
+          hint?: string;
+          conceptPointer?: string;
+        };
 
-        setHints((prev) => [
-          ...prev,
-          { level: nextLevel, question: hint, conceptPointer },
-        ]);
+        const hint: SocraticHint = {
+          level: nextLevel,
+          question: data.hint?.trim() || fallbackHint().question,
+          conceptPointer:
+            data.conceptPointer?.trim() || fallbackHint().conceptPointer,
+        };
+
+        setHints((prev) => [...prev, hint]);
+        return hint;
       } catch (e) {
-        if ((e as Error).name === "AbortError") return;
+        if ((e as Error).name === "AbortError") return null;
 
-        // Fallback to static hints
-        const staticHint = challenge.staticHints[nextLevel - 1];
-        const concept =
-          CATEGORY_CONCEPTS[challenge.category]?.[nextLevel - 1] ?? "";
-
-        setHints((prev) => [
-          ...prev,
-          { level: nextLevel, question: staticHint, conceptPointer: concept },
-        ]);
+        const hint = fallbackHint();
+        setHints((prev) => [...prev, hint]);
 
         if (e instanceof Error && e.message !== "AI unavailable") {
           setError(e.message);
         }
+        return hint;
       } finally {
         setIsLoading(false);
       }
     },
-    [challenge, hintLevel, isExhausted, isLoading],
+    [challenge, isLoading],
   );
 
-  return { getHint, hints, hintLevel, isLoading, isExhausted, error };
+  return {
+    getHint,
+    hints,
+    hintLevel,
+    isLoading,
+    isExhausted,
+    error,
+    resetHints,
+  };
 }
-
-// ── Prompt builder ─────────────────────────────────────────────────────────
 
 function buildSocraticPrompt(
   challenge: SecurityChallenge,
