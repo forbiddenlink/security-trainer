@@ -1,0 +1,15 @@
+# gitleaks config for security-trainer.
+#
+# The app teaches web security, so src/data/** deliberately contains FAKE
+# credentials as lesson/CTF material (example JWTs, sample API keys, demo flags).
+# Allowlist that path so real leaks aren't buried under teaching-content noise.
+title = "security-trainer gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Educational sample secrets in lesson/CTF content are not real credentials"
+paths = [
+  '''src/data/.*''',
+]

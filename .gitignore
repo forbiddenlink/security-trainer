@@ -53,3 +53,4 @@ out/
 # Playwright test output
 test-results/
 playwright-report/
+.audit-report.md

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Trophy, Medal, Crown, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
-import { Button } from "../components/ui";
+import { Button, Skeleton } from "../components/ui";
 import { isSupabaseConfigured } from "../lib/supabase";
 import { getSafeAvatarUrl } from "../utils/urlValidation";
 
@@ -10,6 +10,7 @@ export const Leaderboard: React.FC = () => {
   const {
     user,
     leaderboard,
+    leaderboardLoading,
     userRank,
     profile,
     fetchLeaderboard,
@@ -133,7 +134,16 @@ export const Leaderboard: React.FC = () => {
       )}
 
       <div className="space-y-3">
-        {leaderboard.length === 0 ? (
+        {leaderboardLoading && leaderboard.length === 0 ? (
+          <div className="space-y-3" aria-hidden="true">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                className="h-16 w-full rounded-[var(--radius-md)]"
+              />
+            ))}
+          </div>
+        ) : leaderboard.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Trophy className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>No agents on the leaderboard yet. Be the first!</p>

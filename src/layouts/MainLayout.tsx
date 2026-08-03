@@ -1,14 +1,36 @@
-import React, { useState, useCallback } from "react";
-import { Outlet } from "react-router-dom";
+import React, { useState, useCallback, useEffect } from "react";
+import { Outlet, useLocation, Link } from "react-router-dom";
 import { Sidebar } from "../components/Sidebar";
 import { Header } from "../components/Header";
 import { LevelUpToast } from "../components/LevelUpToast";
 import { AchievementToast } from "../components/AchievementToast";
 
+const BASE_TITLE = "SecTrainer";
+// Map the first path segment to a descriptive document title.
+const ROUTE_TITLES: Record<string, string> = {
+  "": "Mission Control",
+  modules: "Modules",
+  profile: "Profile",
+  challenge: "Daily Challenge",
+  leaderboard: "Leaderboard",
+  paths: "Learning Paths",
+  reviews: "Reviews",
+  ctf: "CTF Challenges",
+};
+
 export const MainLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), []);
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const seg = pathname.split("/")[1] ?? "";
+    const label = ROUTE_TITLES[seg];
+    document.title = label
+      ? `${label} · ${BASE_TITLE}`
+      : `${BASE_TITLE} | Cyber Security Training`;
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground antialiased selection:bg-primary/20">
@@ -45,11 +67,27 @@ export const MainLayout: React.FC = () => {
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 overflow-auto relative z-0"
+          className="flex-1 overflow-auto relative z-0 outline-none"
         >
           <div className="mx-auto w-full max-w-[1200px] px-4 py-4 md:px-6 md:py-6">
             <Outlet />
           </div>
+          <footer className="mx-auto w-full max-w-[1200px] px-4 md:px-6 py-6 mt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-2 text-caption text-muted-foreground">
+            <span>SecTrainer — free, hands-on security training.</span>
+            <nav className="flex items-center gap-4">
+              <Link to="/privacy" className="hover:text-foreground">
+                Privacy &amp; Terms
+              </Link>
+              <a
+                href="https://github.com/forbiddenlink/security-trainer"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground"
+              >
+                GitHub
+              </a>
+            </nav>
+          </footer>
         </main>
         <LevelUpToast />
         <AchievementToast />

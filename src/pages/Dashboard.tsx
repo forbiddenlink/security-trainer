@@ -28,8 +28,23 @@ export const Dashboard: React.FC = () => {
   const streakMultiplier = getStreakMultiplier();
   const bonusPercent = Math.round((streakMultiplier - 1) * 100);
 
+  const isNewVisitor = xp === 0 && completedModules.length === 0;
+
   return (
-    <div className="space-y-8 max-w-6xl mx-auto" role="main">
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {isNewVisitor && (
+        <section className="ui-card ui-card-lg" aria-label="What SecTrainer is">
+          <p className="ui-chip mb-3">New here?</p>
+          <h1 className="text-h1 mb-2">Learn web security by doing.</h1>
+          <p className="text-muted-foreground max-w-2xl text-body-sm md:text-body">
+            SecTrainer is a free, hands-on trainer for web security —{" "}
+            {MODULES.length}+ modules across the OWASP Top 10, injection, auth
+            flaws, cloud, and compliance, with in-browser code labs, quizzes,
+            and CTF challenges. No signup required; your progress saves in this
+            browser. Pick a track below to begin.
+          </p>
+        </section>
+      )}
       {!userRole && xp === 0 && completedModules.length === 0 ? (
         <RoleSelector />
       ) : (
@@ -43,7 +58,7 @@ export const Dashboard: React.FC = () => {
                 <span className="range-dot" aria-hidden="true" />
                 <span className="range-readout">Range Status // Online</span>
               </div>
-              <h2 className="text-h1 mb-2">Welcome back, Agent.</h2>
+              <h1 className="text-h1 mb-2">Welcome back, Agent.</h1>
               <p className="text-muted-foreground text-body-sm md:text-body max-w-lg">
                 Current Clearance Level:{" "}
                 <span className="text-primary font-semibold">

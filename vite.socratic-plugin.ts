@@ -3,6 +3,10 @@
  * Mirrors the Vercel serverless handler; uses GROQ_API_KEY from env.
  */
 import type { Plugin, Connect } from "vite";
+import {
+  buildSocraticPrompt,
+  parseSocraticBody,
+} from "./src/lib/socraticPrompt";
 
 const MAX_BODY_BYTES = 16_384;
 
@@ -52,23 +56,14 @@ export function socraticHintApiPlugin(): Plugin {
 
         try {
           const raw = await readBody(req);
-          const body = JSON.parse(raw || "{}") as {
-            prompt?: string;
-            level?: number;
-          };
-
-          if (!body.prompt) {
+          const parsed = parseSocraticBody(JSON.parse(raw || "{}"));
+          if (!parsed.ok) {
             res.statusCode = 400;
             res.setHeader("Content-Type", "application/json");
-            res.end(JSON.stringify({ error: "Missing prompt" }));
+            res.end(JSON.stringify({ error: parsed.error }));
             return;
           }
-          if (body.prompt.length > 4000) {
-            res.statusCode = 413;
-            res.setHeader("Content-Type", "application/json");
-            res.end(JSON.stringify({ error: "Prompt too large" }));
-            return;
-          }
+          const prompt = buildSocraticPrompt(parsed.value);
 
           const response = await fetch(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -88,7 +83,7 @@ export function socraticHintApiPlugin(): Plugin {
                     content:
                       'You are a cybersecurity instructor using the Socratic method. Reply with JSON only: {"hint":"...","conceptPointer":"..."}',
                   },
-                  { role: "user", content: body.prompt },
+                  { role: "user", content: prompt },
                 ],
               }),
             },
@@ -105,9 +100,9 @@ export function socraticHintApiPlugin(): Plugin {
             choices?: { message?: { content?: string } }[];
           };
           const content = data.choices?.[0]?.message?.content ?? "{}";
-          let parsed: { hint?: string; conceptPointer?: string } = {};
+          let result: { hint?: string; conceptPointer?: string } = {};
           try {
-            parsed = JSON.parse(content);
+            result = JSON.parse(content);
           } catch {
             res.statusCode = 502;
             res.setHeader("Content-Type", "application/json");
@@ -119,9 +114,9 @@ export function socraticHintApiPlugin(): Plugin {
           res.setHeader("Content-Type", "application/json");
           res.end(
             JSON.stringify({
-              hint: (parsed.hint ?? "").slice(0, 500),
-              conceptPointer: (parsed.conceptPointer ?? "").slice(0, 300),
-              level: body.level ?? 1,
+              hint: (result.hint ?? "").slice(0, 500),
+              conceptPointer: (result.conceptPointer ?? "").slice(0, 300),
+              level: parsed.value.level,
             }),
           );
         } catch {

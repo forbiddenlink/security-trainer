@@ -30,7 +30,7 @@ export const LEARNING_PATHS: LearningPath[] = [
     title: "API & Backend Security",
     codename: "Operation Backend",
     description:
-      "Secure APIs and server-side systems. Deep dive into authentication, authorization, and backend-specific attack vectors.",
+      "Secure APIs and server-side systems. Master authentication, authorization, and the attack vectors unique to backend systems.",
     difficulty: "Intermediate",
     modules: [
       "api-security",

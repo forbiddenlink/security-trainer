@@ -3,8 +3,18 @@ import { useGameStore } from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
 import { BadgeList } from "../components/BadgeList";
 import { MODULES } from "../data/modules";
-import { User, Shield, Trophy, Target, Award, Pencil } from "lucide-react";
+import {
+  User,
+  Shield,
+  Trophy,
+  Target,
+  Award,
+  Pencil,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Certificate } from "../components/Certificate";
 import { ProfileEditModal } from "../components/ProfileEditModal";
 import { RoleSelector } from "../components/RoleSelector";
@@ -19,10 +29,20 @@ const ROLE_LABELS: Record<string, string> = {
 
 export const Profile: React.FC = () => {
   const { xp, level, streakDays, completedModules, userRole } = useGameStore();
-  const { profile, user } = useAuthStore();
+  const { profile, user, loading, deleteAccount } = useAuthStore();
   const displayName = profile?.display_name || "Agent";
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showRolePicker, setShowRolePicker] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const navigate = useNavigate();
+
+  const handleDeleteAccount = async () => {
+    const { error } = await deleteAccount();
+    if (!error) {
+      useGameStore.getState().resetProgress();
+      navigate("/");
+    }
+  };
 
   useEffect(() => {
     // Use getState to ensure we always get the latest function reference
@@ -165,6 +185,47 @@ export const Profile: React.FC = () => {
       <div className="ui-card ui-card-lg">
         <Certificate />
       </div>
+
+      {user && (
+        <div className="ui-card ui-card-lg border border-destructive/30">
+          <h3 className="text-h4 mb-2 flex items-center gap-2 text-destructive">
+            <AlertTriangle className="w-5 h-5" /> Danger Zone
+          </h3>
+          <p className="text-body-sm text-muted-foreground mb-4">
+            Delete your account and stored progress. This permanently removes
+            your saved profile data and cannot be undone.
+          </p>
+          {confirmingDelete ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-body-sm text-foreground">
+                Are you sure? This is permanent.
+              </span>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={loading}
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-md)] bg-destructive text-white font-medium hover:bg-destructive/90 disabled:opacity-60"
+              >
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                Yes, delete my account
+              </button>
+              <button
+                onClick={() => setConfirmingDelete(false)}
+                disabled={loading}
+                className="h-10 px-4 rounded-[var(--radius-md)] border border-border font-medium hover:bg-muted/70"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmingDelete(true)}
+              className="h-10 px-4 rounded-[var(--radius-md)] border border-destructive/50 text-destructive font-medium hover:bg-destructive/10"
+            >
+              Delete account
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Profile Edit Modal */}
       <ProfileEditModal
