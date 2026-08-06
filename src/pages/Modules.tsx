@@ -112,6 +112,12 @@ export const Modules: React.FC = () => {
   return (
     <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in duration-500">
       <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <span className="range-dot" aria-hidden="true" />
+          <span className="range-readout">
+            Mission Board // {MODULES.length} Ops
+          </span>
+        </div>
         <h1 className="text-h1">Active Operations</h1>
         <p className="text-muted-foreground text-body">
           Select a mission to upgrade your security clearance level.
@@ -192,6 +198,15 @@ export const Modules: React.FC = () => {
               lessonTotal > 0
                 ? Math.round((lessonDone / lessonTotal) * 100)
                 : 0;
+            const threatClass =
+              module.difficulty === "Beginner"
+                ? "threat-lo"
+                : module.difficulty === "Intermediate"
+                  ? "threat-mid"
+                  : "threat-hi";
+            const designator = `OP-${String(
+              MODULES.findIndex((m) => m.id === module.id) + 1,
+            ).padStart(2, "0")}`;
 
             return (
               <Card
@@ -200,9 +215,13 @@ export const Modules: React.FC = () => {
                   "group relative overflow-hidden ui-card-md",
                   isLocked
                     ? "bg-muted/20 opacity-70"
-                    : "mission-card ui-card-interactive",
+                    : "mission-card ui-card-interactive range-scan",
                 )}
               >
+                <span
+                  className={clsx("threat-bar", isLocked ? "" : threatClass)}
+                  aria-hidden="true"
+                />
                 <div className="grid gap-6 md:grid-cols-[1fr_220px] items-start md:items-center relative z-10">
                   <div className="flex gap-4 min-w-0">
                     <div
@@ -216,6 +235,7 @@ export const Modules: React.FC = () => {
                       <Shield className="w-6 h-6 relative z-10" />
                     </div>
                     <div className="min-w-0 flex-1">
+                      <span className="op-tag block mb-1">{designator}</span>
                       <div className="flex items-center gap-3 mb-1 flex-wrap">
                         <h3 className="text-h4 group-hover:text-primary transition-colors">
                           {module.title}

@@ -495,6 +495,216 @@ h2 {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CYBER RANGE — BRIEFING ROOM SIGNATURE
+   Phosphor-green range accents (var(--color-terminal)) kept distinct from
+   the navy/brass primary. Motion is decorative and opt-in via
+   prefers-reduced-motion: no-preference; static fallbacks read fully.
+   ═══════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* Briefing panel — faint sector grid washed toward one corner */
+  .range-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .range-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(
+        color-mix(in oklab, var(--color-terminal) 15%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--color-terminal) 15%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 75% 130% at 88% -25%,
+      #000 0%,
+      transparent 68%
+    );
+    mask-image: radial-gradient(
+      ellipse 75% 130% at 88% -25%,
+      #000 0%,
+      transparent 68%
+    );
+    opacity: 0.85;
+  }
+
+  /* L-shaped corner registration ticks (drawn as 8 gradient strips) */
+  .range-ticks::after {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    z-index: 1;
+    pointer-events: none;
+    --tick: color-mix(in oklab, var(--color-terminal) 60%, transparent);
+    --len: 13px;
+    --w: 1.5px;
+    background:
+      linear-gradient(var(--tick), var(--tick)) top left / var(--len) var(--w)
+        no-repeat,
+      linear-gradient(var(--tick), var(--tick)) top left / var(--w) var(--len)
+        no-repeat,
+      linear-gradient(var(--tick), var(--tick)) top right / var(--len) var(--w)
+        no-repeat,
+      linear-gradient(var(--tick), var(--tick)) top right / var(--w) var(--len)
+        no-repeat,
+      linear-gradient(var(--tick), var(--tick)) bottom left / var(--len)
+        var(--w) no-repeat,
+      linear-gradient(var(--tick), var(--tick)) bottom left / var(--w)
+        var(--len) no-repeat,
+      linear-gradient(var(--tick), var(--tick)) bottom right / var(--len)
+        var(--w) no-repeat,
+      linear-gradient(var(--tick), var(--tick)) bottom right / var(--w)
+        var(--len) no-repeat;
+  }
+
+  /* Range-status readout — mono, phosphor, wide-tracked */
+  .range-readout {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: color-mix(
+      in oklab,
+      var(--color-terminal) 78%,
+      var(--color-foreground)
+    );
+  }
+
+  .range-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--color-terminal);
+    box-shadow: 0 0 0 0
+      color-mix(in oklab, var(--color-terminal) 55%, transparent);
+    flex-shrink: 0;
+  }
+
+  /* Operation designator — mono call-sign for mission cards */
+  .op-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--color-muted-foreground);
+  }
+
+  /* Threat-level left bar (persistent, distinct from mission-card hover bar) */
+  .threat-bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    z-index: 2;
+    background: var(--threat, var(--color-border));
+  }
+  .threat-lo {
+    --threat: var(--color-accent);
+  }
+  .threat-mid {
+    --threat: var(--color-warning);
+  }
+  .threat-hi {
+    --threat: var(--color-destructive);
+  }
+
+  /* Quiz option key — A/B/C/D designator box */
+  .quiz-key {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-xs);
+    font-size: var(--text-body-sm);
+    line-height: 1;
+    flex-shrink: 0;
+    border: 1px solid var(--color-border);
+    color: var(--color-muted-foreground);
+  }
+
+  /* Range verdict — after-action result panel */
+  .range-verdict-title {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: var(--text-body-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* Scan-sweep — a thin phosphor wash that runs on hover only */
+  .range-scan {
+    position: relative;
+    overflow: hidden;
+  }
+  .range-scan::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 45%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-terminal) 12%, transparent),
+      transparent
+    );
+    transform: translateY(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .range-dot {
+    animation: range-pulse 2.2s ease-out infinite;
+  }
+  .range-scan:hover::after {
+    animation: range-sweep 1.5s var(--ease-smooth) infinite;
+  }
+  @keyframes range-pulse {
+    0% {
+      box-shadow: 0 0 0 0
+        color-mix(in oklab, var(--color-terminal) 55%, transparent);
+    }
+    70% {
+      box-shadow: 0 0 0 7px transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+  @keyframes range-sweep {
+    0% {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    18% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(320%);
+      opacity: 0;
+    }
+  }
+}
+
 @media (max-width: 768px) {
   body {
     font-size: 15px;
