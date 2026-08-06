@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useCallback, useState, memo } from "react";
-import { Terminal as XTerm } from "xterm";
+import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
-import "xterm/css/xterm.css";
+import "@xterm/xterm/css/xterm.css";
 import { cn } from "../lib/cn";
 
 export interface TerminalCommand {
@@ -133,11 +133,17 @@ const defaultCommands: TerminalCommand[] = [
     description: "Show available commands",
     handler: (_args, terminal) => {
       terminal.writeLine("\r\n\x1b[1;36mAvailable Commands:\x1b[0m\r\n");
-      terminal.writeLine("  \x1b[1;33mhelp\x1b[0m     - Show this help message");
+      terminal.writeLine(
+        "  \x1b[1;33mhelp\x1b[0m     - Show this help message",
+      );
       terminal.writeLine("  \x1b[1;33mclear\x1b[0m    - Clear the terminal");
       terminal.writeLine("  \x1b[1;33mwhoami\x1b[0m   - Display current user");
-      terminal.writeLine("  \x1b[1;33mdate\x1b[0m     - Show current date/time");
-      terminal.writeLine("  \x1b[1;33mecho\x1b[0m     - Print arguments to terminal");
+      terminal.writeLine(
+        "  \x1b[1;33mdate\x1b[0m     - Show current date/time",
+      );
+      terminal.writeLine(
+        "  \x1b[1;33mecho\x1b[0m     - Print arguments to terminal",
+      );
       terminal.writeLine("");
     },
   },
@@ -246,7 +252,7 @@ export const Terminal: React.FC<TerminalProps> = memo(
 
         // Find and execute the command
         const command = allCommands.find(
-          (cmd) => cmd.name.toLowerCase() === commandName
+          (cmd) => cmd.name.toLowerCase() === commandName,
         );
 
         if (command) {
@@ -254,23 +260,23 @@ export const Terminal: React.FC<TerminalProps> = memo(
             await command.handler(args, terminalApi.current);
           } catch (error) {
             terminalApi.current.writeLine(
-              `\r\n\x1b[1;31mError executing command: ${error instanceof Error ? error.message : "Unknown error"}\x1b[0m`
+              `\r\n\x1b[1;31mError executing command: ${error instanceof Error ? error.message : "Unknown error"}\x1b[0m`,
             );
             terminalApi.current.writeLine("");
           }
         } else {
           terminalApi.current.writeLine(
-            `\r\n\x1b[1;31mCommand not found: ${commandName}\x1b[0m`
+            `\r\n\x1b[1;31mCommand not found: ${commandName}\x1b[0m`,
           );
           terminalApi.current.writeLine(
-            '\x1b[0;37mType "help" for available commands.\x1b[0m'
+            '\x1b[0;37mType "help" for available commands.\x1b[0m',
           );
           terminalApi.current.writeLine("");
         }
 
         terminalApi.current.prompt();
       },
-      [allCommands, onCommand]
+      [allCommands, onCommand],
     );
 
     // Initialize terminal
@@ -351,9 +357,7 @@ export const Terminal: React.FC<TerminalProps> = memo(
                 const afterCursor = line.slice(cursorPositionRef.current + 1);
                 if (afterCursor) {
                   xterm.write(afterCursor + " ");
-                  xterm.write(
-                    "\b".repeat(afterCursor.length + 1)
-                  );
+                  xterm.write("\b".repeat(afterCursor.length + 1));
                 }
                 return newLine;
               }
@@ -370,7 +374,7 @@ export const Terminal: React.FC<TerminalProps> = memo(
               if (parts.length === 1) {
                 const partial = parts[0].toLowerCase();
                 const matches = allCommands.filter((cmd) =>
-                  cmd.name.toLowerCase().startsWith(partial)
+                  cmd.name.toLowerCase().startsWith(partial),
                 );
                 if (matches.length === 1) {
                   const completion = matches[0].name.slice(partial.length);
@@ -379,9 +383,7 @@ export const Terminal: React.FC<TerminalProps> = memo(
                   return line + completion;
                 } else if (matches.length > 1) {
                   xterm.writeln("");
-                  xterm.writeln(
-                    matches.map((m) => `  ${m.name}`).join("  ")
-                  );
+                  xterm.writeln(matches.map((m) => `  ${m.name}`).join("  "));
                   xterm.write(`${promptRef.current} ${line}`);
                 }
               }
@@ -402,7 +404,10 @@ export const Terminal: React.FC<TerminalProps> = memo(
                 if (cmd) {
                   setCurrentLine((line) => {
                     // Clear current line
-                    xterm.write("\r" + " ".repeat(promptRef.current.length + 1 + line.length));
+                    xterm.write(
+                      "\r" +
+                        " ".repeat(promptRef.current.length + 1 + line.length),
+                    );
                     xterm.write(`\r${promptRef.current} ${cmd}`);
                     cursorPositionRef.current = cmd.length;
                     return cmd;
@@ -422,7 +427,10 @@ export const Terminal: React.FC<TerminalProps> = memo(
               setHistoryIndex((idx) => {
                 if (idx <= 0) {
                   setCurrentLine((line) => {
-                    xterm.write("\r" + " ".repeat(promptRef.current.length + 1 + line.length));
+                    xterm.write(
+                      "\r" +
+                        " ".repeat(promptRef.current.length + 1 + line.length),
+                    );
                     xterm.write(`\r${promptRef.current} `);
                     cursorPositionRef.current = 0;
                     return "";
@@ -434,7 +442,10 @@ export const Terminal: React.FC<TerminalProps> = memo(
                 const cmd = history[history.length - 1 - newIdx];
                 if (cmd) {
                   setCurrentLine((line) => {
-                    xterm.write("\r" + " ".repeat(promptRef.current.length + 1 + line.length));
+                    xterm.write(
+                      "\r" +
+                        " ".repeat(promptRef.current.length + 1 + line.length),
+                    );
                     xterm.write(`\r${promptRef.current} ${cmd}`);
                     cursorPositionRef.current = cmd.length;
                     return cmd;
@@ -487,7 +498,12 @@ export const Terminal: React.FC<TerminalProps> = memo(
           }
 
           // Printable characters
-          if (key.length === 1 && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) {
+          if (
+            key.length === 1 &&
+            !domEvent.ctrlKey &&
+            !domEvent.altKey &&
+            !domEvent.metaKey
+          ) {
             setCurrentLine((line) => {
               const newLine =
                 line.slice(0, cursorPositionRef.current) +
@@ -515,7 +531,14 @@ export const Terminal: React.FC<TerminalProps> = memo(
         window.removeEventListener("resize", handleResize);
         xterm.dispose();
       };
-    }, [executeCommand, fontSize, theme, welcomeMessage, readOnly, allCommands]);
+    }, [
+      executeCommand,
+      fontSize,
+      theme,
+      welcomeMessage,
+      readOnly,
+      allCommands,
+    ]);
 
     // Update theme when changed
     useEffect(() => {
@@ -532,7 +555,7 @@ export const Terminal: React.FC<TerminalProps> = memo(
           theme === "matrix" && "bg-[#0a0a0a]",
           theme === "amber" && "bg-[#1a1200]",
           theme === "cyber" && "bg-[#0c0c1e]",
-          className
+          className,
         )}
       >
         <div
@@ -544,7 +567,7 @@ export const Terminal: React.FC<TerminalProps> = memo(
         />
       </div>
     );
-  }
+  },
 );
 
 Terminal.displayName = "Terminal";
