@@ -226,8 +226,8 @@ describe("LessonView", () => {
         screen.getByRole("button", { name: /submit your selected answer/i }),
       );
 
-      // Should show "Correct!" feedback
-      expect(screen.getByText("Correct!")).toBeInTheDocument();
+      // Should show correct-answer feedback
+      expect(screen.getByText("Target Neutralized")).toBeInTheDocument();
       expect(
         screen.getByText(
           /OWASP stands for the Open Web Application Security Project/i,
@@ -252,8 +252,8 @@ describe("LessonView", () => {
         screen.getByRole("button", { name: /submit your selected answer/i }),
       );
 
-      // Should show "Incorrect" feedback
-      expect(screen.getByText("Incorrect")).toBeInTheDocument();
+      // Should show wrong-answer feedback
+      expect(screen.getByText("Breach Detected")).toBeInTheDocument();
     });
 
     it("disables Next button until quiz is submitted", async () => {
