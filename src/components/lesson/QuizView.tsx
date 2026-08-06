@@ -59,7 +59,7 @@ export const QuizView: React.FC<QuizViewProps> = memo(
                 aria-disabled={submitted}
                 tabIndex={0}
                 className={clsx(
-                  "w-full min-h-[52px] text-left p-4 rounded-[var(--radius-sm)] border transition-all duration-150 flex items-center justify-between",
+                  "w-full min-h-[52px] text-left p-4 rounded-[var(--radius-sm)] border transition-all duration-150 flex items-center justify-between gap-3",
                   selectedOption === idx && !submitted
                     ? "border-2 border-primary bg-primary/8"
                     : "border-border/70 hover:bg-muted/40 hover:border-primary/40",
@@ -73,7 +73,24 @@ export const QuizView: React.FC<QuizViewProps> = memo(
                     : "",
                 )}
               >
-                <span>{option}</span>
+                <span className="flex items-center gap-3 min-w-0">
+                  <span
+                    className={clsx(
+                      "quiz-key",
+                      submitted && idx === quiz.correctAnswer
+                        ? "border-accent text-accent bg-accent/10"
+                        : submitted && selectedOption === idx
+                          ? "border-destructive text-destructive bg-destructive/10"
+                          : selectedOption === idx && !submitted
+                            ? "border-primary text-primary bg-primary/10"
+                            : "",
+                    )}
+                    aria-hidden="true"
+                  >
+                    {String.fromCharCode(65 + idx)}
+                  </span>
+                  <span>{option}</span>
+                </span>
                 {submitted && idx === quiz.correctAnswer && (
                   <>
                     <CheckCircle
@@ -118,12 +135,23 @@ export const QuizView: React.FC<QuizViewProps> = memo(
               role="alert"
               aria-live="polite"
             >
-              <p className="font-bold flex items-center gap-2">
-                {selectedOption === quiz.correctAnswer
-                  ? "Correct!"
-                  : "Incorrect"}
+              <p className="range-verdict-title">
+                {selectedOption === quiz.correctAnswer ? (
+                  <>
+                    <CheckCircle
+                      className="w-4 h-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    Target Neutralized
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    Breach Detected
+                  </>
+                )}
               </p>
-              <p className="text-sm mt-1 text-foreground">{quiz.explanation}</p>
+              <p className="text-sm mt-2 text-foreground">{quiz.explanation}</p>
             </div>
           )}
         </Card>

@@ -34,12 +34,15 @@ export const Dashboard: React.FC = () => {
         <RoleSelector />
       ) : (
         <section
-          className="ui-card ui-card-lg ops-briefing relative overflow-hidden"
+          className="ui-card ui-card-lg ops-briefing range-panel range-ticks relative overflow-hidden"
           aria-label="Welcome section"
         >
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <p className="ui-chip mb-3">Mission Status</p>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="range-dot" aria-hidden="true" />
+                <span className="range-readout">Range Status // Online</span>
+              </div>
               <h2 className="text-h1 mb-2">Welcome back, Agent.</h2>
               <p className="text-muted-foreground text-body-sm md:text-body max-w-lg">
                 Current Clearance Level:{" "}
