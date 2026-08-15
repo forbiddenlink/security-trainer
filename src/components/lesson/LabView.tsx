@@ -442,9 +442,26 @@ export const LabView: React.FC<LabViewProps> = memo(
         </div>
 
         <div className="lg:w-[66%] flex flex-col gap-2 h-full">
-          <div className="flex items-center gap-1 border-b border-border/50 pb-2">
+          <div
+            className="flex items-center gap-1 border-b border-border/50 pb-2"
+            role="tablist"
+            aria-label="Lab workspace"
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                e.preventDefault();
+                setActiveTab((prev) =>
+                  prev === "editor" ? "terminal" : "editor",
+                );
+              }
+            }}
+          >
             <button
               type="button"
+              role="tab"
+              id="lab-tab-editor"
+              aria-selected={activeTab === "editor"}
+              aria-controls="lab-panel-editor"
+              tabIndex={activeTab === "editor" ? 0 : -1}
               onClick={() => setActiveTab("editor")}
               className={clsx(
                 "flex items-center gap-2 px-3 py-1.5 rounded-t-[var(--radius-sm)] text-sm font-medium transition-colors",
@@ -453,11 +470,16 @@ export const LabView: React.FC<LabViewProps> = memo(
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
               )}
             >
-              <Code className="w-4 h-4" />
+              <Code className="w-4 h-4" aria-hidden="true" />
               Editor
             </button>
             <button
               type="button"
+              role="tab"
+              id="lab-tab-terminal"
+              aria-selected={activeTab === "terminal"}
+              aria-controls="lab-panel-terminal"
+              tabIndex={activeTab === "terminal" ? 0 : -1}
               onClick={() => setActiveTab("terminal")}
               className={clsx(
                 "flex items-center gap-2 px-3 py-1.5 rounded-t-[var(--radius-sm)] text-sm font-medium transition-colors",
@@ -466,13 +488,20 @@ export const LabView: React.FC<LabViewProps> = memo(
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
               )}
             >
-              <TerminalIcon className="w-4 h-4" />
+              <TerminalIcon className="w-4 h-4" aria-hidden="true" />
               Terminal
             </button>
           </div>
 
           <div
             className="flex-1 min-h-[400px]"
+            role="tabpanel"
+            id={
+              activeTab === "editor" ? "lab-panel-editor" : "lab-panel-terminal"
+            }
+            aria-labelledby={
+              activeTab === "editor" ? "lab-tab-editor" : "lab-tab-terminal"
+            }
             aria-label={activeTab === "editor" ? "Code editor" : "Terminal"}
           >
             {activeTab === "editor" ? (

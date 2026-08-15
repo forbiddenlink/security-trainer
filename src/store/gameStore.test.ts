@@ -1,144 +1,200 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useGameStore } from './gameStore';
+import { describe, it, expect, beforeEach } from "vitest";
+import { useGameStore } from "./gameStore";
 
-describe('gameStore', () => {
-    beforeEach(() => {
-        // Reset store to initial state before each test
-        useGameStore.getState().resetProgress();
-        // Also reset the toast state
-        useGameStore.setState({ showLevelUpToast: false });
+describe("gameStore", () => {
+  beforeEach(() => {
+    // Reset store to initial state before each test
+    useGameStore.getState().resetProgress();
+    // Also reset the toast state
+    useGameStore.setState({ showLevelUpToast: false });
+  });
+
+  describe("addXp", () => {
+    it("adds XP to the current total", () => {
+      const { addXp } = useGameStore.getState();
+
+      addXp(100);
+
+      expect(useGameStore.getState().xp).toBe(100);
     });
 
-    describe('addXp', () => {
-        it('adds XP to the current total', () => {
-            const { addXp } = useGameStore.getState();
+    it("levels up when XP exceeds threshold (level * 1000)", () => {
+      const { addXp } = useGameStore.getState();
 
-            addXp(100);
+      // At level 1, threshold is 1000 XP
+      addXp(1000);
 
-            expect(useGameStore.getState().xp).toBe(100);
-        });
-
-        it('levels up when XP exceeds threshold (level * 1000)', () => {
-            const { addXp } = useGameStore.getState();
-
-            // At level 1, threshold is 1000 XP
-            addXp(1000);
-
-            const state = useGameStore.getState();
-            expect(state.level).toBe(2);
-            expect(state.xp).toBe(0); // XP resets after level up
-        });
-
-        it('handles multiple level-ups from large XP gain', () => {
-            const { addXp } = useGameStore.getState();
-
-            // At level 1, gaining 3000 XP should jump to level 4
-            // Level 1 threshold: 1000, Level 2: 2000, Level 3: 3000
-            // 3000 - 1000 = 2000, 2000 - 2000 = 0, level 3
-            // Wait, let me recalculate:
-            // Start: level 1, xp 0
-            // Add 3000: xp = 3000
-            // 3000 >= 1*1000? Yes, xp = 3000-1000 = 2000, level = 2
-            // 2000 >= 2*1000? Yes, xp = 2000-2000 = 0, level = 3
-            // 0 >= 3*1000? No, done
-            addXp(3000);
-
-            const state = useGameStore.getState();
-            expect(state.level).toBe(3);
-            expect(state.xp).toBe(0);
-        });
-
-        it('shows level up toast when leveling up', () => {
-            const { addXp } = useGameStore.getState();
-
-            addXp(1000);
-
-            expect(useGameStore.getState().showLevelUpToast).toBe(true);
-        });
-
-        it('does not show toast when not leveling up', () => {
-            const { addXp } = useGameStore.getState();
-
-            addXp(500);
-
-            expect(useGameStore.getState().showLevelUpToast).toBe(false);
-        });
-
-        it('carries over excess XP after level up', () => {
-            const { addXp } = useGameStore.getState();
-
-            // At level 1, threshold is 1000
-            // Adding 1500 should level up and leave 500 XP
-            addXp(1500);
-
-            const state = useGameStore.getState();
-            expect(state.level).toBe(2);
-            expect(state.xp).toBe(500);
-        });
+      const state = useGameStore.getState();
+      expect(state.level).toBe(2);
+      expect(state.xp).toBe(0); // XP resets after level up
     });
 
-    describe('completeModule', () => {
-        it('adds module to completed list', () => {
-            const { completeModule } = useGameStore.getState();
+    it("handles multiple level-ups from large XP gain", () => {
+      const { addXp } = useGameStore.getState();
 
-            completeModule('sql-injection');
+      // At level 1, gaining 3000 XP should jump to level 4
+      // Level 1 threshold: 1000, Level 2: 2000, Level 3: 3000
+      // 3000 - 1000 = 2000, 2000 - 2000 = 0, level 3
+      // Wait, let me recalculate:
+      // Start: level 1, xp 0
+      // Add 3000: xp = 3000
+      // 3000 >= 1*1000? Yes, xp = 3000-1000 = 2000, level = 2
+      // 2000 >= 2*1000? Yes, xp = 2000-2000 = 0, level = 3
+      // 0 >= 3*1000? No, done
+      addXp(3000);
 
-            expect(useGameStore.getState().completedModules).toContain('sql-injection');
-        });
-
-        it('does not add duplicate modules', () => {
-            const { completeModule } = useGameStore.getState();
-
-            completeModule('sql-injection');
-            completeModule('sql-injection');
-
-            expect(useGameStore.getState().completedModules.filter(m => m === 'sql-injection')).toHaveLength(1);
-        });
+      const state = useGameStore.getState();
+      expect(state.level).toBe(3);
+      expect(state.xp).toBe(0);
     });
 
-    describe('unlockBadge', () => {
-        it('adds badge to unlocked list', () => {
-            const { unlockBadge } = useGameStore.getState();
+    it("shows level up toast when leveling up", () => {
+      const { addXp } = useGameStore.getState();
 
-            unlockBadge('badge-elite');
+      addXp(1000);
 
-            expect(useGameStore.getState().badges).toContain('badge-elite');
-        });
-
-        it('does not add duplicate badges', () => {
-            const { unlockBadge } = useGameStore.getState();
-
-            unlockBadge('badge-elite');
-            unlockBadge('badge-elite');
-
-            expect(useGameStore.getState().badges.filter(b => b === 'badge-elite')).toHaveLength(1);
-        });
+      expect(useGameStore.getState().showLevelUpToast).toBe(true);
     });
 
-    describe('dismissLevelUpToast', () => {
-        it('sets showLevelUpToast to false', () => {
-            useGameStore.setState({ showLevelUpToast: true });
+    it("does not show toast when not leveling up", () => {
+      const { addXp } = useGameStore.getState();
 
-            useGameStore.getState().dismissLevelUpToast();
+      addXp(500);
 
-            expect(useGameStore.getState().showLevelUpToast).toBe(false);
-        });
+      expect(useGameStore.getState().showLevelUpToast).toBe(false);
     });
 
-    describe('resetProgress', () => {
-        it('resets all progress to initial state', () => {
-            const store = useGameStore.getState();
-            store.addXp(5000);
-            store.completeModule('test-module');
-            store.unlockBadge('test-badge');
+    it("carries over excess XP after level up", () => {
+      const { addXp } = useGameStore.getState();
 
-            store.resetProgress();
+      // At level 1, threshold is 1000
+      // Adding 1500 should level up and leave 500 XP
+      addXp(1500);
 
-            const state = useGameStore.getState();
-            expect(state.xp).toBe(0);
-            expect(state.level).toBe(1);
-            expect(state.completedModules).toHaveLength(0);
-            expect(state.badges).toHaveLength(0);
-        });
+      const state = useGameStore.getState();
+      expect(state.level).toBe(2);
+      expect(state.xp).toBe(500);
     });
+  });
+
+  describe("completeModule", () => {
+    it("adds module to completed list", () => {
+      const { completeModule } = useGameStore.getState();
+
+      completeModule("sql-injection");
+
+      expect(useGameStore.getState().completedModules).toContain(
+        "sql-injection",
+      );
+    });
+
+    it("does not add duplicate modules", () => {
+      const { completeModule } = useGameStore.getState();
+
+      completeModule("sql-injection");
+      completeModule("sql-injection");
+
+      expect(
+        useGameStore
+          .getState()
+          .completedModules.filter((m) => m === "sql-injection"),
+      ).toHaveLength(1);
+    });
+  });
+
+  describe("unlockBadge", () => {
+    it("adds badge to unlocked list", () => {
+      const { unlockBadge } = useGameStore.getState();
+
+      unlockBadge("badge-elite");
+
+      expect(useGameStore.getState().badges).toContain("badge-elite");
+    });
+
+    it("does not add duplicate badges", () => {
+      const { unlockBadge } = useGameStore.getState();
+
+      unlockBadge("badge-elite");
+      unlockBadge("badge-elite");
+
+      expect(
+        useGameStore.getState().badges.filter((b) => b === "badge-elite"),
+      ).toHaveLength(1);
+    });
+  });
+
+  describe("dismissLevelUpToast", () => {
+    it("sets showLevelUpToast to false", () => {
+      useGameStore.setState({ showLevelUpToast: true });
+
+      useGameStore.getState().dismissLevelUpToast();
+
+      expect(useGameStore.getState().showLevelUpToast).toBe(false);
+    });
+  });
+
+  describe("resetProgress", () => {
+    it("resets all progress to initial state", () => {
+      const store = useGameStore.getState();
+      store.addXp(5000);
+      store.completeModule("test-module");
+      store.unlockBadge("test-badge");
+
+      store.resetProgress();
+
+      const state = useGameStore.getState();
+      expect(state.xp).toBe(0);
+      expect(state.level).toBe(1);
+      expect(state.completedModules).toHaveLength(0);
+      expect(state.badges).toHaveLength(0);
+    });
+  });
+
+  describe("badge awards", () => {
+    it('awards the "Mission Complete" badge on first module completion', () => {
+      useGameStore.getState().completeModule("owasp-intro");
+
+      expect(useGameStore.getState().badges).toContain("badge-completion");
+    });
+
+    it('awards the "SQL Slayer" badge when completing the SQL Injection module', () => {
+      useGameStore.getState().completeModule("sql-injection");
+
+      expect(useGameStore.getState().badges).toContain("sql-slayer");
+    });
+
+    it('awards the "XSS Terminator" badge when completing the XSS module', () => {
+      useGameStore.getState().completeModule("xss-basics");
+
+      expect(useGameStore.getState().badges).toContain("xss-terminator");
+    });
+
+    it("does not award a module-specific badge for an unrelated module", () => {
+      useGameStore.getState().completeModule("owasp-intro");
+
+      const { badges } = useGameStore.getState();
+      expect(badges).not.toContain("sql-slayer");
+      expect(badges).not.toContain("xss-terminator");
+    });
+
+    it('awards the "Master Operator" badge when reaching level 5', () => {
+      // Level thresholds: 1000+2000+3000+4000 = 10000 XP reaches level 5
+      useGameStore.getState().addXp(10000);
+
+      expect(useGameStore.getState().level).toBe(5);
+      expect(useGameStore.getState().badges).toContain("master-hacker");
+    });
+
+    it('does not award "Master Operator" below level 5', () => {
+      useGameStore.getState().addXp(3000); // reaches level 3
+
+      expect(useGameStore.getState().badges).not.toContain("master-hacker");
+    });
+
+    it('awards the "Recruit" badge on first streak check', () => {
+      useGameStore.getState().checkStreak();
+
+      expect(useGameStore.getState().badges).toContain("recruit");
+    });
+  });
 });

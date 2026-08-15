@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { MODULES } from "../data/modules";
 import { useGameStore } from "../store/gameStore";
-import { TheoryView, QuizView, LabView } from "../components/lesson";
+// Import light views directly (not via the barrel) so the barrel's static
+// LabView re-export doesn't pull Monaco/xterm back into this chunk.
+import { TheoryView } from "../components/lesson/TheoryView";
+import { QuizView } from "../components/lesson/QuizView";
+
+// Lazy-loaded: LabView pulls in Monaco + xterm, only needed for lab lessons.
+const LabView = lazy(() =>
+  import("../components/lesson/LabView").then((m) => ({ default: m.LabView })),
+);
 import { ReviewModal } from "../components/ReviewModal";
 import { LiveLabTargets } from "../components/LiveLabTargets";
 import { Button, EmptyState, Progress } from "../components/ui";
@@ -24,8 +32,13 @@ export const LessonView: React.FC = () => {
   }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { completeModule, completeLesson, addXp, isLessonDueForReview } =
-    useGameStore();
+  const {
+    completeModule,
+    completeLesson,
+    addXp,
+    isLessonDueForReview,
+    completedModules,
+  } = useGameStore();
 
   // Check if this is a review session
   const isReviewSession = searchParams.get("review") === "true";
@@ -48,6 +61,7 @@ export const LessonView: React.FC = () => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewLessonId, setReviewLessonId] = useState<string | null>(null);
   const [reviewLessonTitle, setReviewLessonTitle] = useState<string>("");
+  const [showComplete, setShowComplete] = useState(false);
 
   const currentLesson = module?.lessons[currentLessonIndex];
   const isFirstLesson = currentLessonIndex === 0;
@@ -94,6 +108,20 @@ export const LessonView: React.FC = () => {
     setShowLessonMenu(false);
   };
 
+  const fireConfetti = () => {
+    import("canvas-confetti")
+      .then((confetti) => {
+        confetti.default({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      })
+      .catch(() => {
+        // Confetti animation failed to load - not critical
+      });
+  };
+
   const handleNext = () => {
     // Check if this lesson is due for review before completing
     const isDueForReview =
@@ -102,7 +130,17 @@ export const LessonView: React.FC = () => {
     // Mark current lesson as complete (this initializes review tracking for new lessons)
     completeLesson(currentLesson.id, module.id);
 
-    // Show review modal if this was a review session
+    // Award module-completion rewards on the last lesson BEFORE any review-modal
+    // interrupt, so finishing a module always grants its XP and celebration even
+    // when the final lesson also happens to be due for review.
+    if (isLastLesson) {
+      completeModule(module.id);
+      // Pass moduleId to apply difficulty multiplier
+      addXp(module.xpReward, module.id);
+      fireConfetti();
+    }
+
+    // Show review modal if this lesson was due for review
     if (isDueForReview) {
       setReviewLessonId(currentLesson.id);
       setReviewLessonTitle(currentLesson.title);
@@ -111,30 +149,22 @@ export const LessonView: React.FC = () => {
     }
 
     if (isLastLesson) {
-      completeModule(module.id);
-      // Pass moduleId to apply difficulty multiplier
-      addXp(module.xpReward, module.id);
-      import("canvas-confetti")
-        .then((confetti) => {
-          confetti.default({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-          });
-        })
-        .catch(() => {
-          // Confetti animation failed to load - not critical
-        });
-      setTimeout(() => navigate("/modules"), 1000);
+      setShowComplete(true);
     } else {
       setCurrentLessonIndex((prev) => prev + 1);
     }
   };
 
+  // Next uncompleted module to recommend after finishing this one
+  const nextModule = MODULES.find(
+    (m) => m.id !== module.id && !completedModules.includes(m.id),
+  );
+
   const handleReviewModalClose = () => {
     setShowReviewModal(false);
-    // After review, navigate back to dashboard
-    navigate("/");
+    // Return to modules after finishing the final lesson, otherwise back to the
+    // dashboard where remaining reviews surface.
+    navigate(isLastLesson ? "/modules" : "/");
   };
 
   const handlePrev = () => {
@@ -266,12 +296,20 @@ export const LessonView: React.FC = () => {
             {currentLesson.type === "lab" && currentLesson.lab && (
               <div className="h-full flex flex-col gap-4">
                 <div className="flex-1 min-h-0">
-                  <LabView
-                    key={currentLesson.id}
-                    lab={currentLesson.lab}
-                    lessonId={currentLesson.id}
-                    onSuccess={() => setLabCompleted(true)}
-                  />
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center h-full">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                      </div>
+                    }
+                  >
+                    <LabView
+                      key={currentLesson.id}
+                      lab={currentLesson.lab}
+                      lessonId={currentLesson.id}
+                      onSuccess={() => setLabCompleted(true)}
+                    />
+                  </Suspense>
                 </div>
                 <LiveLabTargets moduleId={module.id} className="shrink-0" />
               </div>
@@ -311,6 +349,49 @@ export const LessonView: React.FC = () => {
           <ChevronRight className="w-4 h-4" aria-hidden="true" />
         </Button>
       </nav>
+
+      {/* Mission complete panel with next-mission recommendation */}
+      {showComplete && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mission complete"
+        >
+          <div className="ui-card ui-card-elevated ui-card-lg max-w-md w-full text-center space-y-4">
+            <span className="range-readout justify-center">Debrief</span>
+            <h3 className="text-h3">Mission Complete</h3>
+            <p className="text-muted-foreground">
+              You cleared{" "}
+              <span className="text-foreground">{module.title}</span> and banked
+              +{module.xpReward} XP.
+            </p>
+            <div className="flex flex-col gap-2 pt-1">
+              {nextModule ? (
+                <Button
+                  variant="primary"
+                  className="w-full justify-center"
+                  onClick={() => navigate(`/modules/${nextModule.id}`)}
+                >
+                  Start Next Mission: {nextModule.title}
+                  <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                </Button>
+              ) : (
+                <p className="text-body-sm text-accent">
+                  Every module cleared. Outstanding work, operator.
+                </p>
+              )}
+              <Button
+                variant="outline"
+                className="w-full justify-center"
+                onClick={() => navigate("/modules")}
+              >
+                Back to Modules
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Review Modal for spaced repetition */}
       <ReviewModal
