@@ -19,12 +19,11 @@ Security Trainer teaches web security vulnerabilities and defensive coding throu
 - Monaco-based code editor for hands-on labs, with a statically-defined verification registry (no dynamic code execution) in `src/utils/labVerification.ts`
 - Mermaid diagrams for visualizing attack flows and architecture inside lessons
 - CTF challenges page with flag hashing/validation utilities
-- Gamification: XP, levels, badges/achievements, streaks, and certificates (`src/lib/gamification/`)
+- Gamification: XP, levels, badges/achievements, and streaks (`src/store/gameStore.ts`)
 - Learning paths, a dashboard, leaderboard, and profile pages
-- AI-assisted feedback via Groq (code review on labs) and a Socratic-method AI tutor that nudges toward answers instead of giving them outright
-- Text-to-speech mission briefings (Edge TTS) with a spy/agent voice theme
+- A Socratic-method AI tutor (Groq `llama-3.1-8b`, served by `api/socratic-hint.ts`) that nudges toward answers instead of giving them outright
 - Supabase-backed auth and persistence, with Zustand + localStorage for local game state
-- Sentry error tracking and PostHog analytics (both optional, enabled via env vars)
+- PostHog analytics (optional, enabled via env var, and skipped when the browser sends Do-Not-Track / Global Privacy Control)
 
 ## Getting Started
 
@@ -35,7 +34,7 @@ pnpm install
 pnpm dev
 ```
 
-Copy `.env.example` to `.env.local` and fill in the values you need (Supabase, Groq, Sentry, PostHog are all optional; the app runs without them, with reduced functionality).
+Copy `.env.example` to `.env.local` and fill in the values you need (Supabase, Groq, PostHog are all optional; the app runs without them, with reduced functionality).
 
 ### Scripts
 
@@ -61,7 +60,6 @@ pnpm test:e2e         # Playwright end-to-end tests
 - **Terminal:** xterm.js
 - **Diagrams:** Mermaid
 - **Backend/Auth:** Supabase
-- **AI:** Groq SDK (`@ai-sdk/groq`, `groq-sdk`)
-- **Text-to-speech:** edge-tts
+- **AI:** Groq (`llama-3.1-8b-instant`) via a rate-limited serverless endpoint
 - **Testing:** Vitest + Testing Library, Playwright (e2e)
-- **Monitoring:** Sentry, PostHog
+- **Analytics:** PostHog (optional, privacy-signal aware)

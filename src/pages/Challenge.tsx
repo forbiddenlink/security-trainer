@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { prefersReducedMotion } from "../utils/prefersReducedMotion";
 import { motion } from "framer-motion";
 import { clsx } from "clsx";
 import { Timer, AlertTriangle, Skull, CheckCircle } from "lucide-react";
@@ -69,13 +70,15 @@ export const Challenge: React.FC = () => {
           setUserWon(true);
           addXp(1000);
           unlockBadge("badge-elite");
-          import("canvas-confetti")
-            .then((confetti) => {
-              confetti.default({ particleCount: 200, spread: 100 });
-            })
-            .catch(() => {
-              // Confetti animation failed to load - not critical
-            });
+          if (!prefersReducedMotion()) {
+            import("canvas-confetti")
+              .then((confetti) => {
+                confetti.default({ particleCount: 200, spread: 100 });
+              })
+              .catch(() => {
+                // Confetti animation failed to load - not critical
+              });
+          }
         } else {
           setCurrentIndex((prev) => prev + 1);
         }

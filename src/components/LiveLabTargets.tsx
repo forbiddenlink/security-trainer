@@ -99,6 +99,11 @@ export const LiveLabTargets: React.FC<LiveLabTargetsProps> = ({
   showAll = false,
   className,
 }) => {
+  // The practice range is a set of localhost docker containers, so these links
+  // are only meaningful in local dev. On the deployed site they'd be dead
+  // http://localhost links — hide the panel entirely there.
+  if (!canProbe) return null;
+
   const targets = showAll
     ? LIVE_TARGETS
     : moduleId

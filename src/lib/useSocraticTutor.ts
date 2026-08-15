@@ -185,19 +185,17 @@ export function useSocraticTutor(
         abortRef.current?.abort();
         abortRef.current = new AbortController();
 
-        const prompt = buildSocraticPrompt(
-          challenge,
-          nextLevel,
-          learnerQuestion,
-        );
-
+        // The server builds the Socratic prompt from these validated fields,
+        // so this endpoint can't be abused as a general-purpose LLM proxy.
         const res = await fetch("/api/socratic-hint", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            prompt,
             category: challenge.category,
             level: nextLevel,
+            title: challenge.title,
+            vulnerableCode: challenge.vulnerableCode,
+            learnerQuestion: learnerQuestion ?? "",
           }),
           signal: abortRef.current.signal,
         });
@@ -244,36 +242,4 @@ export function useSocraticTutor(
     error,
     resetHints,
   };
-}
-
-function buildSocraticPrompt(
-  challenge: SecurityChallenge,
-  level: 1 | 2 | 3,
-  learnerQuestion?: string,
-): string {
-  const intensityGuide = {
-    1: "A very gentle hint — just point them in the right conceptual direction, do NOT name the vulnerability",
-    2: "A moderate hint — name the concept but ask them to identify WHERE in the code it applies",
-    3: "A strong hint — describe exactly what to look for without writing the fix",
-  };
-
-  return `You are a cybersecurity instructor using the Socratic method.
-
-Challenge: "${challenge.title}" (category: ${challenge.category})
-
-Vulnerable code:
-\`\`\`
-${challenge.vulnerableCode.slice(0, 800)}
-\`\`\`
-
-${learnerQuestion ? `The learner asked: "${learnerQuestion}"` : "The learner is stuck."}
-
-Hint level requested: ${level}/3
-Instruction: ${intensityGuide[level]}
-
-Return JSON with exactly:
-{
-  "hint": "<one probing question, ≤ 40 words>",
-  "conceptPointer": "<the OWASP concept or technical term they should research>"
-}`;
 }

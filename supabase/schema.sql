@@ -24,9 +24,12 @@ create table if not exists public.profiles (
 alter table public.profiles enable row level security;
 
 -- Create policies
-create policy "Public profiles are viewable by everyone"
+-- SELECT is owner-only: the anon key ships in the client bundle, so a public
+-- SELECT policy would expose every user's email. Public reads go through the
+-- PII-free `leaderboard` view below instead.
+create policy "Users can view their own profile"
     on public.profiles for select
-    using (true);
+    using (auth.uid() = id);
 
 create policy "Users can insert their own profile"
     on public.profiles for insert
@@ -35,6 +38,17 @@ create policy "Users can insert their own profile"
 create policy "Users can update their own profile"
     on public.profiles for update
     using (auth.uid() = id);
+
+create policy "Users can delete their own profile"
+    on public.profiles for delete
+    using (auth.uid() = id);
+
+-- Public leaderboard WITHOUT PII. Definer-rights view (security_invoker = false)
+-- reads across users but only exposes non-PII columns — email is never selected.
+create or replace view public.leaderboard
+with (security_invoker = false) as
+    select id, display_name, avatar_url, xp, level
+    from public.profiles;
 
 -- Create index for leaderboard queries
 create index if not exists profiles_xp_idx on public.profiles (xp desc);
@@ -62,6 +76,9 @@ create trigger on_auth_user_created
     after insert on auth.users
     for each row execute procedure public.handle_new_user();
 
--- Grant necessary permissions
+-- Grant necessary permissions (least privilege).
+-- anon may read ONLY the leaderboard view; the base table is reachable only by
+-- authenticated users, still row-scoped by the policies above.
 grant usage on schema public to anon, authenticated;
-grant all on public.profiles to anon, authenticated;
+grant select, insert, update, delete on public.profiles to authenticated;
+grant select on public.leaderboard to anon, authenticated;

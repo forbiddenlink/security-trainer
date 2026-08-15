@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { prefersReducedMotion } from "../utils/prefersReducedMotion";
 import { clsx } from "clsx";
 import {
   Flag,
@@ -140,11 +141,6 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
           >
             {solved ? progress?.pointsEarned : challenge.points} pts
           </div>
-          {challenge.solveCount !== undefined && (
-            <div className="text-xs text-muted-foreground mt-1">
-              {challenge.solveCount} solves
-            </div>
-          )}
         </div>
       </div>
     </button>
@@ -405,15 +401,17 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
         });
         setFlagInput("");
         // Trigger confetti
-        import("canvas-confetti")
-          .then((confetti) => {
-            confetti.default({
-              particleCount: 100,
-              spread: 70,
-              origin: { y: 0.6 },
-            });
-          })
-          .catch(() => {});
+        if (!prefersReducedMotion()) {
+          import("canvas-confetti")
+            .then((confetti) => {
+              confetti.default({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+              });
+            })
+            .catch(() => {});
+        }
       } else {
         setFeedback({
           type: "error",
@@ -660,9 +658,14 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
         <form onSubmit={handleSubmit}>
           <div className="flex gap-3">
             <div className="flex-1 relative">
+              <label htmlFor="ctf-flag-input" className="sr-only">
+                Flag submission
+              </label>
               <Flag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
+                id="ctf-flag-input"
                 type="text"
+                autoComplete="off"
                 placeholder="FLAG{...}"
                 value={flagInput}
                 onChange={(e) => setFlagInput(e.target.value)}
@@ -675,7 +678,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
               disabled={solved || isSubmitting || !flagInput.trim()}
               variant={solved ? "accent" : "primary"}
             >
-              {isSubmitting ? "Checking..." : solved ? "Solved" : "Submit"}
+              {isSubmitting ? "Checking..." : solved ? "Solved" : "Verify Flag"}
             </Button>
           </div>
         </form>
@@ -778,7 +781,7 @@ export const CTFChallenges: React.FC = () => {
     : null;
 
   return (
-    <div className="h-[calc(100vh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6 flex flex-col lg:flex-row">
+    <div className="h-[calc(100dvh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6 flex flex-col lg:flex-row">
       {/* Sidebar - Challenge list */}
       <div
         className={clsx(

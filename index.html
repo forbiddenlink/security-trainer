@@ -2,11 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Set the theme class before first paint to avoid a flash of the wrong theme.
+         Mirrors the persisted zustand key 'security-trainer-theme'. -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem("security-trainer-theme");
+          var theme = raw ? (JSON.parse(raw).state || {}).theme : "system";
+          var dark =
+            theme === "dark" ||
+            ((!theme || theme === "system") &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var cl = document.documentElement.classList;
+          cl.add(dark ? "dark" : "light");
+          cl.remove(dark ? "light" : "dark");
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#0b0d10" />
+    <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,7 +38,7 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://securitytrainer.vercel.app/" />
+    <meta property="og:url" content="https://security-trainer.vercel.app/" />
     <meta property="og:title" content="SecTrainer | Cyber Security Training" />
     <meta property="og:description" content="Level up your security skills with interactive modules on OWASP Top 10, XSS, SQLi, and more." />
     <meta property="og:image" content="/og-image.png" />
@@ -28,7 +47,7 @@
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://securitytrainer.vercel.app/" />
+    <meta property="twitter:url" content="https://security-trainer.vercel.app/" />
     <meta property="twitter:title" content="SecTrainer | Cyber Security Training" />
     <meta property="twitter:description" content="Level up your security skills with interactive modules on OWASP Top 10, XSS, SQLi, and more." />
     <meta property="twitter:image" content="/og-image.png" />

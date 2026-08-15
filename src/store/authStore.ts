@@ -16,6 +16,7 @@ interface AuthState {
   isAuthModalOpen: boolean;
   authModalMode: "login" | "signup";
   leaderboard: LeaderboardEntry[];
+  leaderboardLoading: boolean;
   userRank: number | null;
 }
 
@@ -31,7 +32,11 @@ interface AuthActions {
     password: string,
   ) => Promise<{ error: AuthError | null }>;
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
+  resetPasswordForEmail: (
+    email: string,
+  ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<{ error: Error | null }>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   syncProgressToCloud: (progress: {
     xp: number;
@@ -69,6 +74,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   isAuthModalOpen: false,
   authModalMode: "login",
   leaderboard: [],
+  leaderboardLoading: false,
   userRank: null,
 
   initialize: async () => {
@@ -192,12 +198,43 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     return { error: null };
   },
 
+  resetPasswordForEmail: async (email: string) => {
+    if (!supabase) return { error: null };
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/profile`,
+    });
+    if (error) set({ error: error.message });
+    return { error };
+  },
+
   signOut: async () => {
     if (!supabase) return;
 
     set({ loading: true });
     await supabase.auth.signOut();
     set({ user: null, profile: null, loading: false, userRank: null });
+  },
+
+  deleteAccount: async () => {
+    const { user } = get();
+    if (!supabase || !user) return { error: null };
+
+    set({ loading: true });
+    // Delete the user's own profile row (allowed by the RLS DELETE policy).
+    // NOTE: fully removing the auth user requires a privileged server route
+    // (auth.admin.deleteUser) — not possible from the client anon key. This
+    // clears their stored data and signs them out.
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", user.id);
+    if (error) {
+      set({ loading: false, error: error.message });
+      return { error: new Error(error.message) };
+    }
+    await supabase.auth.signOut();
+    set({ user: null, profile: null, loading: false, userRank: null });
+    return { error: null };
   },
 
   updateProfile: async (updates) => {
@@ -318,15 +355,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
 
     const { user } = get();
+    set({ leaderboardLoading: true });
 
+    // Read from the PII-free `leaderboard` view, not the profiles table
+    // (profiles SELECT is owner-only, so other users' rows aren't readable).
     const { data, error } = await supabase
-      .from("profiles")
+      .from("leaderboard")
       .select("id, display_name, avatar_url, xp, level")
       .order("xp", { ascending: false })
       .limit(50);
 
     if (error) {
       console.error("Fetch leaderboard error:", error);
+      set({ leaderboardLoading: false });
       return;
     }
 
@@ -351,7 +392,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       } else {
         // User not in top 50, fetch their rank
         const { count } = await supabase
-          .from("profiles")
+          .from("leaderboard")
           .select("id", { count: "exact", head: true })
           .gt("xp", get().profile?.xp || 0);
 
@@ -359,7 +400,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
     }
 
-    set({ leaderboard, userRank });
+    set({ leaderboard, userRank, leaderboardLoading: false });
   },
 
   openAuthModal: (mode) =>

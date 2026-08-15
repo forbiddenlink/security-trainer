@@ -10,6 +10,7 @@ import type { LabConfig } from "../../types";
 import { CodeEditor } from "../CodeEditor";
 import { Terminal, type TerminalCommand } from "../Terminal";
 import { verifyLabSubmission } from "../../utils/labVerification";
+import { checkSyntaxHeuristic } from "../../utils/syntaxCheck";
 import { buildLabTutorChallenge } from "../../lib/labTutorContext";
 import { useSocraticTutor } from "../../lib/useSocraticTutor";
 import {
@@ -240,16 +241,15 @@ export const LabView: React.FC<LabViewProps> = memo(
           description: "Check JavaScript syntax of current code",
           handler: (_, terminal) => {
             const current = codeRef.current;
-            try {
-              new Function(current);
+            // Eval-free heuristic check (no new Function/eval → no CSP unsafe-eval).
+            const problem = checkSyntaxHeuristic(current);
+            if (!problem) {
               terminal.writeLine(
                 "\r\n\x1b[1;32mSyntax check passed.\x1b[0m No obvious syntax errors.",
               );
-            } catch (error) {
+            } else {
               terminal.writeLine(
-                `\r\n\x1b[1;31mSyntax error:\x1b[0m ${
-                  error instanceof Error ? error.message : "Unknown error"
-                }`,
+                `\r\n\x1b[1;31mSyntax error:\x1b[0m ${problem}`,
               );
             }
             terminal.writeLine("");

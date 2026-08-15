@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
+import { prefersReducedMotion } from "../utils/prefersReducedMotion";
 
 export const LessonView: React.FC = () => {
   const { moduleId, lessonId } = useParams<{
@@ -109,6 +110,7 @@ export const LessonView: React.FC = () => {
   };
 
   const fireConfetti = () => {
+    if (prefersReducedMotion()) return;
     import("canvas-confetti")
       .then((confetti) => {
         confetti.default({
@@ -174,7 +176,7 @@ export const LessonView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6">
+    <div className="flex flex-col h-[calc(100dvh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6">
       <div className="border-b border-border/70 bg-card/92 backdrop-blur px-4 py-3 md:px-6 flex items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-0.5">

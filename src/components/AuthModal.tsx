@@ -1,6 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, User, AlertCircle, Loader2 } from "lucide-react";
+import {
+  X,
+  Mail,
+  Lock,
+  User,
+  AlertCircle,
+  Loader2,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+} from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useGameStore } from "../store/gameStore";
 import { isSupabaseConfigured } from "../lib/supabase";
@@ -17,6 +27,7 @@ export const AuthModal: React.FC = () => {
     signIn,
     signUp,
     signInWithGoogle,
+    resetPasswordForEmail,
     clearError,
     loadProgressFromCloud,
   } = useAuthStore();
@@ -26,10 +37,20 @@ export const AuthModal: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [showMergeOption, setShowMergeOption] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  const errorRef = useRef<HTMLDivElement>(null);
 
   const hasLocalProgress =
     gameStore.xp > 0 || gameStore.completedLessons.length > 0;
+
+  // Move focus to the error banner when a new error appears (a11y).
+  useEffect(() => {
+    if (error) errorRef.current?.focus();
+  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +77,13 @@ export const AuthModal: React.FC = () => {
       await syncLocalProgressToCloud();
       handleClose();
     }
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearError();
+    const { error: resetError } = await resetPasswordForEmail(email);
+    if (!resetError) setResetSent(true);
   };
 
   const handleGoogleSignIn = async () => {
@@ -86,8 +114,6 @@ export const AuthModal: React.FC = () => {
       if (cloudProfile) {
         // Reset local and apply cloud progress
         gameStore.resetProgress();
-        // We need to apply cloud progress to local store
-        // This is done via direct store update since we're merging
         useGameStore.setState({
           xp: cloudProfile.xp,
           level: cloudProfile.level,
@@ -113,7 +139,10 @@ export const AuthModal: React.FC = () => {
     setEmail("");
     setPassword("");
     setDisplayName("");
+    setShowPassword(false);
     setShowMergeOption(false);
+    setShowReset(false);
+    setResetSent(false);
     clearError();
     closeAuthModal();
   };
@@ -124,6 +153,37 @@ export const AuthModal: React.FC = () => {
   if (!isSupabaseConfigured()) {
     return null;
   }
+
+  const errorBanner = error ? (
+    <div
+      ref={errorRef}
+      id="auth-error"
+      tabIndex={-1}
+      role="alert"
+      className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-destructive outline-none"
+    >
+      <AlertCircle className="w-5 h-5 shrink-0" />
+      <span className="text-sm">{error}</span>
+    </div>
+  ) : null;
+
+  const describedBy = error ? "auth-error" : undefined;
+
+  const title = showReset
+    ? "Reset Password"
+    : showMergeOption
+      ? "Sync Progress"
+      : authModalMode === "login"
+        ? "Welcome Back, Agent"
+        : "Join the Mission";
+
+  const subtitle = showReset
+    ? "We'll email you a secure link to set a new password."
+    : showMergeOption
+      ? "We found existing progress. Choose which to keep."
+      : authModalMode === "login"
+        ? "Sign in to sync your progress"
+        : "Create an account to save your progress";
 
   return (
     <AnimatePresence>
@@ -162,25 +222,23 @@ export const AuthModal: React.FC = () => {
                 id="auth-modal-title"
                 className="text-2xl font-bold text-foreground"
               >
-                {showMergeOption
-                  ? "Sync Progress"
-                  : authModalMode === "login"
-                    ? "Welcome Back, Agent"
-                    : "Join the Mission"}
+                {title}
               </h2>
-              <p className="text-muted-foreground mt-1">
-                {showMergeOption
-                  ? "We found existing progress. Choose which to keep."
-                  : authModalMode === "login"
-                    ? "Sign in to sync your progress"
-                    : "Create an account to save your progress"}
-              </p>
+              <p className="text-muted-foreground mt-1">{subtitle}</p>
             </div>
 
             {/* Content */}
             <div className="p-6">
               {showMergeOption ? (
                 <div className="space-y-4">
+                  <div
+                    role="alert"
+                    className="p-3 bg-warning/10 border border-warning/30 rounded-lg text-sm text-foreground"
+                  >
+                    Heads up: keeping one side{" "}
+                    <strong>permanently discards the other</strong>. This can't
+                    be undone.
+                  </div>
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <h3 className="font-semibold mb-2">Cloud Progress</h3>
                     <p className="text-sm text-muted-foreground">
@@ -200,24 +258,92 @@ export const AuthModal: React.FC = () => {
                       variant="secondary"
                       className="flex-1"
                     >
-                      Keep Cloud
+                      Keep Cloud (discard local)
                     </Button>
                     <Button
                       onClick={() => handleMergeChoice(false)}
                       className="flex-1"
                     >
-                      Keep Local
+                      Keep Local (discard cloud)
                     </Button>
                   </div>
                 </div>
+              ) : showReset ? (
+                <>
+                  {resetSent ? (
+                    <div className="text-center py-4">
+                      <CheckCircle2 className="w-10 h-10 text-primary mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        If an account exists for{" "}
+                        <span className="text-foreground">{email}</span>, a
+                        reset link is on its way. Check your inbox.
+                      </p>
+                      <Button
+                        onClick={() => {
+                          setShowReset(false);
+                          setResetSent(false);
+                        }}
+                        variant="secondary"
+                        className="mt-6 w-full h-11"
+                      >
+                        Back to sign in
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      {errorBanner}
+                      <form onSubmit={handleResetSubmit} className="space-y-4">
+                        <div>
+                          <label
+                            htmlFor="reset-email"
+                            className="block text-sm font-medium text-foreground mb-1.5"
+                          >
+                            Email
+                          </label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Input
+                              id="reset-email"
+                              type="email"
+                              autoComplete="email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              placeholder="agent@example.com"
+                              required
+                              aria-describedby={describedBy}
+                              aria-invalid={!!error}
+                              className="h-11 pl-10 pr-4"
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          type="submit"
+                          disabled={loading}
+                          className="w-full h-11"
+                        >
+                          {loading && (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          )}
+                          Send reset link
+                        </Button>
+                      </form>
+                      <p className="mt-6 text-center text-sm text-muted-foreground">
+                        <button
+                          onClick={() => {
+                            clearError();
+                            setShowReset(false);
+                          }}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Back to sign in
+                        </button>
+                      </p>
+                    </>
+                  )}
+                </>
               ) : (
                 <>
-                  {error && (
-                    <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-destructive">
-                      <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-sm">{error}</span>
-                    </div>
-                  )}
+                  {errorBanner}
 
                   <form onSubmit={handleSubmit} className="space-y-4">
                     {authModalMode === "signup" && (
@@ -233,6 +359,7 @@ export const AuthModal: React.FC = () => {
                           <Input
                             id="displayName"
                             type="text"
+                            autoComplete="name"
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value)}
                             placeholder="Agent Smith"
@@ -254,34 +381,73 @@ export const AuthModal: React.FC = () => {
                         <Input
                           id="email"
                           type="email"
+                          autoComplete="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="agent@example.com"
                           required
+                          aria-describedby={describedBy}
+                          aria-invalid={!!error}
                           className="h-11 pl-10 pr-4"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="password"
-                        className="block text-sm font-medium text-foreground mb-1.5"
-                      >
-                        Password
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label
+                          htmlFor="password"
+                          className="block text-sm font-medium text-foreground"
+                        >
+                          Password
+                        </label>
+                        {authModalMode === "login" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              clearError();
+                              setShowReset(true);
+                            }}
+                            className="text-xs text-primary hover:underline font-medium"
+                          >
+                            Forgot password?
+                          </button>
+                        )}
+                      </div>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
                           id="password"
-                          type="password"
+                          type={showPassword ? "text" : "password"}
+                          autoComplete={
+                            authModalMode === "login"
+                              ? "current-password"
+                              : "new-password"
+                          }
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="Enter your password"
                           required
                           minLength={6}
-                          className="h-11 pl-10 pr-4"
+                          aria-describedby={describedBy}
+                          aria-invalid={!!error}
+                          className="h-11 pl-10 pr-11"
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md hover:bg-muted/70 text-muted-foreground"
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                          aria-pressed={showPassword}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
                       </div>
                     </div>
 

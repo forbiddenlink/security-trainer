@@ -1,41 +1,103 @@
 /**
  * POST /api/socratic-hint
- * Body: { prompt, category, level }
+ * Body: { category, level, title?, vulnerableCode?, learnerQuestion? }
  * Requires GROQ_API_KEY (server env) — never expose to the client.
  *
- * Rate-limited per-IP via Upstash when UPSTASH_REDIS_REST_URL/TOKEN are set
- * (skipped gracefully if not configured — e.g. local dev uses the Vite plugin).
+ * The Socratic prompt is constructed SERVER-SIDE from validated fields so the
+ * endpoint cannot be used as a general-purpose Groq proxy (an attacker cannot
+ * send arbitrary completion text).
+ *
+ * Abuse controls (all require Upstash to be configured; skipped in local dev):
+ *   - Per-client rate limit: 20 req / 60s, keyed on a TRUSTED client IP.
+ *   - Global daily budget: hard cap on total requests/day + env kill switch,
+ *     bounding worst-case Groq spend even under a distributed attack.
  *
  * Compatible with Vercel Node serverless and local Vite middleware.
  */
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import {
+  buildSocraticPrompt,
+  parseSocraticBody,
+} from "../src/lib/socraticPrompt";
 
 type ReqReq = {
   method?: string;
-  body?: { prompt?: string; category?: string; level?: number };
+  body?: unknown;
   headers?: Record<string, string | string[] | undefined>;
 };
 
-// Lazily build one limiter per warm instance: 20 requests / 60s per IP.
+// Default 2000 successful calls/day (~llama-3.1-8b, negligible cost) unless overridden.
+const DAILY_BUDGET = Number(process.env.AI_DAILY_BUDGET ?? "2000");
+
+let redis: Redis | null = null;
 let ratelimit: Ratelimit | null = null;
-function getRatelimit(): Ratelimit | null {
-  if (ratelimit) return ratelimit;
+
+function getRedis(): Redis | null {
+  if (redis) return redis;
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return null;
+  redis = new Redis({ url, token });
+  return redis;
+}
+
+function getRatelimit(): Ratelimit | null {
+  if (ratelimit) return ratelimit;
+  const r = getRedis();
+  if (!r) return null;
   ratelimit = new Ratelimit({
-    redis: new Redis({ url, token }),
+    redis: r,
     limiter: Ratelimit.slidingWindow(20, "60 s"),
     prefix: "rl:socratic-hint",
   });
   return ratelimit;
 }
 
-function clientIp(req: ReqReq): string {
-  const fwd = req.headers?.["x-forwarded-for"];
-  const raw = Array.isArray(fwd) ? fwd[0] : fwd;
-  return raw?.split(",")[0]?.trim() || "unknown";
+function headerValue(
+  headers: ReqReq["headers"],
+  name: string,
+): string | undefined {
+  const v = headers?.[name];
+  return Array.isArray(v) ? v[0] : v;
+}
+
+/**
+ * Resolve a TRUSTED client IP. On Vercel, `x-forwarded-for` is client-spoofable
+ * at its LEFTMOST entry, so we prefer platform-set trusted headers and, failing
+ * that, take the RIGHTMOST forwarded hop (closest to our edge). Exported for tests.
+ */
+export function clientIpFromHeaders(headers: ReqReq["headers"]): string {
+  const trusted =
+    headerValue(headers, "x-real-ip") ??
+    headerValue(headers, "x-vercel-forwarded-for");
+  if (trusted?.trim()) return trusted.trim();
+
+  const fwd = headerValue(headers, "x-forwarded-for");
+  if (fwd) {
+    const hops = fwd
+      .split(",")
+      .map((h) => h.trim())
+      .filter(Boolean);
+    // Rightmost hop is added by infrastructure we control, not the client.
+    if (hops.length) return hops[hops.length - 1];
+  }
+  return "unknown";
+}
+
+/** Increment today's global counter (TTL 24h). Fail-open (returns true) on Redis error. */
+async function withinDailyBudget(): Promise<boolean> {
+  const r = getRedis();
+  if (!r) return true; // no Redis configured (local dev) → no global cap
+  try {
+    const key = `budget:socratic-hint:${new Date().toISOString().slice(0, 10)}`;
+    const count = await r.incr(key);
+    if (count === 1) await r.expire(key, 86400);
+    return count <= DAILY_BUDGET;
+  } catch (err) {
+    console.error("[socratic-hint] budget check failed, allowing:", err);
+    return true;
+  }
 }
 
 type ResLike = {
@@ -51,17 +113,33 @@ export default async function handler(req: ReqReq, res: ResLike) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  if (process.env.AI_DISABLED === "1") {
+    return res.status(503).json({ error: "AI unavailable" });
+  }
+
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: "AI unavailable" });
   }
 
+  // --- Validate input (server owns the prompt shape) ---
+  const parsed = parseSocraticBody(req.body);
+  if (!parsed.ok) {
+    return res.status(400).json({ error: parsed.error });
+  }
+  const input = parsed.value;
+
+  // --- Abuse controls (best-effort; degrade open on infra failure) ---
   const limiter = getRatelimit();
   if (limiter) {
-    const { success } = await limiter.limit(clientIp(req));
-    if (!success) {
-      res.setHeader("Retry-After", "60");
-      return res.status(429).json({ error: "Too many requests" });
+    try {
+      const { success } = await limiter.limit(clientIpFromHeaders(req.headers));
+      if (!success) {
+        res.setHeader("Retry-After", "60");
+        return res.status(429).json({ error: "Too many requests" });
+      }
+    } catch (err) {
+      console.error("[socratic-hint] rate limiter failed, allowing:", err);
     }
   } else if (
     process.env.VERCEL &&
@@ -74,14 +152,12 @@ export default async function handler(req: ReqReq, res: ResLike) {
     return res.status(503).json({ error: "AI unavailable" });
   }
 
-  const { prompt, level } = req.body ?? {};
-  if (!prompt || typeof prompt !== "string") {
-    return res.status(400).json({ error: "Missing prompt" });
+  if (!(await withinDailyBudget())) {
+    res.setHeader("Retry-After", "3600");
+    return res.status(429).json({ error: "Daily AI limit reached" });
   }
-  // Cap input — the client prompt is a bounded template; anything larger is abuse.
-  if (prompt.length > 4000) {
-    return res.status(413).json({ error: "Prompt too large" });
-  }
+
+  const prompt = buildSocraticPrompt(input);
 
   try {
     const response = await fetch(
@@ -116,17 +192,17 @@ export default async function handler(req: ReqReq, res: ResLike) {
       choices?: { message?: { content?: string } }[];
     };
     const content = data.choices?.[0]?.message?.content ?? "{}";
-    let parsed: { hint?: string; conceptPointer?: string } = {};
+    let result: { hint?: string; conceptPointer?: string } = {};
     try {
-      parsed = JSON.parse(content);
+      result = JSON.parse(content);
     } catch {
       return res.status(502).json({ error: "AI unavailable" });
     }
 
     return res.status(200).json({
-      hint: (parsed.hint ?? "").slice(0, 500),
-      conceptPointer: (parsed.conceptPointer ?? "").slice(0, 300),
-      level: level ?? 1,
+      hint: (result.hint ?? "").slice(0, 500),
+      conceptPointer: (result.conceptPointer ?? "").slice(0, 300),
+      level: input.level,
     });
   } catch {
     return res.status(502).json({ error: "AI unavailable" });
