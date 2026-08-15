@@ -63,6 +63,15 @@ export default async function handler(req: ReqReq, res: ResLike) {
       res.setHeader("Retry-After", "60");
       return res.status(429).json({ error: "Too many requests" });
     }
+  } else if (
+    process.env.VERCEL &&
+    process.env.HINTS_ALLOW_NO_RATELIMIT !== "true"
+  ) {
+    // Fail closed on a real deployment: without a configured limiter this is an
+    // open, unauthenticated proxy to a paid LLM. Refuse rather than expose it.
+    // Set UPSTASH_REDIS_REST_URL/TOKEN to enable throttling, or
+    // HINTS_ALLOW_NO_RATELIMIT=true to intentionally run unlimited.
+    return res.status(503).json({ error: "AI unavailable" });
   }
 
   const { prompt, level } = req.body ?? {};

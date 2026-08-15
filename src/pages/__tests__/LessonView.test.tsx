@@ -327,8 +327,27 @@ describe("LessonView", () => {
       await navigateToLab(user);
 
       expect(screen.getByText("lab")).toBeInTheDocument();
-      expect(screen.getByText("Mission Objective")).toBeInTheDocument();
+      expect(await screen.findByText("Mission Objective")).toBeInTheDocument();
       expect(screen.getByTestId("code-editor")).toBeInTheDocument();
+    });
+
+    it("exposes the editor/terminal toggle as an accessible tablist", async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<LessonView />);
+
+      await navigateToLab(user);
+
+      const tabs = screen.getAllByRole("tab");
+      expect(tabs).toHaveLength(2);
+      expect(screen.getByRole("tab", { name: /editor/i })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(screen.getByRole("tab", { name: /terminal/i })).toHaveAttribute(
+        "aria-selected",
+        "false",
+      );
+      expect(screen.getByRole("tabpanel")).toBeInTheDocument();
     });
 
     it("shows Deploy Patch button", async () => {
@@ -437,6 +456,128 @@ describe("LessonView", () => {
       });
 
       vi.useRealTimers();
+    });
+
+    it("shows a Mission Complete panel with a next-mission recommendation", async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<LessonView />);
+
+      // theory -> quiz
+      await user.click(
+        screen.getByRole("button", { name: /go to next lesson step/i }),
+      );
+      const options = screen.getAllByRole("radio");
+      await user.click(options[0]);
+      await user.click(
+        screen.getByRole("button", { name: /submit your selected answer/i }),
+      );
+      // quiz -> lab
+      await user.click(
+        screen.getByRole("button", { name: /go to next lesson step/i }),
+      );
+      // solve the lab
+      const editor = screen.getByTestId("code-editor");
+      await user.clear(editor);
+      await user.type(
+        editor,
+        "// INJECTION: SQL\n// XSS: innerHTML\n// IDOR: No auth check",
+      );
+      await user.click(
+        screen.getByRole("button", {
+          name: /deploy patch and verify your code fix/i,
+        }),
+      );
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", {
+            name: /complete this mission and return to modules/i,
+          }),
+        ).not.toBeDisabled();
+      });
+      await user.click(
+        screen.getByRole("button", {
+          name: /complete this mission and return to modules/i,
+        }),
+      );
+
+      // Completion panel appears instead of a blind redirect
+      expect(await screen.findByText("Mission Complete")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /start next mission/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /back to modules/i }),
+      ).toBeInTheDocument();
+    });
+
+    it("awards module completion XP even when the last lesson is due for review", async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<LessonView />);
+
+      // theory -> quiz
+      await user.click(
+        screen.getByRole("button", { name: /go to next lesson step/i }),
+      );
+
+      // answer the quiz
+      const options = screen.getAllByRole("radio");
+      await user.click(options[0]);
+      await user.click(
+        screen.getByRole("button", { name: /submit your selected answer/i }),
+      );
+
+      // quiz -> lab
+      await user.click(
+        screen.getByRole("button", { name: /go to next lesson step/i }),
+      );
+
+      // Seed the final lab lesson as overdue for review so the review modal
+      // interrupts navigation on the last lesson.
+      useGameStore.setState({
+        lessonReviews: {
+          "owasp-lab": {
+            lessonId: "owasp-lab",
+            lastReviewDate: "2000-01-01",
+            nextReviewDate: "2000-01-01",
+            interval: 1,
+            easeFactor: 2.5,
+            reviewCount: 0,
+          },
+        },
+      });
+
+      // solve the lab
+      const editor = screen.getByTestId("code-editor");
+      await user.clear(editor);
+      await user.type(
+        editor,
+        "// INJECTION: SQL\n// XSS: innerHTML\n// IDOR: No auth check",
+      );
+      await user.click(
+        screen.getByRole("button", {
+          name: /deploy patch and verify your code fix/i,
+        }),
+      );
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", {
+            name: /complete this mission and return to modules/i,
+          }),
+        ).not.toBeDisabled();
+      });
+
+      // Complete the mission (last lesson, due for review)
+      await user.click(
+        screen.getByRole("button", {
+          name: /complete this mission and return to modules/i,
+        }),
+      );
+
+      // Module completion XP (owasp-intro xpReward = 100) must still be awarded
+      await waitFor(() => {
+        expect(useGameStore.getState().xp).toBe(100);
+      });
+      expect(useGameStore.getState().completedModules).toContain("owasp-intro");
     });
   });
 

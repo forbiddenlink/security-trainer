@@ -12,6 +12,9 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground antialiased selection:bg-primary/20">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -39,7 +42,11 @@ export const MainLayout: React.FC = () => {
           <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-muted-foreground)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-muted-foreground)_1px,transparent_1px)] bg-[size:24px_24px] opacity-[0.06]" />
         </div>
         <Header onMenuClick={toggleSidebar} />
-        <main className="flex-1 overflow-auto relative z-0">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 overflow-auto relative z-0"
+        >
           <div className="mx-auto w-full max-w-[1200px] px-4 py-4 md:px-6 md:py-6">
             <Outlet />
           </div>

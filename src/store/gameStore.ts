@@ -32,6 +32,15 @@ const DIFFICULTY_MULTIPLIERS: Record<string, number> = {
 /** Streak day milestones that trigger achievement notifications */
 const STREAK_MILESTONES = [3, 7, 30];
 
+/** Maps a module id to a module-specific badge awarded on completion */
+const MODULE_BADGES: Record<string, string> = {
+  "sql-injection": "sql-slayer",
+  "xss-basics": "xss-terminator",
+};
+
+/** Level at which the "Master Operator" badge is awarded */
+const MASTER_OPERATOR_LEVEL = 5;
+
 /** Maximum streak days that contribute to XP bonus (70% max at 7 days) */
 const MAX_STREAK_BONUS_DAYS = 7;
 
@@ -157,9 +166,25 @@ interface GameStore extends UserState {
   isPathUnlocked: (pathId: string) => boolean;
   completePath: (pathId: string) => void;
   // CTF Challenges
-  submitFlag: (challengeId: string, flag: string, challenge: { points: number; hints: { id: string; cost: number }[]; flag: string }) => Promise<{ correct: boolean; pointsEarned: number }>;
+  submitFlag: (
+    challengeId: string,
+    flag: string,
+    challenge: {
+      points: number;
+      hints: { id: string; cost: number }[];
+      flag: string;
+    },
+  ) => Promise<{ correct: boolean; pointsEarned: number }>;
   revealHint: (challengeId: string, hintId: string) => void;
-  getCTFProgress: (challengeId: string) => { solved: boolean; hintsRevealed: string[]; attempts: number; solvedAt?: string; pointsEarned?: number } | null;
+  getCTFProgress: (
+    challengeId: string,
+  ) => {
+    solved: boolean;
+    hintsRevealed: string[];
+    attempts: number;
+    solvedAt?: string;
+    pointsEarned?: number;
+  } | null;
   isCTFSolved: (challengeId: string) => boolean;
   setUserRole: (role: string) => void;
 }
@@ -267,6 +292,12 @@ export const useGameStore = create<GameStore>()(
           level: newLevel,
           showLevelUpToast: shouldShowToast,
         });
+
+        // Award "Master Operator" badge on reaching the milestone level
+        if (newLevel >= MASTER_OPERATOR_LEVEL) {
+          get().unlockBadge("master-hacker");
+        }
+
         debouncedSyncToCloud();
       },
 
@@ -288,6 +319,17 @@ export const useGameStore = create<GameStore>()(
             completedModules: [...completedModules, moduleId],
             achievementQueue: [...achievementQueue, notification],
           });
+
+          // Award "first module complete" badge
+          if (completedModules.length === 0) {
+            get().unlockBadge("badge-completion");
+          }
+          // Award module-specific badge if one exists
+          const moduleBadge = MODULE_BADGES[moduleId];
+          if (moduleBadge) {
+            get().unlockBadge(moduleBadge);
+          }
+
           debouncedSyncToCloud();
         }
       },
@@ -354,6 +396,9 @@ export const useGameStore = create<GameStore>()(
       checkStreak: () => {
         const { lastLoginDate, streakDays, achievementQueue } = get();
         const today = getTodayString();
+
+        // Award "Recruit" badge for starting a session (idempotent)
+        get().unlockBadge("recruit");
 
         if (lastLoginDate === today) return; // Already logged in today
 
@@ -608,7 +653,8 @@ export const useGameStore = create<GameStore>()(
       // ============================================
 
       submitFlag: async (challengeId, flag, challenge) => {
-        const { ctfProgress, ctfTotalPoints, achievementQueue, unlockBadge } = get();
+        const { ctfProgress, ctfTotalPoints, achievementQueue, unlockBadge } =
+          get();
         const existing = ctfProgress[challengeId];
 
         // Already solved - no points
@@ -617,7 +663,7 @@ export const useGameStore = create<GameStore>()(
         }
 
         // Hash the input flag and compare
-        const { validateFlag } = await import('../lib/ctf');
+        const { validateFlag } = await import("../lib/ctf");
         const isCorrect = await validateFlag(flag, challenge.flag);
 
         const hintsRevealed = existing?.hintsRevealed || [];
@@ -626,14 +672,14 @@ export const useGameStore = create<GameStore>()(
         if (isCorrect) {
           // Calculate points after hint deductions
           const hintCost = challenge.hints
-            .filter(h => hintsRevealed.includes(h.id))
+            .filter((h) => hintsRevealed.includes(h.id))
             .reduce((total, hint) => total + hint.cost, 0);
           const pointsEarned = Math.max(0, challenge.points - hintCost);
 
           const notification: AchievementNotification = {
             id: `ctf-${challengeId}-${Date.now()}`,
-            type: 'badge',
-            title: 'Flag Captured!',
+            type: "badge",
+            title: "Flag Captured!",
             message: `+${pointsEarned} CTF points`,
           };
 
@@ -655,16 +701,17 @@ export const useGameStore = create<GameStore>()(
 
           // Check for CTF badges
           const newTotal = ctfTotalPoints + pointsEarned;
-          const solvedCount = Object.values(ctfProgress).filter(p => p.solved).length + 1;
+          const solvedCount =
+            Object.values(ctfProgress).filter((p) => p.solved).length + 1;
 
           if (solvedCount === 1) {
-            unlockBadge('badge-ctf-first');
+            unlockBadge("badge-ctf-first");
           }
           if (solvedCount >= 5) {
-            unlockBadge('badge-ctf-hunter');
+            unlockBadge("badge-ctf-hunter");
           }
           if (newTotal >= 500) {
-            unlockBadge('badge-ctf-500');
+            unlockBadge("badge-ctf-500");
           }
 
           // Also award XP based on CTF points (streak multiplier applies)

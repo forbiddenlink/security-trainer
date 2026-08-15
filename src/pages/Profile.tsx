@@ -7,12 +7,22 @@ import { User, Shield, Trophy, Target, Award, Pencil } from "lucide-react";
 import { motion } from "framer-motion";
 import { Certificate } from "../components/Certificate";
 import { ProfileEditModal } from "../components/ProfileEditModal";
+import { RoleSelector } from "../components/RoleSelector";
+
+const ROLE_LABELS: Record<string, string> = {
+  developer: "Developer / Engineer",
+  devops: "DevOps / IT Admin",
+  manager: "Manager / Executive",
+  general: "General Staff",
+  skipped: "Not set",
+};
 
 export const Profile: React.FC = () => {
-  const { xp, level, streakDays, completedModules } = useGameStore();
+  const { xp, level, streakDays, completedModules, userRole } = useGameStore();
   const { profile, user } = useAuthStore();
   const displayName = profile?.display_name || "Agent";
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showRolePicker, setShowRolePicker] = useState(false);
 
   useEffect(() => {
     // Use getState to ensure we always get the latest function reference
@@ -124,6 +134,32 @@ export const Profile: React.FC = () => {
           <Award className="w-5 h-5 text-primary" /> Service Ribbons & Badges
         </h3>
         <BadgeList />
+      </div>
+
+      <div className="ui-card ui-card-lg">
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <h3 className="text-h4 flex items-center gap-2">
+            <Target className="w-5 h-5 text-primary" /> Training Focus
+          </h3>
+          <button
+            type="button"
+            onClick={() => setShowRolePicker((prev) => !prev)}
+            className="text-body-sm text-muted-foreground hover:text-foreground transition-colors"
+            aria-expanded={showRolePicker}
+          >
+            {showRolePicker ? "Close" : "Change focus"}
+          </button>
+        </div>
+        {showRolePicker ? (
+          <RoleSelector />
+        ) : (
+          <p className="text-muted-foreground text-body-sm">
+            Current role:{" "}
+            <span className="text-foreground font-semibold">
+              {ROLE_LABELS[userRole ?? ""] ?? "Not set"}
+            </span>
+          </p>
+        )}
       </div>
 
       <div className="ui-card ui-card-lg">
