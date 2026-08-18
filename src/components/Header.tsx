@@ -9,6 +9,19 @@ import { Button, Progress } from "./ui";
 import { isSupabaseConfigured } from "../lib/supabase";
 import { getSafeAvatarUrl } from "../utils/urlValidation";
 import { getNextLevelXp } from "../utils/gameUtils";
+import { useLocation } from "react-router-dom";
+
+const ROUTE_TITLES: Record<string, string> = {
+  "": "Mission Control",
+  modules: "Active Operations",
+  profile: "Agent Profile",
+  challenge: "Final Exam",
+  leaderboard: "Rankings",
+  paths: "Learning Paths",
+  reviews: "Intel Refresher",
+  ctf: "CTF Challenges",
+  privacy: "Privacy & Terms",
+};
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -18,6 +31,9 @@ interface HeaderProps {
  * Main header with user stats, level progress, and auth controls
  */
 export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
+  const { pathname } = useLocation();
+  const routeTitle = ROUTE_TITLES[pathname.split("/")[1] ?? ""] ?? "SecTrainer";
+
   // Use selectors for better performance - only re-render when specific values change
   const xp = useGameStore((state) => state.xp);
   const level = useGameStore((state) => state.level);
@@ -86,9 +102,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
         >
           <Menu className="w-5 h-5" aria-hidden="true" />
         </button>
-        <h1 className="text-h4 tracking-tight text-foreground">
-          Mission Control
-        </h1>
+        <h1 className="text-h4 tracking-tight text-foreground">{routeTitle}</h1>
       </div>
 
       <div className="flex items-center gap-2 md:gap-3" aria-label="User stats">

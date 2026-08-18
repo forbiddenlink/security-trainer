@@ -4,7 +4,6 @@ import { useAuthStore } from "../store/authStore";
 import { BadgeList } from "../components/BadgeList";
 import { MODULES } from "../data/modules";
 import {
-  User,
   Shield,
   Trophy,
   Target,
@@ -12,12 +11,14 @@ import {
   Pencil,
   AlertTriangle,
   Loader2,
+  Snowflake,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Certificate } from "../components/Certificate";
 import { ProfileEditModal } from "../components/ProfileEditModal";
 import { RoleSelector } from "../components/RoleSelector";
+import { ActivityHeatmap } from "../components/ActivityHeatmap";
 
 const ROLE_LABELS: Record<string, string> = {
   developer: "Developer / Engineer",
@@ -28,7 +29,12 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export const Profile: React.FC = () => {
-  const { xp, level, streakDays, completedModules, userRole } = useGameStore();
+  const xp = useGameStore((s) => s.xp);
+  const level = useGameStore((s) => s.level);
+  const streakDays = useGameStore((s) => s.streakDays);
+  const completedModules = useGameStore((s) => s.completedModules);
+  const userRole = useGameStore((s) => s.userRole);
+  const streakFreezeCount = useGameStore((s) => s.streakFreezeCount);
   const { profile, user, loading, deleteAccount } = useAuthStore();
   const displayName = profile?.display_name || "Agent";
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -57,8 +63,10 @@ export const Profile: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
         <div className="ui-card ui-card-lg flex flex-col items-center gap-4 min-w-[250px]">
           <div className="w-32 h-32 rounded-full border-2 border-primary/40 p-1">
-            <div className="w-full h-full rounded-full bg-muted flex items-center justify-center overflow-hidden">
-              <User className="w-16 h-16 text-muted-foreground" />
+            <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+              <span className="text-5xl font-bold text-primary select-none">
+                {displayName[0]?.toUpperCase() ?? "A"}
+              </span>
             </div>
           </div>
           <div className="text-center">
@@ -79,7 +87,7 @@ export const Profile: React.FC = () => {
             </p>
           </div>
           <div className="w-full h-px bg-border/70 my-2" />
-          <div className="grid grid-cols-2 gap-4 w-full text-center">
+          <div className="grid grid-cols-3 gap-2 w-full text-center">
             <div>
               <p className="text-h2 text-foreground">{streakDays}</p>
               <p className="ui-label">Day Streak</p>
@@ -89,6 +97,16 @@ export const Profile: React.FC = () => {
                 {completedModules.length}
               </p>
               <p className="ui-label">Missions</p>
+            </div>
+            <div>
+              <p className="text-h2 text-foreground flex items-center justify-center gap-1">
+                <Snowflake
+                  className="w-5 h-5 text-sky-400"
+                  aria-hidden="true"
+                />
+                {streakFreezeCount}
+              </p>
+              <p className="ui-label">Freezes</p>
             </div>
           </div>
         </div>
@@ -180,6 +198,10 @@ export const Profile: React.FC = () => {
             </span>
           </p>
         )}
+      </div>
+
+      <div className="ui-card ui-card-lg">
+        <ActivityHeatmap />
       </div>
 
       <div className="ui-card ui-card-lg">

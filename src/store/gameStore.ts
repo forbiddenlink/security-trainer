@@ -32,6 +32,12 @@ const DIFFICULTY_MULTIPLIERS: Record<string, number> = {
 /** Streak day milestones that trigger achievement notifications */
 const STREAK_MILESTONES = [3, 7, 30];
 
+/** Streak milestones that award a freeze token */
+const STREAK_FREEZE_MILESTONES = [7, 30];
+
+/** Maximum freeze tokens a user can hold */
+const MAX_STREAK_FREEZES = 3;
+
 /** Maps a module id to a module-specific badge awarded on completion */
 const MODULE_BADGES: Record<string, string> = {
   "sql-injection": "sql-slayer",
@@ -176,9 +182,7 @@ interface GameStore extends UserState {
     },
   ) => Promise<{ correct: boolean; pointsEarned: number }>;
   revealHint: (challengeId: string, hintId: string) => void;
-  getCTFProgress: (
-    challengeId: string,
-  ) => {
+  getCTFProgress: (challengeId: string) => {
     solved: boolean;
     hintsRevealed: string[];
     attempts: number;
@@ -206,6 +210,8 @@ const INITIAL_STATE: UserState = {
   ctfProgress: {},
   ctfTotalPoints: 0,
   userRole: null,
+  activityLog: [],
+  streakFreezeCount: 0,
 };
 
 // Helper to get today's date string
@@ -394,39 +400,81 @@ export const useGameStore = create<GameStore>()(
       setCurrentModule: (moduleId) => set({ currentModuleId: moduleId }),
 
       checkStreak: () => {
-        const { lastLoginDate, streakDays, achievementQueue } = get();
+        const {
+          lastLoginDate,
+          streakDays,
+          achievementQueue,
+          activityLog,
+          streakFreezeCount,
+        } = get();
         const today = getTodayString();
 
         // Award "Recruit" badge for starting a session (idempotent)
         get().unlockBadge("recruit");
 
-        if (lastLoginDate === today) return; // Already logged in today
+        // Always ensure today is in the activity log (idempotent)
+        if (!activityLog.includes(today)) {
+          const updatedLog = [...activityLog, today].slice(-365);
+          set({ activityLog: updatedLog });
+        }
 
-        const matchDate = new Date();
-        matchDate.setDate(matchDate.getDate() - 1);
-        const yesterday = matchDate.toISOString().split("T")[0];
+        if (lastLoginDate === today) return; // Already counted streak today
+
+        const dateOffset = (n: number) => {
+          const d = new Date();
+          d.setDate(d.getDate() - n);
+          return d.toISOString().split("T")[0];
+        };
+        const yesterday = dateOffset(1);
+        const dayBefore = dateOffset(2);
 
         let newStreakDays: number;
+        let newFreezeCount = streakFreezeCount;
         const notifications: AchievementNotification[] = [];
 
         if (lastLoginDate === yesterday) {
           newStreakDays = streakDays + 1;
-
-          // Check for streak milestones
-          if (STREAK_MILESTONES.includes(newStreakDays)) {
-            notifications.push({
-              id: `streak-${newStreakDays}-${Date.now()}`,
-              type: "streak",
-              title: "Streak Milestone!",
-              message: `${newStreakDays}-day streak! Keep it up!`,
-            });
-          }
+        } else if (lastLoginDate === dayBefore && streakFreezeCount > 0) {
+          // Missed exactly 1 day but have a freeze — auto-apply
+          newStreakDays = streakDays + 1;
+          newFreezeCount = streakFreezeCount - 1;
+          notifications.push({
+            id: `freeze-used-${Date.now()}`,
+            type: "streak",
+            title: "Streak Freeze Used!",
+            message: `A freeze token saved your ${streakDays}-day streak! (${newFreezeCount} remaining)`,
+          });
         } else {
           newStreakDays = 1; // Reset or start streak
         }
 
+        // Milestone notification
+        if (STREAK_MILESTONES.includes(newStreakDays)) {
+          notifications.push({
+            id: `streak-${newStreakDays}-${Date.now()}`,
+            type: "streak",
+            title: "Streak Milestone!",
+            message: `${newStreakDays}-day streak! Keep it up!`,
+          });
+        }
+
+        // Award freeze token at freeze milestones (cap at MAX_STREAK_FREEZES)
+        if (
+          STREAK_FREEZE_MILESTONES.includes(newStreakDays) &&
+          newFreezeCount < MAX_STREAK_FREEZES
+        ) {
+          newFreezeCount++;
+          notifications.push({
+            id: `freeze-earned-${Date.now()}`,
+            type: "streak",
+            title: "Freeze Token Earned!",
+            message: `${newStreakDays}-day streak — you earned a streak freeze! (${newFreezeCount} held)`,
+          });
+        }
+
         set({
           streakDays: newStreakDays,
+          streakFreezeCount: newFreezeCount,
           lastLoginDate: today,
           achievementQueue: [...achievementQueue, ...notifications],
         });
@@ -792,6 +840,8 @@ export const useGameStore = create<GameStore>()(
         ctfProgress: state.ctfProgress,
         ctfTotalPoints: state.ctfTotalPoints,
         userRole: state.userRole,
+        activityLog: state.activityLog,
+        streakFreezeCount: state.streakFreezeCount,
       }),
     },
   ),

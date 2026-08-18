@@ -6,7 +6,13 @@ export interface Module {
   xpReward: number;
   lessons: Lesson[];
   locked: boolean;
-  category?: 'web-security' | 'api-backend' | 'advanced' | 'awareness' | 'compliance' | 'infrastructure';
+  category?:
+    | "web-security"
+    | "api-backend"
+    | "advanced"
+    | "awareness"
+    | "compliance"
+    | "infrastructure";
 }
 
 export interface Lesson {
@@ -61,6 +67,10 @@ export interface UserState {
   ctfTotalPoints: number;
   // Onboarding
   userRole: string | null;
+  // Activity tracking (for heatmap)
+  activityLog: string[];
+  // Streak freeze tokens
+  streakFreezeCount: number;
 }
 
 export interface CTFProgressState {
@@ -108,4 +118,10 @@ export interface LearningPath {
 }
 
 // CTF Challenge Types (re-exported from lib/ctf.ts for convenience)
-export type { CTFCategory, CTFHint, CTFChallenge, CTFSubmission, CTFProgress } from '../lib/ctf';
+export type {
+  CTFCategory,
+  CTFHint,
+  CTFChallenge,
+  CTFSubmission,
+  CTFProgress,
+} from "../lib/ctf";

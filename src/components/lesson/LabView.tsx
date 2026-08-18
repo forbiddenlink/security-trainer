@@ -491,6 +491,38 @@ export const LabView: React.FC<LabViewProps> = memo(
               <TerminalIcon className="w-4 h-4" aria-hidden="true" />
               Terminal
             </button>
+
+            {/* Keyboard shortcut hints */}
+            <div
+              className="ml-auto flex items-center gap-2 text-[10px] text-muted-foreground/60 select-none"
+              aria-hidden="true"
+            >
+              {activeTab === "editor" ? (
+                <>
+                  <span className="flex items-center gap-1">
+                    <kbd className="lab-key">⌘Z</kbd> undo
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <kbd className="lab-key">⌘/</kbd> comment
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <kbd className="lab-key">Tab</kbd> indent
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="flex items-center gap-1">
+                    <kbd className="lab-key">↑↓</kbd> history
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <kbd className="lab-key">Tab</kbd> complete
+                  </span>
+                </>
+              )}
+              <span className="flex items-center gap-1">
+                <kbd className="lab-key">←→</kbd> switch tab
+              </span>
+            </div>
           </div>
 
           <div

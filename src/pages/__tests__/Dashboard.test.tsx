@@ -13,7 +13,11 @@ vi.mock("framer-motion", () => ({
     div: ({ children, ...props }: { children?: React.ReactNode }) => (
       <div {...props}>{children}</div>
     ),
+    circle: (props: React.SVGProps<SVGCircleElement>) => <circle {...props} />,
   },
+  AnimatePresence: ({ children }: { children?: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 describe("Dashboard", () => {
@@ -57,7 +61,10 @@ describe("Dashboard", () => {
     });
 
     it("displays number of completed modules", () => {
-      setupGameStore({ completedModules: ["owasp-intro", "sql-injection"], userRole: "developer" });
+      setupGameStore({
+        completedModules: ["owasp-intro", "sql-injection"],
+        userRole: "developer",
+      });
 
       renderWithRouter(<Dashboard />);
 
@@ -99,7 +106,9 @@ describe("Dashboard", () => {
       setupGameStore({ userRole: "developer" });
       renderWithRouter(<Dashboard />);
 
-      const viewAllLink = screen.getByRole("link", { name: /view all/i });
+      const viewAllLink = screen.getByRole("link", {
+        name: /view all achievements/i,
+      });
       expect(viewAllLink).toHaveAttribute("href", "/profile");
     });
   });

@@ -59,12 +59,23 @@ export const Leaderboard: React.FC = () => {
   if (!isSupabaseConfigured()) {
     return (
       <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-        <div className="text-center py-12">
-          <Trophy className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-h2 mb-2">Leaderboard Unavailable</h2>
-          <p className="text-body text-muted-foreground">
-            Configure Supabase to enable the leaderboard feature.
-          </p>
+        <div className="ui-card ui-card-lg ops-briefing range-panel range-ticks relative overflow-hidden">
+          <div className="relative z-10 text-center py-8">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="range-dot" aria-hidden="true" />
+              <span className="range-readout">
+                INTEL FEED // CLEARANCE REQUIRED
+              </span>
+            </div>
+            <div className="p-5 rounded-full bg-primary/8 border border-primary/20 inline-flex mb-6">
+              <Trophy className="w-14 h-14 text-primary" aria-hidden="true" />
+            </div>
+            <h2 className="text-h2 mb-3">Rankings Classified</h2>
+            <p className="text-body text-muted-foreground max-w-sm mx-auto">
+              Agent rankings require database clearance. Configure Supabase to
+              access the global leaderboard.
+            </p>
+          </div>
         </div>
       </div>
     );
