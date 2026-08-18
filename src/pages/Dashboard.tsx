@@ -5,21 +5,29 @@ import { DailyChallenge } from "../components/DailyChallenge";
 import { IntelRefresher } from "../components/IntelRefresher";
 import { RoleSelector } from "../components/RoleSelector";
 import { LiveLabTargets } from "../components/LiveLabTargets";
+import { NextBadgePreview } from "../components/NextBadgePreview";
 import { MODULES } from "../data/modules";
-import { Card, Progress } from "../components/ui";
-import { ArrowRight } from "lucide-react";
+import { Card } from "../components/ui";
+import { StatRing } from "../components/StatRing";
+import {
+  ArrowRight,
+  Trophy,
+  Crosshair,
+  Flame,
+  Zap,
+  Snowflake,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Dashboard: React.FC = () => {
-  const {
-    xp,
-    level,
-    completedModules,
-    currentModuleId,
-    streakDays,
-    getStreakMultiplier,
-    userRole,
-  } = useGameStore();
+  const xp = useGameStore((s) => s.xp);
+  const level = useGameStore((s) => s.level);
+  const completedModules = useGameStore((s) => s.completedModules);
+  const currentModuleId = useGameStore((s) => s.currentModuleId);
+  const streakDays = useGameStore((s) => s.streakDays);
+  const streakFreezeCount = useGameStore((s) => s.streakFreezeCount);
+  const getStreakMultiplier = useGameStore((s) => s.getStreakMultiplier);
+  const userRole = useGameStore((s) => s.userRole);
   const currentModule = useMemo(
     () => MODULES.find((m) => m.id === currentModuleId),
     [currentModuleId],
@@ -33,16 +41,26 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
       {isNewVisitor && (
-        <section className="ui-card ui-card-lg" aria-label="What SecTrainer is">
-          <p className="ui-chip mb-3">New here?</p>
-          <h1 className="text-h1 mb-2">Learn web security by doing.</h1>
-          <p className="text-muted-foreground max-w-2xl text-body-sm md:text-body">
-            SecTrainer is a free, hands-on trainer for web security —{" "}
-            {MODULES.length}+ modules across the OWASP Top 10, injection, auth
-            flaws, cloud, and compliance, with in-browser code labs, quizzes,
-            and CTF challenges. No signup required; your progress saves in this
-            browser. Pick a track below to begin.
-          </p>
+        <section
+          className="ui-card ui-card-lg ops-briefing range-panel range-ticks relative overflow-hidden"
+          aria-label="What SecTrainer is"
+        >
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="range-dot" aria-hidden="true" />
+              <span className="range-readout">
+                CLEARANCE LEVEL ZERO // WELCOME, RECRUIT
+              </span>
+            </div>
+            <h1 className="text-h1 mb-2">Learn web security by doing.</h1>
+            <p className="text-muted-foreground max-w-2xl text-body-sm md:text-body">
+              SecTrainer is a free, hands-on trainer for web security —{" "}
+              {MODULES.length}+ modules across the OWASP Top 10, injection, auth
+              flaws, cloud, and compliance, with in-browser code labs, quizzes,
+              and CTF challenges. No signup required; your progress saves in
+              this browser. Pick a track below to begin.
+            </p>
+          </div>
         </section>
       )}
       {!userRole && xp === 0 && completedModules.length === 0 ? (
@@ -95,48 +113,63 @@ export const Dashboard: React.FC = () => {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
         aria-label="Statistics"
       >
-        {/* XP Card - Hero stat with progress */}
+        {/* XP Card - Hero stat with ring */}
         <Card className="ui-card-md md:col-span-2 lg:col-span-1">
-          <p className="ui-label mb-2" id="score-label">
+          <p className="ui-label mb-3" id="score-label">
             Current Score
           </p>
-          <h3 className="ui-stat-value" aria-labelledby="score-label">
-            {xp}
-            <span className="text-body-sm text-muted-foreground font-normal ml-1">
-              XP
-            </span>
-          </h3>
-          <Progress
-            className="mt-3"
-            value={xp}
-            min={0}
-            max={nextLevelXp}
-            aria-label={`XP progress: ${xp} of ${nextLevelXp}`}
-            indicatorClassName="bg-primary"
-          />
-          <p className="text-body-sm text-muted-foreground mt-1.5">
-            {nextLevelXp - xp} XP to next level
-          </p>
+          <div className="flex items-center gap-4">
+            <StatRing value={xp} max={nextLevelXp} colorClass="text-primary">
+              <Zap className="w-4 h-4 text-primary" aria-hidden="true" />
+            </StatRing>
+            <div>
+              <h3 className="ui-stat-value" aria-labelledby="score-label">
+                {xp}
+                <span className="text-body-sm text-muted-foreground font-normal ml-1">
+                  XP
+                </span>
+              </h3>
+              <p className="text-body-sm text-muted-foreground mt-0.5">
+                {nextLevelXp - xp} XP to next level
+              </p>
+            </div>
+          </div>
         </Card>
 
         {/* Modules Completed */}
         <Card className="ui-card-md">
-          <p className="ui-label mb-2" id="modules-label">
+          <p className="ui-label mb-3" id="modules-label">
             Missions Complete
           </p>
-          <h3 className="ui-stat-value" aria-labelledby="modules-label">
-            {completedModules.length}
-            <span className="text-body-sm text-muted-foreground font-normal ml-1">
-              / {MODULES.length}
-            </span>
-          </h3>
+          <div className="flex items-center gap-4">
+            <StatRing
+              value={completedModules.length}
+              max={MODULES.length}
+              colorClass="text-accent"
+            >
+              <Crosshair className="w-4 h-4 text-accent" aria-hidden="true" />
+            </StatRing>
+            <div>
+              <h3 className="ui-stat-value" aria-labelledby="modules-label">
+                {completedModules.length}
+                <span className="text-body-sm text-muted-foreground font-normal ml-1">
+                  / {MODULES.length}
+                </span>
+              </h3>
+            </div>
+          </div>
         </Card>
 
         {/* Active Mission */}
         <Card className="ui-card-md">
-          <p className="ui-label mb-2" id="mission-label">
-            Active Mission
-          </p>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="ui-icon-box bg-warning/10 text-warning">
+              <Trophy className="w-4 h-4" aria-hidden="true" />
+            </div>
+            <p className="ui-label" id="mission-label">
+              Active Mission
+            </p>
+          </div>
           {currentModule ? (
             <Link
               to={`/modules/${currentModule.id}`}
@@ -146,7 +179,10 @@ export const Dashboard: React.FC = () => {
               {currentModule.title}
             </Link>
           ) : (
-            <h3 className="text-h4 truncate" aria-labelledby="mission-label">
+            <h3
+              className="text-h4 truncate text-muted-foreground"
+              aria-labelledby="mission-label"
+            >
               None assigned
             </h3>
           )}
@@ -154,9 +190,16 @@ export const Dashboard: React.FC = () => {
 
         {/* Streak */}
         <Card className="ui-card-md">
-          <p className="ui-label mb-2" id="streak-label">
-            Current Streak
-          </p>
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className={`ui-icon-box ${streakDays > 0 ? "bg-warning/10 text-warning" : "bg-muted/60 text-muted-foreground"}`}
+            >
+              <Flame className="w-4 h-4" aria-hidden="true" />
+            </div>
+            <p className="ui-label" id="streak-label">
+              Current Streak
+            </p>
+          </div>
           <h3 className="ui-stat-value" aria-labelledby="streak-label">
             {streakDays}
             <span className="text-body-sm text-muted-foreground font-normal ml-1">
@@ -168,8 +211,19 @@ export const Dashboard: React.FC = () => {
               +{bonusPercent}% XP bonus
             </p>
           )}
+          {streakFreezeCount > 0 && (
+            <p
+              className="flex items-center gap-1 text-body-sm text-sky-400 mt-1"
+              title="Streak freeze tokens — auto-applied if you miss a day"
+            >
+              <Snowflake className="w-3.5 h-3.5" aria-hidden="true" />
+              {streakFreezeCount} freeze{streakFreezeCount !== 1 ? "s" : ""}
+            </p>
+          )}
         </Card>
       </section>
+
+      <NextBadgePreview />
 
       <section aria-labelledby="daily-challenge-heading">
         <h2 id="daily-challenge-heading" className="text-h2 mb-4">
