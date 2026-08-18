@@ -58,10 +58,10 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
             onClick={onNavigate}
             className={({ isActive }) =>
               clsx(
-                "group relative flex h-10 items-center gap-3 rounded-[var(--radius-sm)] px-3.5 text-body-sm font-medium transition-colors",
+                "group relative flex h-10 items-center gap-3 rounded-[var(--radius-sm)] pl-3 pr-3.5 text-body-sm font-medium transition-colors border-l-2",
                 isActive
-                  ? "bg-primary/8 text-primary"
-                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                  ? "bg-primary/10 text-primary border-primary"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground border-transparent",
               )
             }
           >

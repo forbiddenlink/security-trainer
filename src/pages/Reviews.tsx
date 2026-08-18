@@ -5,7 +5,6 @@ import {
   RefreshCw,
   CheckCircle,
   AlertTriangle,
-  ArrowLeft,
   Clock,
   BookOpen,
 } from "lucide-react";
@@ -122,45 +121,49 @@ export const Reviews: React.FC = () => {
     <div className="container max-w-4xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+        <section
+          className="ui-card ui-card-lg ops-briefing range-panel range-ticks relative overflow-hidden"
+          aria-label="Intel Refresher status"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Dashboard
-        </Link>
-        <div className="flex items-center gap-4">
-          <div
-            className={`h-12 w-12 grid place-items-center rounded-lg ${
-              overdueCount > 0
-                ? "bg-destructive/10 text-destructive"
-                : "bg-primary/10 text-primary"
-            }`}
-          >
-            <RefreshCw className="w-6 h-6" aria-hidden="true" />
-          </div>
-          <div>
-            <h1 className="text-h1">
-              Intel Refresher
-            </h1>
-            <p className="text-muted-foreground">
-              {reviewsDue.length > 0 ? (
-                <>
-                  {reviewsDue.length} lesson{reviewsDue.length !== 1 ? "s" : ""}{" "}
-                  due for review
-                  {overdueCount > 0 && (
-                    <span className="text-destructive">
-                      {" "}
-                      ({overdueCount} overdue)
-                    </span>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="range-dot" aria-hidden="true" />
+              <span className="range-readout">
+                Spaced Repetition // Memory Protocol
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div
+                className={`h-12 w-12 grid place-items-center rounded-[var(--radius-sm)] ${
+                  overdueCount > 0
+                    ? "bg-warning/10 text-warning"
+                    : "bg-accent/10 text-accent"
+                }`}
+              >
+                <RefreshCw className="w-6 h-6" aria-hidden="true" />
+              </div>
+              <div>
+                <h1 className="text-h1">Intel Refresher</h1>
+                <p className="text-muted-foreground">
+                  {reviewsDue.length > 0 ? (
+                    <>
+                      {reviewsDue.length} lesson
+                      {reviewsDue.length !== 1 ? "s" : ""} due for review
+                      {overdueCount > 0 && (
+                        <span className="text-warning">
+                          {" "}
+                          ({overdueCount} overdue)
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    "All intel is fresh, Agent"
                   )}
-                </>
-              ) : (
-                "All intel is fresh, Agent"
-              )}
-            </p>
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
 
       {/* Stats */}

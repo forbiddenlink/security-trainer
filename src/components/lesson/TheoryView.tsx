@@ -105,14 +105,20 @@ export const TheoryView: React.FC<TheoryViewProps> = memo(({ content }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto prose prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-primary prose-a:text-primary prose-li:text-foreground prose-table:border-border prose-th:border-border prose-td:border-border">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-        components={components}
-      >
-        {processedContent}
-      </ReactMarkdown>
+    <div className="max-w-3xl mx-auto">
+      <div className="flex items-center gap-2 mb-6">
+        <span className="range-dot" aria-hidden="true" />
+        <span className="range-readout">INTEL BRIEF // CLASSIFIED READING</span>
+      </div>
+      <div className="prose dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-primary prose-a:text-primary prose-li:text-foreground prose-table:border-border prose-th:border-border prose-td:border-border max-w-none">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
+          components={components}
+        >
+          {processedContent}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 });

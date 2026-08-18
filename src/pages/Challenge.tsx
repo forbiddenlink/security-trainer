@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { prefersReducedMotion } from "../utils/prefersReducedMotion";
 import { motion } from "framer-motion";
 import { clsx } from "clsx";
-import { Timer, AlertTriangle, Skull, CheckCircle } from "lucide-react";
+import { Timer, ShieldAlert, Skull, CheckCircle, Zap } from "lucide-react";
 import { MODULES } from "../data/modules";
 import { useGameStore } from "../store/gameStore";
 import { Button, Card } from "../components/ui";
@@ -106,25 +106,28 @@ export const Challenge: React.FC = () => {
         aria-label="Final exam start screen"
       >
         <div
-          className="p-7 rounded-full bg-destructive/10 border-2 border-destructive/30 animate-pulse"
+          className="p-7 rounded-full bg-warning/8 border-2 border-warning/35 relative"
           aria-hidden="true"
         >
-          <AlertTriangle className="w-20 h-20 text-destructive" />
+          <ShieldAlert className="w-20 h-20 text-warning" />
         </div>
-        <h1 className="text-display text-foreground">FINAL EXAM</h1>
+        <div>
+          <p className="range-readout mb-3">CLEARANCE PROTOCOL // ALPHA-7</p>
+          <h1 className="text-display text-foreground">FINAL EXAM</h1>
+        </div>
         <p className="text-h4 text-muted-foreground font-normal">
           60 Seconds. 5 Random Questions. <br />
-          <span className="text-destructive font-semibold">
+          <span className="text-warning font-semibold">
             One mistake ends the run.
           </span>
         </p>
         <Button
           onClick={() => setGameStarted(true)}
-          variant="destructive"
           size="lg"
-          className="px-8 text-body"
+          className="px-8 text-body bg-primary hover:bg-primary-hover text-primary-foreground"
           aria-label="Start the final exam"
         >
+          <Zap className="w-4 h-4 mr-2" aria-hidden="true" />
           INITIATE PROTOCOL
         </Button>
       </div>
@@ -200,8 +203,8 @@ export const Challenge: React.FC = () => {
       <Card className="ui-card-md flex justify-between items-center mb-8">
         <div
           className={clsx(
-            "flex items-center gap-2 text-h2 font-mono font-bold text-destructive",
-            timeLeft <= 10 && "animate-pulse",
+            "flex items-center gap-2 text-h2 font-mono font-bold",
+            timeLeft <= 10 ? "text-warning animate-pulse" : "text-primary",
           )}
           aria-live="polite"
           aria-atomic="true"

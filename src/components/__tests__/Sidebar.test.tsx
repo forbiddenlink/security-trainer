@@ -124,7 +124,7 @@ describe("Sidebar", () => {
 
       const dashboardLink = screen.getByRole("link", { name: /dashboard/i });
       // Check that it has the active class
-      expect(dashboardLink).toHaveClass("bg-primary/8");
+      expect(dashboardLink).toHaveClass("bg-primary/10");
     });
   });
 

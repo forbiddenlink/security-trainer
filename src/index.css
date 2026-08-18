@@ -653,6 +653,19 @@ h2 {
     color: var(--color-muted-foreground);
   }
 
+  /* Lab keyboard shortcut key badge */
+  .lab-key {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+    background: color-mix(in srgb, var(--color-muted) 40%, transparent);
+    color: var(--color-muted-foreground);
+    white-space: nowrap;
+  }
+
   /* Range verdict — after-action result panel */
   .range-verdict-title {
     font-family: var(--font-mono);
