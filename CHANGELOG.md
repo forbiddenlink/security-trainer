@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/forbiddenlink/security-trainer/compare/v1.0.0...v1.0.1) (2026-08-29)
+
+
+### Bug Fixes
+
+* **deps:** move resolution overrides to package.json and add missing patches ([#72](https://github.com/forbiddenlink/security-trainer/issues/72)) ([8446174](https://github.com/forbiddenlink/security-trainer/commit/84461744ee4700e12da29d48e60de301c2d450d8))
+
 ## 1.0.0 (2026-08-29)
 
 
