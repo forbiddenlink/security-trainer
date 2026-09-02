@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.2](https://github.com/forbiddenlink/security-trainer/compare/v1.0.1...v1.0.2) (2026-09-02)
+
+
+### Bug Fixes
+
+* **ci:** let pnpm/action-setup read the version from packageManager ([5667d65](https://github.com/forbiddenlink/security-trainer/commit/5667d6512ecf913c3d788f8c232e6fd5295b01a2))
+* **deps:** give every resolution override an upper bound ([ac77bbb](https://github.com/forbiddenlink/security-trainer/commit/ac77bbbf57bd3ef82e7e9b66950099dea4806e34))
+* **security:** pin transitive dependencies flagged by Dependabot ([d40a8c8](https://github.com/forbiddenlink/security-trainer/commit/d40a8c8b81baa4351f54ad70e1da8348f3a8dc7c))
+
 ## [1.0.1](https://github.com/forbiddenlink/security-trainer/compare/v1.0.0...v1.0.1) (2026-08-29)
 
 
