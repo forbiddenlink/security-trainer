@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/forbiddenlink/security-trainer/compare/v1.0.2...v1.0.3) (2026-09-08)
+
+
+### Bug Fixes
+
+* show profile save failures instead of false success ([#85](https://github.com/forbiddenlink/security-trainer/issues/85)) ([a95811b](https://github.com/forbiddenlink/security-trainer/commit/a95811b5de7a9cf9a42c7604fcf3985cb933ca1d))
+
 ## [1.0.2](https://github.com/forbiddenlink/security-trainer/compare/v1.0.1...v1.0.2) (2026-09-02)
 
 
