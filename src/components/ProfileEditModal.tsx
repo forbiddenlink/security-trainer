@@ -54,7 +54,11 @@ const ProfileEditForm: React.FC<{
       return;
     }
 
-    await updateProfile({ display_name: trimmedName });
+    const result = await updateProfile({ display_name: trimmedName });
+    if (result.error) {
+      setError(result.error.message);
+      return;
+    }
     setSuccess(true);
 
     // Close after brief success feedback (with cleanup on unmount)

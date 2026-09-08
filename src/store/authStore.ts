@@ -37,7 +37,9 @@ interface AuthActions {
   ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<{ error: Error | null }>;
-  updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  updateProfile: (
+    updates: Partial<Profile>,
+  ) => Promise<{ error: Error | null }>;
   syncProgressToCloud: (progress: {
     xp: number;
     level: number;
@@ -239,13 +241,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   updateProfile: async (updates) => {
     const { user } = get();
-    if (!supabase || !user) return;
+    if (!supabase || !user)
+      return { error: new Error("Sign in to update your profile") };
 
     // Validate avatar_url if provided - prevent XSS via malicious URLs
     if (updates.avatar_url !== undefined) {
       if (updates.avatar_url && !isValidAvatarUrl(updates.avatar_url)) {
         console.error("Invalid avatar URL rejected:", updates.avatar_url);
-        return;
+        return { error: new Error("Invalid avatar URL") };
       }
     }
 
@@ -254,19 +257,27 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .update(updateData)
-      .eq("id", user.id)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(updateData)
+        .eq("id", user.id)
+        .select()
+        .single();
 
-    if (error) {
-      console.error("Profile update error:", error);
-      return;
+      if (error) {
+        console.error("Profile update error:", error);
+        return { error: new Error(error.message) };
+      }
+
+      set({ profile: data });
+      return { error: null };
+    } catch (error) {
+      return {
+        error:
+          error instanceof Error ? error : new Error("Profile update failed"),
+      };
     }
-
-    set({ profile: data });
   },
 
   syncProgressToCloud: async (progress) => {
