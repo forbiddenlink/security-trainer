@@ -46,7 +46,24 @@ describe("ProfileEditModal", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUpdateProfile.mockResolvedValue(undefined);
+    mockUpdateProfile.mockResolvedValue({ error: null });
+  });
+
+  it("keeps the form open and shows an error when saving fails", async () => {
+    setupStore();
+    mockUpdateProfile.mockResolvedValue({
+      error: new Error("Save unavailable"),
+    });
+    render(<ProfileEditModal isOpen={true} onClose={mockOnClose} />);
+    await userEvent.click(screen.getByRole("button", { name: /save/i }));
+    await waitFor(() =>
+      expect(screen.getByText("Save unavailable")).toBeInTheDocument(),
+    );
+    expect(
+      screen.queryByText("Profile updated successfully"),
+    ).not.toBeInTheDocument();
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    expect(mockOnClose).not.toHaveBeenCalled();
   });
 
   describe("Rendering", () => {
