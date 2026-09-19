@@ -39,8 +39,8 @@ pnpm test:coverage    # vitest run --coverage
 pnpm test:e2e         # playwright test
 ```
 
-Note: an older doc in this repo showed the npm CLI; the repo pins
-`packageManager: pnpm@10.32.1` and ships `pnpm-lock.yaml`. Use pnpm.
+The repo pins `packageManager: pnpm@10.32.1` and ships `pnpm-lock.yaml`; use pnpm (the stale
+handoff doc that showed npm was removed 2026-09-19).
 
 ## Layout
 
