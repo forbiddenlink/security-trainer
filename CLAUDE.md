@@ -1,67 +1,96 @@
-# Security Trainer - Project Guidelines
+# Security Trainer
 
-## Project Overview
+Gamified, hands-on cybersecurity training platform (spy/agent theme, XP,
+levels, badges, streaks). 40+ modules covering OWASP Top 10, auth/session
+flaws, injection, cloud/container/API security, compliance basics (GDPR,
+HIPAA, PCI-DSS, SOC 2), phishing/social engineering, and AI security.
+Live: https://security-trainer.vercel.app
 
-A gamified web-based interactive learning platform for teaching web security vulnerabilities and defensive coding practices. Features a spy/agent theme with XP, levels, badges, and hands-on code labs.
+## Stack
 
-## Tech Stack
-
-- **Frontend**: React 19 + TypeScript 5.9
-- **Build**: Vite 7.2
-- **State**: Zustand (with localStorage persistence)
-- **Styling**: Tailwind CSS 4.1
-- **Animations**: Framer Motion
-- **Editor**: Monaco Editor (for code labs)
-
-## Project Structure
-
-```
-src/
-├── components/    # Reusable UI components
-├── pages/         # Route page components
-├── layouts/       # Layout wrappers
-├── store/         # Zustand state management
-├── data/modules/  # Static module/lesson content (42 modules)
-├── types/         # TypeScript interfaces
-├── utils/         # Utility functions (lab verification)
-├── lib/           # External service clients (Supabase)
-```
-
-## Key Patterns
-
-### Lab Verification
-
-Lab exercises are verified using a secure registry pattern in `src/utils/labVerification.ts`:
-
-- All verification functions are statically defined (no dynamic code execution)
-- Add new lab verifiers by lab ID to the `labVerifiers` object
-- Each verifier receives the user's code string and returns boolean
-
-### State Management
-
-- Use Zustand store in `src/store/gameStore.ts`
-- Transient UI state (like toasts) should be in store but excluded from persistence via `partialize`
-- Trigger side effects (confetti, toasts) within store actions, not React effects
-
-### Adding Modules
-
-1. Create a new file in `src/data/modules/` (e.g., `my-module.ts`)
-2. Export and add to `src/data/modules/index.ts`
-3. For labs, add corresponding verifier to `src/utils/labVerification.ts`
-4. Use existing lesson types: `theory`, `quiz`, `lab`
+- Vite 8 + React 19 + React Router 7, TypeScript 6
+- State: Zustand 5, persisted to localStorage
+- Styling: Tailwind CSS 4
+- Animation: Framer Motion; Editor: Monaco (`@monaco-editor/react`);
+  Terminal: xterm.js; Diagrams: Mermaid
+- Backend/auth: Supabase (`@supabase/supabase-js`)
+- AI: Groq (`llama-3.1-8b-instant`) via a rate-limited serverless endpoint
+  (`api/socratic-hint.ts`), rate-limited with `@upstash/ratelimit` +
+  `@upstash/redis`
+- Testing: Vitest + Testing Library (unit), Playwright (e2e)
+- Analytics: PostHog (optional, respects Do-Not-Track / GPC)
+- Lint/format: both ESLint + Prettier (via husky/lint-staged on commit) and
+  Biome scripts exist side by side; there is no single source of truth,
+  check which one a given file is actually formatted with before assuming.
+- pnpm (`pnpm@10.34.5`)
 
 ## Commands
 
 ```bash
-npm run dev      # Development server
-npm run build    # Production build
-npm run lint     # ESLint check
-npm run preview  # Preview production build
+pnpm dev              # vite dev server
+pnpm build            # tsc -b && vite build
+pnpm lint             # eslint .
+pnpm biome:check      # biome check .
+pnpm biome:fix        # biome check . --write
+pnpm preview          # vite preview
+pnpm test             # vitest (watch)
+pnpm test:run         # vitest run
+pnpm test:coverage    # vitest run --coverage
+pnpm test:e2e         # playwright test
 ```
 
-## Code Standards
+The repo pins `packageManager: pnpm@10.34.5` and ships `pnpm-lock.yaml`; use pnpm (the stale
+handoff doc that showed npm was removed 2026-09-19).
 
-- Use React functional components with hooks
-- Avoid dynamic code execution patterns - use the verification registry
-- Follow existing Tailwind class naming conventions
-- Use Lucide icons for consistency
+## Layout
+
+- `src/components/`: reusable UI components
+- `src/pages/`: route page components
+- `src/layouts/`: layout wrappers
+- `src/store/gameStore.ts`: Zustand state (XP, levels, badges, streaks)
+- `src/data/modules/`: static lesson content (42 modules); each exports
+  `theory`, `quiz`, or `lab` lesson types, added to `src/data/modules/index.ts`
+- `src/types/`: TypeScript interfaces
+- `src/utils/labVerification.ts`: statically-defined lab verification
+  registry (no dynamic code execution)
+- `src/lib/`: external service clients (Supabase)
+- `api/socratic-hint.ts`: serverless endpoint for the Socratic AI tutor
+- `supabase/schema.sql`, `supabase/migrations/`: DB schema and migrations
+- `e2e/`: Playwright specs
+
+## Conventions
+
+- Add a module: create a file in `src/data/modules/`, export it and add it
+  to `index.ts`; if it has a lab, add a verifier to
+  `src/utils/labVerification.ts` keyed by lab ID.
+- Zustand: transient UI state (toasts) lives in the store but is excluded
+  from persistence via `partialize`; trigger side effects (confetti,
+  toasts) inside store actions, not React effects.
+- Never add dynamic code execution for lab verification; use the
+  registry pattern.
+
+## Env vars
+
+Client (`VITE_` prefix, all optional, app runs with reduced functionality
+without them):
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`
+
+Server (`api/socratic-hint.ts`, the AI tutor endpoint):
+- `GROQ_API_KEY`, `AI_DISABLED`, `AI_DAILY_BUDGET`
+- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
+- `HINTS_ALLOW_NO_RATELIMIT`
+
+`API_KEY`, `ENCRYPTION_KEY`, `VAULT_TOKEN` also appear in
+`process.env.*` calls, but only inside `src/data/modules/*.ts` lesson
+content and its tests: fake vulnerable-code examples for the lessons, not
+real config.
+
+## Gotchas
+
+- `.gitleaks.toml` allowlists all of `src/data/**`: lesson/CTF content
+  deliberately contains fake credentials (sample JWTs, API keys, demo
+  flags) as teaching material. Do not "fix" these as real leaks.
+- `pnpm.overrides` in `package.json` pins several transitive deps for
+  security advisories (vite, rollup, undici, dompurify, etc.); check why
+  before removing.
