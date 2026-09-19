@@ -22,7 +22,7 @@ Live: https://security-trainer.vercel.app
 - Lint/format: both ESLint + Prettier (via husky/lint-staged on commit) and
   Biome scripts exist side by side; there is no single source of truth,
   check which one a given file is actually formatted with before assuming.
-- pnpm (`pnpm@10.32.1`)
+- pnpm (`pnpm@10.34.5`)
 
 ## Commands
 
@@ -39,7 +39,7 @@ pnpm test:coverage    # vitest run --coverage
 pnpm test:e2e         # playwright test
 ```
 
-The repo pins `packageManager: pnpm@10.32.1` and ships `pnpm-lock.yaml`; use pnpm (the stale
+The repo pins `packageManager: pnpm@10.34.5` and ships `pnpm-lock.yaml`; use pnpm (the stale
 handoff doc that showed npm was removed 2026-09-19).
 
 ## Layout
