@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/forbiddenlink/security-trainer/compare/v1.0.3...v1.0.4) (2026-09-19)
+
+
+### Bug Fixes
+
+* **config:** drop env example vars no code reads ([#91](https://github.com/forbiddenlink/security-trainer/issues/91)) ([1b3de75](https://github.com/forbiddenlink/security-trainer/commit/1b3de7554fcfff9664b76291a1996ad2a133cc3d))
+
 ## [1.0.3](https://github.com/forbiddenlink/security-trainer/compare/v1.0.2...v1.0.3) (2026-09-08)
 
 
