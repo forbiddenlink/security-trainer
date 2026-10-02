@@ -36,6 +36,7 @@ describe("AuthModal", () => {
   const mockSignIn = vi.fn();
   const mockSignUp = vi.fn();
   const mockSignInWithGoogle = vi.fn();
+  const mockSignInWithGitHub = vi.fn();
   const mockCloseAuthModal = vi.fn();
   const mockClearError = vi.fn();
   const mockLoadProgressFromCloud = vi.fn();
@@ -53,6 +54,7 @@ describe("AuthModal", () => {
       signIn: mockSignIn,
       signUp: mockSignUp,
       signInWithGoogle: mockSignInWithGoogle,
+      signInWithGitHub: mockSignInWithGitHub,
       closeAuthModal: mockCloseAuthModal,
       clearError: mockClearError,
       loadProgressFromCloud: mockLoadProgressFromCloud,
@@ -186,6 +188,24 @@ describe("AuthModal", () => {
       await user.click(screen.getByRole("button", { name: /google/i }));
 
       expect(mockSignInWithGoogle).toHaveBeenCalled();
+    });
+
+    it("hides GitHub sign-in until VITE_AUTH_GITHUB is enabled", () => {
+      setupStores();
+      render(<AuthModal />);
+      expect(screen.queryByRole("button", { name: /github/i })).toBeNull();
+    });
+
+    it("calls GitHub sign-in when the provider is enabled", async () => {
+      vi.stubEnv("VITE_AUTH_GITHUB", "true");
+      setupStores();
+      const user = userEvent.setup();
+      render(<AuthModal />);
+
+      await user.click(screen.getByRole("button", { name: /github/i }));
+
+      expect(mockSignInWithGitHub).toHaveBeenCalled();
+      vi.unstubAllEnvs();
     });
   });
 

@@ -32,6 +32,7 @@ interface AuthActions {
     password: string,
   ) => Promise<{ error: AuthError | null }>;
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
+  signInWithGitHub: () => Promise<{ error: AuthError | null }>;
   resetPasswordForEmail: (
     email: string,
   ) => Promise<{ error: AuthError | null }>;
@@ -186,6 +187,28 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      set({ loading: false, error: error.message });
+      return { error };
+    }
+
+    set({ loading: false });
+    return { error: null };
+  },
+
+  signInWithGitHub: async () => {
+    if (!supabase)
+      return { error: { message: "Supabase not configured" } as AuthError };
+
+    set({ loading: true, error: null });
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
       options: {
         redirectTo: window.location.origin,
       },

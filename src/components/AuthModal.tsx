@@ -17,6 +17,11 @@ import { isSupabaseConfigured } from "../lib/supabase";
 import { useFocusTrap } from "../utils/useFocusTrap";
 import { Button, Input } from "./ui";
 
+// GitHub needs its provider enabled in Supabase Auth first; the button stays
+// hidden until VITE_AUTH_GITHUB is "true".
+const isGitHubSignInEnabled = (): boolean =>
+  import.meta.env.VITE_AUTH_GITHUB === "true";
+
 export const AuthModal: React.FC = () => {
   const {
     isAuthModalOpen,
@@ -27,6 +32,7 @@ export const AuthModal: React.FC = () => {
     signIn,
     signUp,
     signInWithGoogle,
+    signInWithGitHub,
     resetPasswordForEmail,
     clearError,
     loadProgressFromCloud,
@@ -86,9 +92,16 @@ export const AuthModal: React.FC = () => {
     if (!resetError) setResetSent(true);
   };
 
+  const githubEnabled = isGitHubSignInEnabled();
+
   const handleGoogleSignIn = async () => {
     clearError();
     await signInWithGoogle();
+  };
+
+  const handleGitHubSignIn = async () => {
+    clearError();
+    await signInWithGitHub();
   };
 
   const syncLocalProgressToCloud = async () => {
@@ -473,36 +486,62 @@ export const AuthModal: React.FC = () => {
                     </div>
                   </div>
 
-                  <Button
-                    onClick={handleGoogleSignIn}
-                    disabled={loading}
-                    variant="secondary"
-                    className="w-full h-11 font-medium"
+                  <div
+                    className={
+                      githubEnabled ? "grid grid-cols-2 gap-3" : undefined
+                    }
                   >
-                    <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
+                    <Button
+                      onClick={handleGoogleSignIn}
+                      disabled={loading}
+                      variant="secondary"
+                      className="w-full h-11 font-medium"
                     >
-                      <path
-                        fill="currentColor"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      />
-                    </svg>
-                    Google
-                  </Button>
+                      <svg
+                        className="w-5 h-5"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                      Google
+                    </Button>
+                    {githubEnabled && (
+                      <Button
+                        onClick={handleGitHubSignIn}
+                        disabled={loading}
+                        variant="secondary"
+                        className="w-full h-11 font-medium"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"
+                          />
+                        </svg>
+                        GitHub
+                      </Button>
+                    )}
+                  </div>
 
                   <p className="mt-6 text-center text-sm text-muted-foreground">
                     {authModalMode === "login" ? (
