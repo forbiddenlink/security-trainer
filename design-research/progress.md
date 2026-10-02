@@ -58,3 +58,13 @@ Pre-existing uncommitted edits to `.husky/pre-commit` and `CLAUDE.md` belong to 
 - E2E: 12/12 pass, twice in a row. Specs updated for the new UI; 2 real defects found by them were fixed (duplicate lesson h1; CTF flag acceptance).
 - Lighthouse (preview build, simulated throttling): mobile `/` perf 0.61, a11y 0.97, best practices 0.96, SEO 1.00. Production (old design) under the same conditions: perf 0.60, a11y 0.96. Desktop `/modules` 0.56/0.97, lesson 0.55/0.96, CTF 0.56/0.96. FCP is a flat 6.0s in every run, while real unthrottled load measures 239ms; the simulated FCP is dominated by the render-blocking Google Fonts stylesheet and the shared lesson-content chunk, both unchanged from production.
 - Journeys clicked in Chrome: dashboard first mission, theory to quiz, quiz answer unlocks Next, lab deploy verdict, command palette (Ctrl+K, Cmd+K, `/`, Enter navigates), catalog filters restored from URL, path start deep link, mobile drawer to CTF, CTF select and back button, flag hint confirm and solve, final exam fail and retry, theme toggle. Only console errors: localhost Live Range probes (`ERR_CONNECTION_REFUSED`, expected with no docker lab running).
+
+## Follow-up pass (2026-10-02, "do all we should")
+
+- `biome:check` fixed: config migrated to Biome 2; formatter and import sorting off (Prettier owns formatting); 68 real a11y errors fixed or suppressed with a reason. Passes with 0 errors.
+- Performance: fonts self-hosted via `@fontsource`; Mermaid parser/layout engines, xterm and PostHog moved off first load. Eager `vendor` chunk 1.8 MB to 389 KB. Simulated FCP on `/` 6.0 s to about 4.3 s; mobile perf 0.61 to 0.67-0.69 across runs.
+- OWASP Top 10:2025 tags on 23 modules (catalog chip, lesson header link, palette search).
+- GitHub sign-in behind `VITE_AUTH_GITHUB` (verified in Chrome with dummy Supabase config).
+- Web research (TryHackMe, PortSwigger, HTB Academy, Juice Shop, pwn.college, Hacksplaining, Duolingo) led to: weekly XP goal with tiers (`src/lib/weeklyGoal.ts`, new persisted `xpByDay`), field ranks (`src/lib/rank.ts`), CTF hide-solved filter (`?hide=solved`). Streak freezes already existed.
+- Docs: README rewritten for the current feature set; CLAUDE.md updated (includes the earlier uncommitted rewrite).
+- Unit tests 410 pass; e2e re-run before PR.

@@ -1,6 +1,6 @@
 # Design upgrade report
 
-Snapshot as of 2026-10-02. Branch `design/upgrade`, written against `a385eac`. Base: `86464db` on `main`. Nothing is merged.
+Snapshot as of 2026-10-02. Branch `design/upgrade`, first written against `a385eac`, follow-up section added after `b945cc4`. Base: `86464db` on `main`. Nothing is merged.
 
 ## Summary
 
@@ -89,16 +89,16 @@ All motion respects `prefers-reduced-motion` through `MotionConfig reducedMotion
 
 ## Verification (Phase 6)
 
-| Check                  | Result                                                                                                                                                                                                   |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm build`           | Pass. The only warning is chunk size, which existed before.                                                                                                                                              |
-| `tsc -b`               | Clean                                                                                                                                                                                                    |
-| `pnpm lint`            | 0 errors. 2 warnings in `Terminal.tsx`, which existed before.                                                                                                                                            |
-| `pnpm biome:check`     | **Fails before it checks any file.** `biome.json` uses `organizeImports` and `ignore`, which the installed Biome 1.9.4 rejects. The tree before this work fails the same way (checked with `git stash`). |
-| Unit tests             | 27 files, 391 tests pass. The run needs `--testTimeout=60000` because the machine's load average was about 79.                                                                                           |
-| E2E tests              | 12/12 pass, in two consecutive runs                                                                                                                                                                      |
-| Lighthouse, mobile `/` | Performance 0.61, accessibility 0.97, best practices 0.96, SEO 1.00. Production with the old design scored 0.60 and 0.96 under the same throttling.                                                      |
-| Lighthouse, desktop    | `/modules` 0.56 and 0.97; lesson 0.55 and 0.96; CTF 0.56 and 0.96 (performance and accessibility)                                                                                                        |
+| Check                  | Result                                                                                                                                              |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm build`           | Pass. The only warning is chunk size, which existed before.                                                                                         |
+| `tsc -b`               | Clean                                                                                                                                               |
+| `pnpm lint`            | 0 errors. 2 warnings in `Terminal.tsx`, which existed before.                                                                                       |
+| `pnpm biome:check`     | Pass, 0 errors (fixed in the follow-up pass; see below).                                                                                            |
+| Unit tests             | 27 files, 391 tests pass. The run needs `--testTimeout=60000` because the machine's load average was about 79.                                      |
+| E2E tests              | 12/12 pass, in two consecutive runs                                                                                                                 |
+| Lighthouse, mobile `/` | Performance 0.61, accessibility 0.97, best practices 0.96, SEO 1.00. Production with the old design scored 0.60 and 0.96 under the same throttling. |
+| Lighthouse, desktop    | `/modules` 0.56 and 0.97; lesson 0.55 and 0.96; CTF 0.56 and 0.96 (performance and accessibility)                                                   |
 
 Simulated FCP is a flat 6.0s on every route, but a real unthrottled load measured 239ms. The simulated number comes from two things production also has:
 
@@ -124,12 +124,23 @@ The only console errors were the localhost Live Range probes (`ERR_CONNECTION_RE
 - **AuthModal and ProfileEditModal.** Restyled and covered by component tests, but I never opened them in a browser; they need Supabase.
 - **ReviewModal.** Restyled and covered by tests, but not seen in a browser. It only opens when a due review is completed.
 - **ErrorBoundary.** Restyled, but I did not trigger it in a browser.
-- **Biome.** Its config is broken in a way unrelated to this work. I did not fix it because tooling config is out of scope.
-- **Performance.** Unchanged from production. The biggest win would be self-hosting the three font families and preloading them, which drops the render-blocking third-party stylesheet. That is a non-destructive follow-up and was not done.
+
+## Follow-up pass ("do all we should")
+
+| Item                     | Result                                                                                                                                                                                                                |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Biome                    | Config migrated to Biome 2, lint-only. 68 accessibility errors fixed or suppressed with a reason. `pnpm biome:check` passes.                                                                                          |
+| Performance              | Fonts self-hosted; Mermaid internals, xterm and PostHog off the first load. Eager vendor chunk 1.8 MB to 389 KB. Simulated FCP on `/` 6.0 s to about 4.3 s; mobile performance 0.61 to 0.67-0.69 (run-to-run spread). |
+| OWASP Top 10:2025 tags   | 23 modules, each backed by a CWE listed on owasp.org. Shown on catalog cards, linked from the lesson header, searchable in the palette.                                                                               |
+| GitHub sign-in           | Added behind `VITE_AUTH_GITHUB`; hidden until the provider is enabled in Supabase.                                                                                                                                    |
+| Research-driven features | Weekly XP goal (rolling 7 days, three tiers), field ranks (Recruit to Director), CTF hide-solved filter. Sources: TryHackMe, Juice Shop, pwn.college, HTB Academy, Duolingo retention write-ups.                      |
+| Docs                     | README rewritten; CLAUDE.md updated.                                                                                                                                                                                  |
+
+Shots: `after/modules-owasp-*.png`, `after/lesson-owasp-*.png`, `after/auth-github-*.png`, `after/weekly-goal*.png`, `after/profile-rank-*.png`, `after/ctf-hide-solved-*.png`, `wip/paths-selfhosted-desktop.png`.
 
 ## Needs approval (full list)
 
-None of these were done. The same list is in `needs-approval.md`.
+Current status of each item is in `needs-approval.md`: 1 is code-complete pending Supabase config, 2 is done for the 2025 edition, 3 and 4 are not done, 5 is a PR awaiting your merge.
 
 1. **Social sign-in (GitHub, Google).** Needs Supabase OAuth provider config and new client IDs and secrets.
 2. **OWASP Top 10 mapping and risk meters per module.** These add factual claims that need a human accuracy review.
