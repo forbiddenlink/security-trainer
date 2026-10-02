@@ -1,34 +1,23 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import {
-  Lock,
-  ArrowRight,
-  Award,
-  Shield,
-  Server,
-  Target,
-  Users,
-  FileCheck,
-  Cloud,
-} from "lucide-react";
+import { Lock, ArrowRight, Award } from "lucide-react";
+import { clsx } from "clsx";
 import { Progress } from "./ui";
 import { useGameStore } from "../store/gameStore";
+import { MODULES } from "../data/modules";
+import { estimateModuleMinutes, formatMinutes } from "../lib/moduleMeta";
 import type { LearningPath } from "../types";
-
-const iconMap: Record<string, React.ElementType> = {
-  Shield,
-  Server,
-  Target,
-  Users,
-  FileCheck,
-  Cloud,
-};
 
 interface PathCardProps {
   path: LearningPath;
   index: number;
 }
+
+const difficultyTone: Record<LearningPath["difficulty"], string> = {
+  Beginner: "text-accent border-accent/40",
+  Intermediate: "text-warning border-warning/40",
+  Advanced: "text-destructive border-destructive/40",
+};
 
 export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
   const { getPathProgress, isPathUnlocked, completedPaths, completedModules } =
@@ -39,97 +28,139 @@ export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
   const isCompleted = completedPaths.includes(path.id);
   const progressPercent =
     progress.total > 0 ? (progress.completed / progress.total) * 100 : 0;
+  const remainingToUnlock =
+    (path.requiredCompletions ?? 0) - completedModules.length;
 
-  const Icon = iconMap[path.icon] || Shield;
-
-  const difficultyColors = {
-    Beginner: "text-accent border-accent/30 bg-accent/10",
-    Intermediate: "text-warning border-warning/30 bg-warning/10",
-    Advanced: "text-destructive border-destructive/30 bg-destructive/10",
-  };
+  const modules = path.modules
+    .map((id) => MODULES.find((m) => m.id === id))
+    .filter((m): m is (typeof MODULES)[number] => Boolean(m));
+  const totalMinutes = modules.reduce(
+    (sum, m) => sum + estimateModuleMinutes(m),
+    0,
+  );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className={`mission-card ui-card relative overflow-hidden ${
-        !isUnlocked ? "opacity-60" : ""
-      } ${isCompleted ? "border-accent/50 bg-accent/5" : ""}`}
+    <article
+      className={clsx(
+        "mission-card ui-card relative flex flex-col p-6",
+        !isUnlocked && "opacity-60",
+        isCompleted && "border-accent/60",
+      )}
     >
-      <div className="relative z-10 p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                isCompleted
-                  ? "bg-accent/20 text-accent"
-                  : "bg-primary/10 text-primary"
-              }`}
-            >
-              {isCompleted ? (
-                <Award className="w-6 h-6" />
-              ) : (
-                <Icon className="w-6 h-6" />
-              )}
-            </div>
-            <div>
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                {path.codename}
-              </p>
-              <h3 className="text-lg font-semibold">{path.title}</h3>
-            </div>
-          </div>
-          <span
-            className={`ui-chip text-xs ${difficultyColors[path.difficulty]}`}
-          >
-            {path.difficulty}
-          </span>
-        </div>
-
-        {/* Description */}
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-          {path.description}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          Track {String(index + 1).padStart(2, "0")}
         </p>
+        <span className={clsx("ui-chip", difficultyTone[path.difficulty])}>
+          {path.difficulty}
+        </span>
+      </div>
 
-        {/* Progress */}
-        <div className="mb-4">
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-muted-foreground">
-              {progress.completed}/{progress.total} modules
-            </span>
-            <span className="font-medium">{Math.round(progressPercent)}%</span>
-          </div>
-          <Progress value={progress.completed} max={progress.total} />
+      <h2 className="text-h3">{path.title}</h2>
+      <p className="mt-1 mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+        {path.codename}
+      </p>
+      <p className="text-body-sm text-muted-foreground mb-5 line-clamp-3">
+        {path.description}
+      </p>
+
+      {modules.length > 0 && (
+        <ol
+          className="flex items-center gap-1 mb-5"
+          aria-label={`${modules.length} modules in this path`}
+        >
+          {modules.map((m, i) => {
+            const done = completedModules.includes(m.id);
+            return (
+              <li
+                key={m.id}
+                className="flex-1 flex items-center gap-1"
+                title={m.title}
+              >
+                <span
+                  className={clsx(
+                    "h-1.5 flex-1",
+                    done ? "bg-primary" : "bg-muted",
+                  )}
+                />
+                <span className="sr-only">
+                  {i + 1}. {m.title}
+                  {done ? " (completed)" : ""}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      <dl className="flex flex-wrap justify-between gap-x-4 gap-y-3 border-t border-border pt-4 mb-5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+        <div>
+          <dt>Progress</dt>
+          <dd className="mt-1 text-body-sm normal-case tracking-normal text-foreground tabular-nums whitespace-nowrap">
+            {progress.completed}/{progress.total} modules
+          </dd>
         </div>
+        <div>
+          <dt>Time</dt>
+          <dd className="mt-1 text-body-sm normal-case tracking-normal text-foreground tabular-nums whitespace-nowrap">
+            {totalMinutes > 0 ? formatMinutes(totalMinutes) : "–"}
+          </dd>
+        </div>
+        <div>
+          <dt>Cleared</dt>
+          <dd className="mt-1 text-body-sm normal-case tracking-normal text-foreground tabular-nums whitespace-nowrap">
+            {Math.round(progressPercent)}%
+          </dd>
+        </div>
+      </dl>
+      <Progress
+        className="sr-only"
+        value={progress.completed}
+        max={progress.total}
+        aria-label={`${path.title}: ${progress.completed} of ${progress.total} modules complete`}
+      />
 
-        {/* Action */}
+      <div className="mt-auto">
         {!isUnlocked ? (
           <div
-            className="flex items-center justify-center gap-2 py-2.5 px-4 bg-muted/50 text-muted-foreground rounded-[var(--radius-sm)]"
+            className="flex items-center gap-2 h-11 px-3 border border-dashed border-border rounded-[var(--radius-sm)] text-body-sm text-muted-foreground"
             role="status"
-            aria-label={`Locked. Complete ${path.requiredCompletions! - completedModules.length} more modules to unlock.`}
+            aria-label={`Locked. Complete ${remainingToUnlock} more modules to unlock.`}
           >
-            <Lock className="w-4 h-4" aria-hidden="true" />
-            Complete {path.requiredCompletions! - completedModules.length} more
-            modules to unlock
+            <Lock className="w-4 h-4 shrink-0" aria-hidden="true" />
+            Complete {remainingToUnlock} more modules to unlock
           </div>
         ) : isCompleted ? (
-          <div className="flex items-center justify-center gap-2 py-2.5 px-4 bg-accent/20 text-accent rounded-[var(--radius-sm)] font-medium">
-            <Award className="w-5 h-5" />
-            Certified
-          </div>
+          <Link
+            to={`/paths/${path.id}`}
+            className="flex items-center justify-between gap-2 h-11 px-3 border border-accent/60 rounded-[var(--radius-sm)] text-accent font-semibold"
+          >
+            <span className="flex items-center gap-2">
+              <Award className="w-4 h-4" aria-hidden="true" />
+              Certified
+            </span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em]">
+              +{path.certificateXp} XP
+            </span>
+          </Link>
         ) : (
           <Link
             to={`/paths/${path.id}`}
-            className="group inline-flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-primary px-4 font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
+            className={clsx(
+              "group inline-flex h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-sm)] px-4 font-semibold transition-colors",
+              progress.completed > 0
+                ? "btn-signal"
+                : "border border-foreground hover:bg-foreground hover:text-background",
+            )}
           >
             {progress.completed > 0 ? "Continue" : "Start"} Path
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight
+              className="w-4 h-4 transition-transform group-hover:translate-x-1"
+              aria-hidden="true"
+            />
           </Link>
         )}
       </div>
-    </motion.div>
+    </article>
   );
 };

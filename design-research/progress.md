@@ -25,8 +25,8 @@ Pre-existing uncommitted edits to `.husky/pre-commit` and `CLAUDE.md` belong to 
 | Lesson theory                        | done: owned prose styles (no typography plugin was installed, so prose classes did nothing), outline rail, Mermaid render bug fixed; 2 rounds   |
 | Lesson quiz                          | done: lettered options, inset signal states, verdict rule; 1 round + fixes                                                                      |
 | Lesson lab                           | done: overlap bug fixed (Live Range moved below workspace), framed editor/terminal, signal Monaco/xterm themes, reference-fix debrief; 2 rounds |
-| Paths `/paths`                       | pending                                                                                                                                         |
-| Path detail                          | pending                                                                                                                                         |
+| Paths `/paths`                       | done: track cards with route ticks, time and bonus XP, ruled header stats; 1 round + fixes                                                      |
+| Path detail                          | done: route map with numbered stops, resume deep link to next lesson, time left, certification panel, EmptyState for unknown path; 1 round      |
 | CTF `/ctf`                           | pending                                                                                                                                         |
 | Reviews `/reviews`                   | pending                                                                                                                                         |
 | Leaderboard                          | pending                                                                                                                                         |
