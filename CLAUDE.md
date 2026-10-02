@@ -25,7 +25,7 @@ Live: https://security-trainer.vercel.app
   `pnpm lint` and `pnpm biome:check` both pass with 0 errors.
 - Fonts: self-hosted via `@fontsource` (Archivo variable, IBM Plex Sans and
   Mono), imported in `src/main.tsx`. No Google Fonts request.
-- pnpm (`pnpm@10.32.1`)
+- pnpm (`pnpm@10.34.5`)
 
 ## Commands
 
@@ -42,8 +42,8 @@ pnpm test:coverage    # vitest run --coverage
 pnpm test:e2e         # playwright test
 ```
 
-Note: an older doc in this repo showed the npm CLI; the repo pins
-`packageManager: pnpm@10.32.1` and ships `pnpm-lock.yaml`. Use pnpm.
+The repo pins `packageManager: pnpm@10.34.5` and ships `pnpm-lock.yaml`; use pnpm (the stale
+handoff doc that showed npm was removed 2026-09-19).
 
 ## Layout
 
@@ -58,13 +58,13 @@ Note: an older doc in this repo showed the npm CLI; the repo pins
   registry (no dynamic code execution)
 - `src/data/owaspTop10.ts`: module to OWASP Top 10:2025 mapping. Only map a
   module when its core CWE is listed on that category's owasp.org page.
-- `src/lib/`: pure helpers with unit tests next to them: `moduleMeta`
-  (time estimates, next lesson), `weeklyGoal` (rolling 7-day XP tiers),
-  `rank` (field rank from modules and paths), `paletteSearch` (Cmd+K),
-  `liveRange` (local Docker targets, localhost only)
+- `src/lib/`: external service clients (Supabase) and pure helpers with
+  unit tests next to them: `moduleMeta` (time estimates, next lesson),
+  `weeklyGoal` (rolling 7-day XP tiers), `rank` (field rank from modules
+  and paths), `paletteSearch` (Cmd+K), `liveRange` (local Docker targets,
+  localhost only)
 - `design-research/`: the 2026-10 design upgrade (plan, report,
   before/after screenshots, `needs-approval.md`)
-- `src/lib/`: external service clients (Supabase)
 - `api/socratic-hint.ts`: serverless endpoint for the Socratic AI tutor
 - `supabase/schema.sql`, `supabase/migrations/`: DB schema and migrations
 - `e2e/`: Playwright specs
