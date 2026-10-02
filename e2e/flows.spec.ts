@@ -37,9 +37,14 @@ async function openApp(page: import("@playwright/test").Page, path: string) {
 test.describe("Security Trainer expanded flows", () => {
   test("module search filters missions", async ({ page }) => {
     await openApp(page, "/modules");
-    await page.getByLabel("Search modules").fill("SQL");
-    await expect(page.getByText("SQL Injection (SQLi)")).toBeVisible();
-    await expect(page.getByText("Cross-Site Scripting")).not.toBeVisible();
+    await page.getByLabel("Search modules", { exact: true }).fill("SQL");
+    const list = page.getByRole("list", { name: "Modules" });
+    await expect(
+      list.getByRole("link", { name: "SQL Injection (SQLi)", exact: true }),
+    ).toBeVisible();
+    await expect(
+      list.getByRole("link", { name: /Cross-Site Scripting/ }),
+    ).toHaveCount(0);
   });
 
   test("CTF challenge select and flag format validation", async ({ page }) => {

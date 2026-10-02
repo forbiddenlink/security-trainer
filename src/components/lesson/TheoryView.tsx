@@ -98,6 +98,8 @@ export const TheoryView: React.FC<TheoryViewProps> = memo(({ content }) => {
   const components: Components = {
     code: CodeBlock,
     pre: PreBlock,
+    // The lesson bar owns the page h1; markdown "# Title" becomes a section h2.
+    h1: ({ children }) => <h2>{children}</h2>,
     // Handle custom video-embed element
     // @ts-expect-error - custom element not in standard types
     "video-embed": ({

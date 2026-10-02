@@ -59,12 +59,18 @@ test.describe("Security Trainer smoke tests", () => {
       .getByRole("link", { name: "Introduction to OWASP", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: "What is OWASP?", exact: true }),
+      page.getByRole("heading", {
+        level: 1,
+        name: "What is OWASP?",
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(page.getByLabel(/Lesson progress/i)).toBeAttached();
 
     await page.getByLabel("Go to next lesson").click();
-    await expect(page.getByText("Knowledge Check")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Knowledge Check" }),
+    ).toBeVisible();
   });
 
   test("learning paths page", async ({ page }) => {
