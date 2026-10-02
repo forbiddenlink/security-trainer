@@ -90,7 +90,11 @@ export const NextBadgePreview: React.FC = () => {
     >
       {/* Circular progress ring with locked badge icon */}
       <div className="relative shrink-0 w-14 h-14" aria-hidden="true">
-        <svg viewBox="0 0 48 48" className="w-14 h-14 -rotate-90">
+        <svg
+          viewBox="0 0 48 48"
+          className="w-14 h-14 -rotate-90"
+          aria-hidden="true"
+        >
           <circle
             cx="24"
             cy="24"

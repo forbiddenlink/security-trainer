@@ -59,6 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 : "An unexpected error occurred. Please try refreshing the page."}
             </p>
             <button
+              type="button"
               onClick={this.handleRetry}
               className="btn-signal"
               aria-label="Reload the page"

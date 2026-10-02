@@ -91,10 +91,11 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = memo(
     }
 
     return (
-      <figure className="my-6" role="figure" aria-label={caption || "Diagram"}>
+      <figure className="my-6" aria-label={caption || "Diagram"}>
         <div
           ref={containerRef}
           className="flex justify-center p-4 bg-card border border-border rounded-[var(--radius-md)] overflow-x-auto"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: SVG comes from mermaid.render with securityLevel "strict" on lesson content we ship
           dangerouslySetInnerHTML={{ __html: svg }}
         />
         {caption && (

@@ -104,12 +104,10 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
   const avatarInitial = displayName[0]?.toUpperCase() || "A";
 
   return (
-    <header
-      className="sticky top-0 z-20 h-16 border-b border-border bg-background/88 backdrop-blur-md px-4 md:px-6 flex items-center justify-between gap-3"
-      role="banner"
-    >
+    <header className="sticky top-0 z-20 h-16 border-b border-border bg-background/88 backdrop-blur-md px-4 md:px-6 flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0">
         <button
+          type="button"
           onClick={onMenuClick}
           className="lg:hidden grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] border border-border text-foreground hover:border-foreground"
           aria-label="Open navigation menu"
@@ -157,7 +155,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
         </nav>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3" aria-label="User stats">
+      <div className="flex items-center gap-2 md:gap-3">
         <button
           type="button"
           onClick={openCommandPalette}
@@ -225,6 +223,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
           ) : user ? (
             <div className="relative" ref={menuRef}>
               <button
+                type="button"
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex h-10 items-center gap-2 rounded-[var(--radius-sm)] border border-border pl-1 pr-2 hover:border-foreground"
                 aria-label="User menu"
@@ -263,6 +262,7 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
                     </div>
                     <div className="p-1.5">
                       <button
+                        type="button"
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-[var(--radius-sm)] transition-colors"
                       >

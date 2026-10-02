@@ -137,10 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
         ))}
       </nav>
 
-      <div
-        className="border-t border-border px-5 py-4 shrink-0"
-        aria-label="Clearance status"
-      >
+      <div className="border-t border-border px-5 py-4 shrink-0">
         <div className="flex items-baseline justify-between">
           <span className="ui-label">Clearance</span>
           <span className="font-mono text-caption tabular-nums text-muted-foreground">

@@ -31,6 +31,7 @@ export const Certificate: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-end">
         <button
+          type="button"
           onClick={handleDownload}
           className="btn-ghost-rule !h-10 text-body-sm"
         >

@@ -149,6 +149,7 @@ export const ActivityHeatmap: React.FC = () => {
                     date === new Date().toISOString().split("T")[0];
                   return (
                     <div
+                      role="img"
                       key={dIdx}
                       title={date ?? ""}
                       className={[

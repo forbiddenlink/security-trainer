@@ -808,9 +808,8 @@ export const CTFChallenges: React.FC = () => {
             />
           </div>
 
-          <div
-            className="-mx-4 px-4 flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&>*]:shrink-0"
-            role="group"
+          <fieldset
+            className="min-w-0 -mx-4 px-4 flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&>*]:shrink-0"
             aria-label="Category"
           >
             <button
@@ -835,10 +834,9 @@ export const CTFChallenges: React.FC = () => {
                 <span className="opacity-60">{categoryCounts[cat]}</span>
               </button>
             ))}
-          </div>
-          <div
-            className="flex flex-wrap items-center gap-1.5"
-            role="group"
+          </fieldset>
+          <fieldset
+            className="min-w-0 flex flex-wrap items-center gap-1.5"
             aria-label="Difficulty"
           >
             {DIFFICULTIES.map((d) => (
@@ -867,7 +865,7 @@ export const CTFChallenges: React.FC = () => {
                 Clear
               </button>
             )}
-          </div>
+          </fieldset>
         </div>
 
         <div className="flex-1 lg:overflow-auto pb-6">

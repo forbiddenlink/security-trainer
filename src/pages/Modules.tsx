@@ -243,10 +243,9 @@ export const Modules: React.FC = () => {
           />
         </div>
 
-        <div
-          role="group"
+        <fieldset
           aria-label="Category"
-          className="flex gap-2 overflow-x-auto pb-1 -mb-1"
+          className="min-w-0 flex gap-2 overflow-x-auto pb-1 -mb-1"
         >
           {CATEGORY_OPTIONS.map((option) => (
             <button
@@ -262,7 +261,7 @@ export const Modules: React.FC = () => {
               </span>
             </button>
           ))}
-        </div>
+        </fieldset>
 
         <button
           type="button"
@@ -274,10 +273,9 @@ export const Modules: React.FC = () => {
           <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
           Refine
           {(selectedLevel || selectedStatus || sort !== "catalog") && (
-            <span
-              className="h-1.5 w-1.5 rounded-full bg-primary"
-              aria-label="(active)"
-            />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary">
+              <span className="sr-only">(active)</span>
+            </span>
           )}
         </button>
         <div
@@ -287,10 +285,9 @@ export const Modules: React.FC = () => {
             showRefine ? "flex" : "hidden",
           )}
         >
-          <div
-            role="group"
+          <fieldset
             aria-label="Difficulty"
-            className="flex flex-wrap items-center gap-2"
+            className="min-w-0 flex flex-wrap items-center gap-2"
           >
             <span className="ui-label mr-1">Level</span>
             {LEVEL_OPTIONS.map((level) => (
@@ -306,11 +303,10 @@ export const Modules: React.FC = () => {
                 {level}
               </button>
             ))}
-          </div>
-          <div
-            role="group"
+          </fieldset>
+          <fieldset
             aria-label="Status"
-            className="flex flex-wrap items-center gap-2"
+            className="min-w-0 flex flex-wrap items-center gap-2"
           >
             <span className="ui-label mr-1">Status</span>
             {STATUS_OPTIONS.map((status) => (
@@ -329,7 +325,7 @@ export const Modules: React.FC = () => {
                 {status.label}
               </button>
             ))}
-          </div>
+          </fieldset>
           <label className="flex items-center gap-2 lg:ml-auto">
             <span className="ui-label">Sort</span>
             <select

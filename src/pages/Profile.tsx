@@ -86,6 +86,7 @@ export const Profile: React.FC = () => {
               <h1 className="text-display leading-none">{displayName}</h1>
               {user && (
                 <button
+                  type="button"
                   onClick={() => setIsEditModalOpen(true)}
                   className="grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] border border-border text-muted-foreground hover:text-foreground hover:border-foreground"
                   aria-label="Edit profile"
@@ -207,6 +208,7 @@ export const Profile: React.FC = () => {
                 Are you sure? This is permanent.
               </span>
               <button
+                type="button"
                 onClick={handleDeleteAccount}
                 disabled={loading}
                 className="inline-flex items-center gap-2 h-10 px-4 rounded-[var(--radius-sm)] bg-destructive text-white font-medium hover:bg-destructive/90 disabled:opacity-60"
@@ -215,6 +217,7 @@ export const Profile: React.FC = () => {
                 Yes, delete my account
               </button>
               <button
+                type="button"
                 onClick={() => setConfirmingDelete(false)}
                 disabled={loading}
                 className="h-10 px-4 rounded-[var(--radius-sm)] border border-border font-medium hover:bg-muted/70"
@@ -224,6 +227,7 @@ export const Profile: React.FC = () => {
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => setConfirmingDelete(true)}
               className="h-10 px-4 rounded-[var(--radius-sm)] border border-destructive/50 text-destructive font-medium hover:bg-destructive/10"
             >

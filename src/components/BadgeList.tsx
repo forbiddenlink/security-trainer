@@ -25,6 +25,7 @@ export const BadgeList: React.FC = memo(() => {
   return (
     <ul
       className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2"
+      // biome-ignore lint/a11y/noRedundantRoles: Safari drops list semantics when list-style is none
       role="list"
       aria-label="Achievement badges"
     >

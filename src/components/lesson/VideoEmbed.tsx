@@ -44,11 +44,7 @@ export const VideoEmbed: React.FC<VideoEmbedProps> = memo(
     const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
     return (
-      <figure
-        className="my-6"
-        role="figure"
-        aria-label={caption || title || "Video"}
-      >
+      <figure className="my-6" aria-label={caption || title || "Video"}>
         <div className="relative aspect-video bg-[#0c0d0b] border border-border rounded-[var(--radius-md)] overflow-hidden">
           {isLoaded ? (
             <iframe
@@ -60,6 +56,7 @@ export const VideoEmbed: React.FC<VideoEmbedProps> = memo(
             />
           ) : (
             <button
+              type="button"
               onClick={() => setIsLoaded(true)}
               className="group absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer"
               aria-label={`Play video: ${title}`}

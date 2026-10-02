@@ -51,7 +51,9 @@ export const QuizView: React.FC<QuizViewProps> = memo(
             aria-label="Quiz options"
           >
             {quiz.options.map((option, idx) => (
+              // biome-ignore lint/a11y/useSemanticElements: custom radio buttons keep the lettered-row design; arrow-key and Enter handling are implemented
               <button
+                type="button"
                 key={idx}
                 onClick={() => !submitted && setSelectedOption(idx)}
                 onKeyDown={(e) => handleKeyDown(e, idx)}

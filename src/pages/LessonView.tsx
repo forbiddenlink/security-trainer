@@ -232,6 +232,7 @@ export const LessonView: React.FC = () => {
           </ol>
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowLessonMenu(!showLessonMenu)}
               className="h-9 inline-flex items-center gap-2 font-mono text-caption uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors px-3 rounded-[var(--radius-sm)] border border-border hover:border-foreground"
               aria-expanded={showLessonMenu}
@@ -265,6 +266,7 @@ export const LessonView: React.FC = () => {
                     const done = completedLessons.includes(lesson.id);
                     return (
                       <button
+                        type="button"
                         key={lesson.id}
                         onClick={() => jumpToLesson(idx)}
                         role="menuitem"

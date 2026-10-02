@@ -41,6 +41,7 @@ export const ThemeToggle: React.FC = () => {
 
   return (
     <button
+      type="button"
       onClick={cycleTheme}
       className="relative grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] border border-border transition-colors text-muted-foreground hover:text-foreground hover:border-foreground"
       aria-label={getLabel()}

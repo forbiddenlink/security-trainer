@@ -32,6 +32,7 @@ export const LevelUpToast: React.FC = () => {
         >
           <div className="flex flex-col gap-1 min-w-[280px] pr-8">
             <button
+              type="button"
               onClick={dismissLevelUpToast}
               className="absolute top-1 right-1 p-2 rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground"
               aria-label="Dismiss level up notification"

@@ -112,6 +112,7 @@ export const Leaderboard: React.FC = () => {
       {leaderboardLoading && leaderboard.length === 0 ? (
         <div
           className="space-y-2"
+          role="status"
           aria-busy="true"
           aria-label="Loading rankings"
         >

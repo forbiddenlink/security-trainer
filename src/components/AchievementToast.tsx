@@ -59,6 +59,7 @@ export const AchievementToast: React.FC = () => {
           aria-live="polite"
         >
           <button
+            type="button"
             onClick={dismissAchievement}
             className="absolute top-1 right-1 p-2 rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground"
             aria-label="Dismiss notification"

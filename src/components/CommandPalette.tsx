@@ -216,6 +216,7 @@ export const CommandPalette: React.FC = () => {
                 aria-hidden="true"
               />
               <input
+                // biome-ignore lint/a11y/noAutofocus: the palette opens only on an explicit shortcut or click, and focus belongs in its input
                 autoFocus
                 value={query}
                 onChange={(e) => {
@@ -239,20 +240,26 @@ export const CommandPalette: React.FC = () => {
             <ul
               ref={listRef}
               id={listId}
+              // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: ARIA combobox pattern; the input owns focus via aria-activedescendant
               role="listbox"
               aria-label="Results"
               className="max-h-[50vh] overflow-y-auto py-1.5"
             >
               {results.length === 0 && (
-                <li className="px-4 py-8 text-center text-body-sm text-muted-foreground">
+                <li
+                  role="presentation"
+                  className="px-4 py-8 text-center text-body-sm text-muted-foreground"
+                >
                   No match for “{query}”. Try a topic like “jwt” or “xss”.
                 </li>
               )}
               {results.map((item, i) => (
+                // biome-ignore lint/a11y/useKeyWithClickEvents lint/a11y/useFocusableInteractive: options are driven from the input's keyboard handler (aria-activedescendant)
                 <li
                   key={item.id}
                   id={`${listId}-${i}`}
                   data-index={i}
+                  // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: ARIA listbox option; focus stays on the combobox input
                   role="option"
                   aria-selected={i === active}
                   onMouseMove={() => setActive(i)}

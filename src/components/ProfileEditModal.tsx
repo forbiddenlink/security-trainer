@@ -191,6 +191,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             >
               {/* Close button */}
               <button
+                type="button"
                 onClick={onClose}
                 className="absolute top-4 right-4 p-2 rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Close profile editor"

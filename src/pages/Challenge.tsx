@@ -115,9 +115,8 @@ export const Challenge: React.FC = () => {
 
   if (!gameStarted) {
     return (
-      <div
+      <section
         className="max-w-3xl space-y-10"
-        role="region"
         aria-label="Final exam start screen"
       >
         <header className="border-b border-border pb-8">
@@ -168,7 +167,7 @@ export const Challenge: React.FC = () => {
             Reward · +1,000 XP · Elite Hacker badge
           </p>
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -244,7 +243,7 @@ export const Challenge: React.FC = () => {
   }
 
   return (
-    <div className="max-w-3xl" aria-label="Final exam quiz">
+    <section className="max-w-3xl" aria-label="Final exam quiz">
       {/* HUD */}
       <div className="sticky top-16 z-10 -mx-4 mb-8 border-b border-border bg-background/92 px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
         <div className="flex items-center justify-between gap-4">
@@ -257,9 +256,7 @@ export const Challenge: React.FC = () => {
             aria-atomic="true"
           >
             <Timer className="w-5 h-5" aria-hidden="true" />
-            <span aria-label={`${timeLeft} seconds remaining`}>
-              {timeLeft}s
-            </span>
+            <span aria-hidden="true">{timeLeft}s</span>
             <span className="sr-only">Time remaining: {timeLeft} seconds</span>
           </div>
           <div className="flex items-center gap-3">
@@ -319,7 +316,9 @@ export const Challenge: React.FC = () => {
           aria-label="Answer options"
         >
           {question.options.map((option, idx) => (
+            // biome-ignore lint/a11y/useSemanticElements: custom radio buttons keep the lettered-row design; arrow-key and Enter handling are implemented
             <button
+              type="button"
               key={idx}
               onClick={() => handleAnswer(idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
@@ -340,6 +339,6 @@ export const Challenge: React.FC = () => {
           ))}
         </div>
       </motion.div>
-    </div>
+    </section>
   );
 };

@@ -34,6 +34,7 @@ const RatingButton: React.FC<RatingButtonProps> = ({
   onClick,
 }) => (
   <button
+    type="button"
     onClick={onClick}
     className={`flex-1 flex flex-col items-start gap-1.5 p-4 rounded-[var(--radius-sm)] border text-left transition-colors ${colorClass}`}
   >
@@ -93,6 +94,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
             >
               {/* Close button */}
               <button
+                type="button"
                 onClick={onClose}
                 className="absolute top-4 right-4 p-2 rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Close review modal"
@@ -153,6 +155,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
 
               {/* Skip option */}
               <button
+                type="button"
                 onClick={onClose}
                 className="btn-ghost-rule w-full mt-4 !h-10 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
