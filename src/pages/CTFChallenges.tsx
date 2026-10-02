@@ -713,6 +713,14 @@ export const CTFChallenges: React.FC = () => {
     "all",
   );
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
+  // In the URL too, so a learner working through the board keeps it on reload.
+  const hideSolved = searchParams.get("hide") === "solved";
+  const setHideSolved = (on: boolean) => {
+    const next = new URLSearchParams(searchParams);
+    if (on) next.set("hide", "solved");
+    else next.delete("hide");
+    setSearchParams(next, { replace: true });
+  };
 
   // Stats
   const solvedCount = Object.values(ctfProgress).filter((p) => p.solved).length;
@@ -743,9 +751,10 @@ export const CTFChallenges: React.FC = () => {
       if (difficultyFilter !== "all" && c.difficulty !== difficultyFilter) {
         return false;
       }
+      if (hideSolved && ctfProgress[c.id]?.solved) return false;
       return true;
     });
-  }, [searchQuery, categoryFilter, difficultyFilter]);
+  }, [searchQuery, categoryFilter, difficultyFilter, hideSolved, ctfProgress]);
 
   // Group by category for display
   const challengesByCategory = useMemo(() => {
@@ -765,7 +774,8 @@ export const CTFChallenges: React.FC = () => {
   const hasFilters =
     searchQuery !== "" ||
     categoryFilter !== "all" ||
-    difficultyFilter !== "all";
+    difficultyFilter !== "all" ||
+    hideSolved;
 
   return (
     <div className="flex flex-col lg:flex-row min-h-[calc(100dvh-64px)]">
@@ -852,6 +862,16 @@ export const CTFChallenges: React.FC = () => {
                 {d}
               </button>
             ))}
+            {solvedCount > 0 && (
+              <button
+                type="button"
+                className="filter-pill filter-pill-soft !h-8"
+                aria-pressed={hideSolved}
+                onClick={() => setHideSolved(!hideSolved)}
+              >
+                Hide solved
+              </button>
+            )}
             {hasFilters && (
               <button
                 type="button"
@@ -860,6 +880,7 @@ export const CTFChallenges: React.FC = () => {
                   setSearchQuery("");
                   setCategoryFilter("all");
                   setDifficultyFilter("all");
+                  setHideSolved(false);
                 }}
               >
                 Clear

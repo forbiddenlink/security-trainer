@@ -11,6 +11,7 @@ import { Certificate } from "../components/Certificate";
 import { ProfileEditModal } from "../components/ProfileEditModal";
 import { RoleSelector } from "../components/RoleSelector";
 import { ActivityHeatmap } from "../components/ActivityHeatmap";
+import { getRank } from "../lib/rank";
 
 const ROLE_LABELS: Record<string, string> = {
   developer: "Developer / Engineer",
@@ -25,6 +26,7 @@ export const Profile: React.FC = () => {
   const level = useGameStore((s) => s.level);
   const streakDays = useGameStore((s) => s.streakDays);
   const completedModules = useGameStore((s) => s.completedModules);
+  const completedPaths = useGameStore((s) => s.completedPaths);
   const userRole = useGameStore((s) => s.userRole);
   const streakFreezeCount = useGameStore((s) => s.streakFreezeCount);
   const { profile, user, loading, deleteAccount } = useAuthStore();
@@ -48,6 +50,7 @@ export const Profile: React.FC = () => {
   }, []);
 
   const nextLevelXp = level * 1000;
+  const rank = getRank(completedModules.length, completedPaths.length);
   const progress = Math.min((xp / nextLevelXp) * 100, 100);
   const trainingPct = Math.round(
     (completedModules.length / MODULES.length) * 100,
@@ -96,7 +99,7 @@ export const Profile: React.FC = () => {
               )}
             </div>
             <p className="mt-2 font-mono text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              Level {level} Operator
+              Level {level} · {rank.current.name}
             </p>
           </div>
         </div>
@@ -118,6 +121,27 @@ export const Profile: React.FC = () => {
             {(nextLevelXp - xp).toLocaleString()} XP needed for Level{" "}
             {level + 1}
           </p>
+          <div className="mt-6 flex justify-between font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-2 tabular-nums">
+            <span>Field rank · {rank.current.name}</span>
+            <span>{rank.next ? `Next: ${rank.next.name}` : "Top rank"}</span>
+          </div>
+          <Progress
+            value={Math.round(rank.progress * 100)}
+            min={0}
+            max={100}
+            aria-label={
+              rank.next
+                ? `${Math.round(rank.progress * 100)}% toward ${rank.next.name} rank`
+                : "Top rank reached"
+            }
+          />
+          {rank.next && (
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground tabular-nums">
+              Needs {rank.next.modules} missions
+              {rank.next.paths > 0 &&
+                ` and ${rank.next.paths} certified path${rank.next.paths > 1 ? "s" : ""}`}
+            </p>
+          )}
         </div>
 
         <dl className="lg:col-span-2 grid grid-cols-2 gap-6 sm:grid-cols-5">

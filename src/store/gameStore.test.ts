@@ -11,6 +11,17 @@ describe("gameStore", () => {
   });
 
   describe("addXp", () => {
+    it("logs earned XP under today's date, even across a level-up", () => {
+      const { addXp } = useGameStore.getState();
+      addXp(900);
+      addXp(300);
+
+      const today = new Date().toISOString().split("T")[0];
+      const state = useGameStore.getState();
+      expect(state.level).toBe(2);
+      expect(state.xpByDay[today]).toBe(1200);
+    });
+
     it("adds XP to the current total", () => {
       const { addXp } = useGameStore.getState();
 

@@ -14,6 +14,7 @@ import { clsx } from "clsx";
 import { useGameStore } from "../store/gameStore";
 import { Progress } from "./ui";
 import { RangeMark } from "./RangeMark";
+import { getRank } from "../lib/rank";
 
 const NAV_GROUPS = [
   {
@@ -48,6 +49,9 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
   const xp = useGameStore((s) => s.xp);
   const level = useGameStore((s) => s.level);
+  const modulesDone = useGameStore((s) => s.completedModules.length);
+  const pathsDone = useGameStore((s) => s.completedPaths.length);
+  const rank = getRank(modulesDone, pathsDone).current;
   const nextLevelXp = level * 1000;
   const clearancePct = Math.min(100, Math.round((xp / nextLevelXp) * 100));
   let index = 0;
@@ -146,6 +150,9 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ onNavigate }) => {
         </div>
         <p className="mt-1 font-display text-h3 font-extrabold [font-stretch:75%] leading-none">
           Level {level}
+        </p>
+        <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          Rank · {rank.name}
         </p>
         <Progress
           className="mt-3"

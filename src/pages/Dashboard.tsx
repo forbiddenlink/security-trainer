@@ -25,6 +25,7 @@ import {
 import type { Module } from "../types";
 import { isLocalRangeAvailable } from "../lib/liveRange";
 import { RuledSection } from "../components/RuledSection";
+import { WeeklyGoal } from "../components/WeeklyGoal";
 
 const TOTAL_LESSONS = MODULES.reduce((n, m) => n + m.lessons.length, 0);
 const TOTAL_LABS = MODULES.reduce(
@@ -232,6 +233,9 @@ export const Dashboard: React.FC = () => {
         <div className="grid gap-4 md:grid-cols-2 items-stretch">
           <DailyChallenge />
           <RandomMission />
+          <div className="md:col-span-2">
+            <WeeklyGoal />
+          </div>
           <div className="md:col-span-2 empty:hidden">
             <IntelRefresher />
           </div>
