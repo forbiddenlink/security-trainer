@@ -16,7 +16,61 @@
       "currentModuleId": "xss-basics",
       "streakDays": 4,
       "userRole": "developer",
-      "lastLoginDate": "2026-10-02"
+      "lastLoginDate": "2026-10-02",
+      "lessonReviews": {
+        "owasp-1": {
+          "lessonId": "owasp-1",
+          "lastReviewDate": "2026-09-20",
+          "nextReviewDate": "2026-09-27",
+          "interval": 3,
+          "stability": 7,
+          "difficulty": 5,
+          "reps": 2,
+          "lapses": 0,
+          "state": 2,
+          "easeFactor": 2.5,
+          "reviewCount": 2
+        },
+        "sqli-theory": {
+          "lessonId": "sqli-theory",
+          "lastReviewDate": "2026-09-28",
+          "nextReviewDate": "2026-10-02",
+          "interval": 3,
+          "stability": 4,
+          "difficulty": 5,
+          "reps": 1,
+          "lapses": 0,
+          "state": 2,
+          "easeFactor": 2.5,
+          "reviewCount": 1
+        },
+        "owasp-quiz-1": {
+          "lessonId": "owasp-quiz-1",
+          "lastReviewDate": "2026-09-30",
+          "nextReviewDate": "2026-10-01",
+          "interval": 3,
+          "stability": 2,
+          "difficulty": 5,
+          "reps": 1,
+          "lapses": 0,
+          "state": 2,
+          "easeFactor": 2.5,
+          "reviewCount": 1
+        },
+        "xss-theory": {
+          "lessonId": "xss-theory",
+          "lastReviewDate": "2026-10-01",
+          "nextReviewDate": "2026-10-09",
+          "interval": 3,
+          "stability": 8,
+          "difficulty": 5,
+          "reps": 1,
+          "lapses": 0,
+          "state": 2,
+          "easeFactor": 2.5,
+          "reviewCount": 1
+        }
+      }
     },
     "version": 0
   }

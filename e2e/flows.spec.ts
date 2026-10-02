@@ -95,7 +95,7 @@ test.describe("Security Trainer expanded flows", () => {
   test("reviews page loads", async ({ page }) => {
     await openApp(page, "/reviews");
     await expect(
-      page.getByRole("heading", { name: /Intel Refresher/i }),
+      page.getByRole("heading", { name: /Intel Review/i, level: 1 }),
     ).toBeVisible();
   });
 
