@@ -1,0 +1,23 @@
+{
+  "security-trainer-storage": {
+    "state": {
+      "xp": 1350,
+      "level": 2,
+      "badges": ["recruit", "sql-slayer", "badge-completion"],
+      "completedModules": ["owasp-intro", "sql-injection"],
+      "completedLessons": [
+        "owasp-1",
+        "owasp-quiz-1",
+        "owasp-lab",
+        "sqli-theory",
+        "sqli-quiz-1",
+        "xss-theory"
+      ],
+      "currentModuleId": "xss-basics",
+      "streakDays": 4,
+      "userRole": "developer",
+      "lastLoginDate": "2026-10-02"
+    },
+    "version": 0
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, memo, useCallback } from "react";
 import { useGameStore } from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
-import { Trophy, LogIn, LogOut, ChevronDown, Menu } from "lucide-react";
+import { LogIn, LogOut, ChevronDown, Menu, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StreakIndicator } from "./StreakIndicator";
 import { ThemeToggle } from "./ThemeToggle";
@@ -10,15 +10,22 @@ import { isSupabaseConfigured } from "../lib/supabase";
 import { getSafeAvatarUrl } from "../utils/urlValidation";
 import { getNextLevelXp } from "../utils/gameUtils";
 import { useLocation } from "react-router-dom";
+import { MODULES } from "../data/modules";
+import { getPathById } from "../data/learningPaths";
+import { openCommandPalette } from "../lib/paletteEvents";
+
+const isMac =
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad/.test(navigator.platform);
 
 const ROUTE_TITLES: Record<string, string> = {
   "": "Mission Control",
-  modules: "Active Operations",
-  profile: "Agent Profile",
+  modules: "Modules",
+  profile: "Profile",
   challenge: "Final Exam",
-  leaderboard: "Rankings",
+  leaderboard: "Leaderboard",
   paths: "Learning Paths",
-  reviews: "Intel Refresher",
+  reviews: "Intel Review",
   ctf: "CTF Challenges",
   privacy: "Privacy & Terms",
 };
@@ -32,7 +39,14 @@ interface HeaderProps {
  */
 export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
   const { pathname } = useLocation();
-  const routeTitle = ROUTE_TITLES[pathname.split("/")[1] ?? ""] ?? "SecTrainer";
+  const [, section = "", detailId] = pathname.split("/");
+  const routeTitle = ROUTE_TITLES[section] ?? "SecTrainer";
+  const detailTitle =
+    section === "modules" && detailId
+      ? MODULES.find((m) => m.id === detailId)?.title
+      : section === "paths" && detailId
+        ? getPathById(detailId)?.title
+        : undefined;
 
   // Use selectors for better performance - only re-render when specific values change
   const xp = useGameStore((state) => state.xp);
@@ -91,48 +105,95 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
 
   return (
     <header
-      className="sticky top-0 z-20 h-16 border-b border-border/70 bg-card/82 backdrop-blur-md px-4 md:px-6 flex items-center justify-between"
+      className="sticky top-0 z-20 h-16 border-b border-border bg-background/88 backdrop-blur-md px-4 md:px-6 flex items-center justify-between gap-3"
       role="banner"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onMenuClick}
-          className="lg:hidden grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground hover:bg-muted/60"
+          className="lg:hidden grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] border border-border text-foreground hover:border-foreground"
           aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" aria-hidden="true" />
         </button>
-        <h1 className="text-h4 tracking-tight text-foreground">{routeTitle}</h1>
+        <nav aria-label="Breadcrumb" className="min-w-0">
+          <ol className="flex items-center gap-2 font-mono text-caption uppercase tracking-[0.12em] min-w-0">
+            <li className="hidden sm:block text-muted-foreground">
+              SecTrainer
+            </li>
+            <li
+              className="hidden sm:block text-muted-foreground"
+              aria-hidden="true"
+            >
+              /
+            </li>
+            <li
+              className={
+                detailTitle
+                  ? "text-muted-foreground truncate"
+                  : "text-foreground truncate"
+              }
+              aria-current={detailTitle ? undefined : "page"}
+            >
+              {routeTitle}
+            </li>
+            {detailTitle && (
+              <>
+                <li
+                  className="hidden md:block text-muted-foreground"
+                  aria-hidden="true"
+                >
+                  /
+                </li>
+                <li
+                  className="hidden md:block text-foreground truncate max-w-[28ch]"
+                  aria-current="page"
+                >
+                  {detailTitle}
+                </li>
+              </>
+            )}
+          </ol>
+        </nav>
       </div>
 
       <div className="flex items-center gap-2 md:gap-3" aria-label="User stats">
+        <button
+          type="button"
+          onClick={openCommandPalette}
+          className="hidden md:flex h-10 w-56 lg:w-64 items-center gap-2 rounded-[var(--radius-sm)] border border-border bg-card px-3 text-body-sm text-muted-foreground hover:border-foreground hover:text-foreground"
+          aria-label="Search modules, paths and challenges"
+          aria-keyshortcuts="Meta+K Control+K"
+        >
+          <Search className="w-4 h-4" aria-hidden="true" />
+          <span className="flex-1 text-left">Jump to…</span>
+          <kbd className="kbd">{isMac ? "⌘K" : "Ctrl K"}</kbd>
+        </button>
+        <button
+          type="button"
+          onClick={openCommandPalette}
+          className="md:hidden grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] border border-border text-foreground"
+          aria-label="Search"
+        >
+          <Search className="w-4 h-4" aria-hidden="true" />
+        </button>
+
         <div
-          className="hidden xl:flex flex-col items-end rounded-[var(--radius-sm)] border border-border/70 bg-background/40 px-3 py-2 group cursor-help min-w-[190px]"
+          className="hidden xl:flex flex-col justify-center gap-1.5 w-40"
           aria-live="polite"
         >
-          <div className="flex items-center gap-2 text-xs font-medium text-foreground">
-            <Trophy className="w-3.5 h-3.5 text-warning" aria-hidden="true" />
-            <span>Level {level}</span>
-            <span className="text-muted-foreground font-normal">|</span>
-            <span className="text-muted-foreground">{xp} XP</span>
+          <div className="flex items-baseline justify-between font-mono text-[11px] tabular-nums">
+            <span className="text-foreground font-semibold">L{level}</span>
+            <span className="text-muted-foreground">
+              {xp.toLocaleString()} / {nextLevelXp.toLocaleString()} XP
+            </span>
           </div>
           <Progress
-            className="mt-1 w-full"
             value={xp}
             min={0}
             max={nextLevelXp}
             aria-label={`${xp} of ${nextLevelXp} XP to next level`}
-            indicatorClassName="bg-primary"
           />
-          <span
-            className="text-caption text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1"
-            aria-hidden="true"
-          >
-            {xp} / {nextLevelXp} XP
-          </span>
-          <span className="sr-only">
-            {xp} of {nextLevelXp} XP to next level
-          </span>
         </div>
 
         <StreakIndicator />
@@ -143,10 +204,10 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
           <span
             className={`ui-chip hidden sm:inline-flex ${
               syncStatus === "synced"
-                ? "border-accent/35 text-accent bg-accent/8"
+                ? "border-accent/50 text-accent"
                 : syncStatus === "error"
-                  ? "border-destructive/35 text-destructive bg-destructive/8"
-                  : "border-warning/35 text-warning bg-warning/8"
+                  ? "border-destructive/50 text-destructive"
+                  : "border-warning/50 text-warning"
             }`}
             aria-live="polite"
           >
@@ -160,12 +221,12 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
 
         {isSupabaseConfigured() ? (
           loading ? (
-            <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
+            <div className="h-10 w-10 rounded-[var(--radius-sm)] bg-muted animate-pulse" />
           ) : user ? (
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 rounded-full border border-border/80 bg-background/40 py-0.5 pl-0.5 pr-2 hover:bg-muted/55"
+                className="flex h-10 items-center gap-2 rounded-[var(--radius-sm)] border border-border pl-1 pr-2 hover:border-foreground"
                 aria-label="User menu"
                 aria-expanded={showUserMenu}
               >
@@ -173,10 +234,10 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
                   <img
                     src={getSafeAvatarUrl(profile?.avatar_url)}
                     alt=""
-                    className="w-8 h-8 rounded-full object-cover border border-primary/20"
+                    className="w-8 h-8 rounded-[2px] object-cover"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-muted border border-primary/30 flex items-center justify-center text-foreground text-sm font-bold">
+                  <div className="w-8 h-8 rounded-[2px] bg-muted flex items-center justify-center font-mono text-foreground text-sm font-semibold">
                     {avatarInitial}
                   </div>
                 )}
@@ -186,12 +247,13 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
               <AnimatePresence>
                 {showUserMenu && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-56 ui-card ui-card-elevated overflow-hidden"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.16 }}
+                    className="absolute right-0 mt-2 w-56 ui-card ui-card-elevated !p-0 overflow-hidden"
                   >
-                    <div className="p-3 border-b border-border/70">
+                    <div className="p-3 border-b border-border">
                       <p className="font-medium text-foreground truncate">
                         {displayName}
                       </p>
@@ -199,10 +261,10 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
                         {user.email}
                       </p>
                     </div>
-                    <div className="p-2">
+                    <div className="p-1.5">
                       <button
                         onClick={handleSignOut}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-muted rounded-[var(--radius-sm)] transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-[var(--radius-sm)] transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
                         Sign Out
@@ -215,19 +277,14 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
           ) : (
             <Button
               onClick={() => openAuthModal("login")}
-              className="inline-flex items-center gap-2"
+              variant="outline"
+              className="h-10"
             >
-              <LogIn className="w-4 h-4" />
-              <span className="hidden sm:inline">Sign In</span>
+              <LogIn className="w-4 h-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Sign in</span>
             </Button>
           )
-        ) : (
-          <div
-            className="w-9 h-9 rounded-full bg-muted border border-primary/20"
-            role="img"
-            aria-label="User avatar"
-          />
-        )}
+        ) : null}
       </div>
     </header>
   );

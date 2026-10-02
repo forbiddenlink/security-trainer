@@ -23,15 +23,12 @@ export const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={clampedValue}
-        className={cn(
-          "h-1.5 w-full overflow-hidden rounded-full bg-muted",
-          className,
-        )}
+        className={cn("h-1 w-full overflow-hidden bg-muted", className)}
         {...props}
       >
         <div
           className={cn(
-            "h-full bg-primary transition-all duration-300",
+            "h-full bg-primary transition-[width] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
             indicatorClassName,
           )}
           style={{ width: `${width}%` }}

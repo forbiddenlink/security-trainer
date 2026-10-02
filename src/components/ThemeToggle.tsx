@@ -20,11 +20,11 @@ export const ThemeToggle: React.FC = () => {
   const getIcon = () => {
     switch (theme) {
       case "light":
-        return <Sun className="w-5 h-5" />;
+        return <Sun className="w-4 h-4" />;
       case "dark":
-        return <Moon className="w-5 h-5" />;
+        return <Moon className="w-4 h-4" />;
       case "system":
-        return <Monitor className="w-5 h-5" />;
+        return <Monitor className="w-4 h-4" />;
     }
   };
 
@@ -42,17 +42,17 @@ export const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={cycleTheme}
-      className="relative grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
+      className="relative grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] border border-border transition-colors text-muted-foreground hover:text-foreground hover:border-foreground"
       aria-label={getLabel()}
       title={`Theme: ${theme}`}
     >
       <AnimatePresence mode="wait">
         <motion.div
           key={theme}
-          initial={{ scale: 0.5, opacity: 0, rotate: -90 }}
-          animate={{ scale: 1, opacity: 1, rotate: 0 }}
-          exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
-          transition={{ duration: 0.2 }}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.14 }}
         >
           {getIcon()}
         </motion.div>

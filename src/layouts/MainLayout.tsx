@@ -4,6 +4,8 @@ import { Sidebar } from "../components/Sidebar";
 import { Header } from "../components/Header";
 import { LevelUpToast } from "../components/LevelUpToast";
 import { AchievementToast } from "../components/AchievementToast";
+import { CommandPalette } from "../components/CommandPalette";
+import { RangeMark } from "../components/RangeMark";
 
 const BASE_TITLE = "SecTrainer";
 // Map the first path segment to a descriptive document title.
@@ -16,6 +18,7 @@ const ROUTE_TITLES: Record<string, string> = {
   paths: "Learning Paths",
   reviews: "Reviews",
   ctf: "CTF Challenges",
+  privacy: "Privacy & Terms",
 };
 
 export const MainLayout: React.FC = () => {
@@ -33,14 +36,14 @@ export const MainLayout: React.FC = () => {
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground antialiased selection:bg-primary/20">
+    <div className="flex min-h-screen bg-background text-foreground">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-background/70 backdrop-blur-sm z-30 lg:hidden"
           onClick={closeSidebar}
           aria-hidden="true"
         />
@@ -55,40 +58,65 @@ export const MainLayout: React.FC = () => {
         <Sidebar onNavigate={closeSidebar} />
       </div>
 
-      <div className="flex-1 flex flex-col relative overflow-hidden lg:ml-0">
-        <div
-          className="absolute inset-0 pointer-events-none opacity-30"
-          aria-hidden="true"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-primary)_0%,transparent_45%)] opacity-[0.07]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-muted-foreground)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-muted-foreground)_1px,transparent_1px)] bg-[size:24px_24px] opacity-[0.06]" />
-        </div>
+      <div className="flex-1 min-w-0 flex flex-col relative">
         <Header onMenuClick={toggleSidebar} />
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 overflow-auto relative z-0 outline-none"
+          className="flex-1 relative z-0 outline-none"
         >
-          <div className="mx-auto w-full max-w-[1200px] px-4 py-4 md:px-6 md:py-6">
+          <div className="mx-auto w-full max-w-[1240px] px-4 py-6 md:px-8 md:py-10">
             <Outlet />
           </div>
-          <footer className="mx-auto w-full max-w-[1200px] px-4 md:px-6 py-6 mt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-2 text-caption text-muted-foreground">
-            <span>SecTrainer — free, hands-on security training.</span>
-            <nav className="flex items-center gap-4">
-              <Link to="/privacy" className="hover:text-foreground">
-                Privacy &amp; Terms
-              </Link>
-              <a
-                href="https://github.com/forbiddenlink/security-trainer"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground"
+          <footer className="mx-auto w-full max-w-[1240px] px-4 md:px-8 pb-8 pt-6 mt-8">
+            <div className="border-t border-border pt-6 grid gap-6 md:grid-cols-[1fr_auto] items-start">
+              <div className="flex items-start gap-3">
+                <RangeMark className="w-6 h-6 text-foreground shrink-0" />
+                <div>
+                  <p className="font-display font-extrabold [font-stretch:75%] text-h4 leading-none">
+                    SecTrainer
+                  </p>
+                  <p className="mt-1.5 text-body-sm text-muted-foreground max-w-md">
+                    Free, hands-on application security training. Progress saves
+                    in this browser; sign in only if you want to sync.
+                  </p>
+                </div>
+              </div>
+              <nav
+                aria-label="Footer"
+                className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-caption uppercase tracking-[0.12em]"
               >
-                GitHub
-              </a>
-            </nav>
+                <Link
+                  to="/modules"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Modules
+                </Link>
+                <Link
+                  to="/paths"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Paths
+                </Link>
+                <Link
+                  to="/privacy"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Privacy &amp; Terms
+                </Link>
+                <a
+                  href="https://github.com/forbiddenlink/security-trainer"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  GitHub<span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              </nav>
+            </div>
           </footer>
         </main>
+        <CommandPalette />
         <LevelUpToast />
         <AchievementToast />
       </div>

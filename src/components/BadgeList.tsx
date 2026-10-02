@@ -24,7 +24,7 @@ export const BadgeList: React.FC = memo(() => {
 
   return (
     <ul
-      className="grid grid-cols-2 md:grid-cols-4 gap-4"
+      className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2"
       role="list"
       aria-label="Achievement badges"
     >
@@ -34,40 +34,38 @@ export const BadgeList: React.FC = memo(() => {
           <li
             key={badge.id}
             className={clsx(
-              "relative group p-4 rounded-[var(--radius-md)] border transition-all duration-200",
+              "flex items-center gap-3 p-3 rounded-[var(--radius-md)] border",
               isUnlocked
-                ? "bg-primary/10 border-primary/40 shadow-[var(--shadow-1)]"
-                : "bg-muted/20 border-border opacity-65",
+                ? "bg-primary/10 border-primary/50"
+                : "border-border opacity-65",
             )}
             aria-label={`${badge.name}: ${isUnlocked ? "Unlocked" : "Locked"} - ${badge.description}`}
           >
-            <div className="flex flex-col items-center text-center gap-3">
-              <div
-                className={clsx(
-                  "p-3 rounded-full lg:mb-2 transition-transform duration-200 group-hover:scale-105",
-                  isUnlocked
-                    ? "bg-primary/20 text-primary"
-                    : "bg-muted text-muted-foreground",
-                )}
-                aria-hidden="true"
-              >
-                {isUnlocked ? (
-                  <Award className="w-8 h-8" />
-                ) : (
-                  <Lock className="w-8 h-8" />
-                )}
-              </div>
-              <div>
-                <h3 className="font-bold text-sm tracking-wide mb-1">
-                  {badge.name}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {badge.description}
-                </p>
-                <span className="sr-only">
-                  {isUnlocked ? "Unlocked" : `Locked - ${badge.condition}`}
-                </span>
-              </div>
+            <div
+              className={clsx(
+                "grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-sm)]",
+                isUnlocked
+                  ? "bg-signal text-signal-ink"
+                  : "border border-dashed border-border text-muted-foreground",
+              )}
+              aria-hidden="true"
+            >
+              {isUnlocked ? (
+                <Award className="w-5 h-5" />
+              ) : (
+                <Lock className="w-4 h-4" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-body text-body-sm font-semibold leading-tight [font-stretch:100%] tracking-normal">
+                {badge.name}
+              </h3>
+              <p className="text-[13px] leading-snug text-muted-foreground">
+                {badge.description}
+              </p>
+              <span className="sr-only">
+                {isUnlocked ? "Unlocked" : `Locked - ${badge.condition}`}
+              </span>
             </div>
           </li>
         );
