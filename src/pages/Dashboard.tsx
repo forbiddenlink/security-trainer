@@ -24,6 +24,7 @@ import {
 } from "../lib/moduleMeta";
 import type { Module } from "../types";
 import { isLocalRangeAvailable } from "../lib/liveRange";
+import { RuledSection } from "../components/RuledSection";
 
 const TOTAL_LESSONS = MODULES.reduce((n, m) => n + m.lessons.length, 0);
 const TOTAL_LABS = MODULES.reduce(
@@ -44,40 +45,6 @@ function recommendedModule(userRole: string | null): Module {
   const id = path?.modules[0];
   return MODULES.find((m) => m.id === id) ?? MODULES[0];
 }
-
-interface SectionProps {
-  index: string;
-  label: string;
-  id: string;
-  title: string;
-  aside?: React.ReactNode;
-  children: React.ReactNode;
-}
-
-const Section: React.FC<SectionProps> = ({
-  index,
-  label,
-  id,
-  title,
-  aside,
-  children,
-}) => (
-  <section className="section-rule" aria-labelledby={id}>
-    <div className="section-rail">
-      <span className="section-index">{index}</span>
-      <span className="ui-label">{label}</span>
-    </div>
-    <div className="min-w-0">
-      <div className="flex items-end justify-between gap-4 mb-5">
-        <h2 id={id} className="text-h2">
-          {title}
-        </h2>
-        {aside}
-      </div>
-      {children}
-    </div>
-  </section>
-);
 
 export const Dashboard: React.FC = () => {
   const xp = useGameStore((s) => s.xp);
@@ -256,7 +223,7 @@ export const Dashboard: React.FC = () => {
         </section>
       )}
 
-      <Section
+      <RuledSection
         index="01"
         label="Today"
         id="today-heading"
@@ -269,9 +236,9 @@ export const Dashboard: React.FC = () => {
             <IntelRefresher />
           </div>
         </div>
-      </Section>
+      </RuledSection>
 
-      <Section
+      <RuledSection
         index="02"
         label="Service record"
         id="achievements-heading"
@@ -290,10 +257,10 @@ export const Dashboard: React.FC = () => {
           <NextBadgePreview />
           <BadgeList />
         </div>
-      </Section>
+      </RuledSection>
 
       {isLocalRangeAvailable && (
-        <Section
+        <RuledSection
           index="03"
           label="Live range"
           id="live-range-heading"
@@ -314,7 +281,7 @@ export const Dashboard: React.FC = () => {
               <LiveLabTargets showAll />
             </div>
           </details>
-        </Section>
+        </RuledSection>
       )}
     </div>
   );
