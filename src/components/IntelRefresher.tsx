@@ -1,12 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  RefreshCw,
-  CheckCircle,
-  AlertTriangle,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Card } from "./ui";
 import { useGameStore } from "../store/gameStore";
 import { MODULES } from "../data/modules";
@@ -44,7 +39,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
   const isOverdue = daysOverdue > 0;
 
   return (
-    <div className="flex items-center justify-between gap-4 p-3 bg-background/50 rounded-lg">
+    <div className="flex items-center justify-between gap-4 p-3 border border-border rounded-[var(--radius-sm)]">
       <div className="flex-1 min-w-0">
         <p className="text-sm text-muted-foreground truncate">
           {info.module.title}
@@ -61,7 +56,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
         </span>
         <Link
           to={`/modules/${info.module.id}/${info.lesson.id}?review=true`}
-          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[var(--radius-sm)] bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
+          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[var(--radius-sm)] border border-border px-3 text-sm font-medium text-foreground transition-colors hover:border-foreground"
         >
           Review
         </Link>
@@ -91,19 +86,13 @@ export const IntelRefresher: React.FC = () => {
     const nextInfo = getLessonInfo(nextReview.lessonId);
 
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-9 w-9 grid place-items-center rounded-[var(--radius-sm)] bg-accent/10 text-accent">
-            <CheckCircle className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold tracking-tight">
-              Intel Refresher
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Your intel is fresh, Agent
-            </p>
-          </div>
+      <Card className="ui-card-md">
+        <div className="mb-4">
+          <p className="ui-label mb-1">Review queue clear</p>
+          <h3 className="text-h4">Intel Refresher</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Your intel is fresh, Agent
+          </p>
         </div>
         <p className="text-muted-foreground text-sm">
           No reviews due. Next review:{" "}
@@ -121,35 +110,23 @@ export const IntelRefresher: React.FC = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`ui-card relative overflow-hidden p-6 ${
-        overdueCount > 0
-          ? "border-destructive/35 border-l-[3px] border-l-destructive"
-          : "border-primary/35 border-l-[3px] border-l-primary"
+      className={`ui-card ui-card-md border-l-[3px] ${
+        overdueCount > 0 ? "border-l-destructive" : "border-l-primary"
       }`}
     >
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div
-              className={`h-9 w-9 grid place-items-center rounded-[var(--radius-sm)] ${
-                overdueCount > 0
-                  ? "bg-destructive/10 text-destructive"
-                  : "bg-primary/10 text-primary"
-              }`}
-            >
-              {overdueCount > 0 ? (
-                <AlertTriangle className="w-5 h-5" />
-              ) : (
-                <RefreshCw className="w-5 h-5" />
-              )}
-            </div>
             <div>
-              <h3 className="text-lg font-semibold tracking-tight">
-                Intel Refresher
-              </h3>
-              <p className="text-xs text-muted-foreground">
+              <p
+                className={`ui-label mb-1 ${overdueCount > 0 ? "!text-destructive" : ""}`}
+              >
+                {overdueCount > 0 ? "Overdue" : "Due for review"}
+              </p>
+              <h3 className="text-h4">Intel Refresher</h3>
+              <p className="text-xs text-muted-foreground mt-1">
                 {reviewsDue.length} lesson{reviewsDue.length !== 1 ? "s" : ""}{" "}
                 {reviewsDue.length === 1 ? "needs" : "need"} review
               </p>
@@ -166,7 +143,7 @@ export const IntelRefresher: React.FC = () => {
         {hasMoreReviews && (
           <Link
             to="/reviews"
-            className="group inline-flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-muted px-4 font-medium text-foreground transition-colors hover:bg-muted/80"
+            className="group inline-flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-border px-4 font-medium text-foreground transition-colors hover:border-foreground"
           >
             View All ({reviewsDue.length} reviews)
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

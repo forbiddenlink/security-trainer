@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 interface Props {
   children: ReactNode;
@@ -45,27 +45,28 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="flex flex-col items-center justify-center h-64 text-center p-6">
-          <AlertTriangle
-            className="w-12 h-12 text-yellow-500 mb-4"
-            aria-hidden="true"
-          />
-          <h2 className="text-xl font-semibold text-foreground mb-2">
-            Something went wrong
-          </h2>
-          <p className="text-foreground/70 mb-4 max-w-md">
-            {this.state.error?.message?.includes("Loading chunk")
-              ? "A page failed to load. This can happen when the app was updated. Please refresh."
-              : "An unexpected error occurred. Please try refreshing the page."}
-          </p>
-          <button
-            onClick={this.handleRetry}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
-            aria-label="Reload the page"
-          >
-            <RefreshCw className="w-4 h-4" aria-hidden="true" />
-            Reload Page
-          </button>
+        <div className="max-w-xl mx-auto py-16 px-6 text-left">
+          <div className="ui-card ui-card-lg border-l-[3px] border-l-destructive">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-destructive">
+              System fault
+            </p>
+            <h2 className="font-display [font-stretch:75%] font-extrabold text-h2 mt-2 mb-3">
+              Something went wrong
+            </h2>
+            <p className="text-body-sm text-muted-foreground mb-6 max-w-md">
+              {this.state.error?.message?.includes("Loading chunk")
+                ? "A page failed to load. This can happen when the app was updated. Please refresh."
+                : "An unexpected error occurred. Please try refreshing the page."}
+            </p>
+            <button
+              onClick={this.handleRetry}
+              className="btn-signal"
+              aria-label="Reload the page"
+            >
+              <RefreshCw className="w-4 h-4" aria-hidden="true" />
+              Reload Page
+            </button>
+          </div>
         </div>
       );
     }

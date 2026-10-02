@@ -191,10 +191,12 @@ export const LessonView: React.FC = () => {
               OP-{opNumber} · <span>{module.title}</span>
             </span>
           </p>
-          <h1 className="text-h4 font-body [font-stretch:100%] tracking-normal flex items-center gap-2 min-w-0">
-            <span className="truncate">{currentLesson.title}</span>
+          <div className="flex items-center gap-2 min-w-0">
+            <h1 className="text-h4 font-body [font-stretch:100%] tracking-normal truncate">
+              {currentLesson.title}
+            </h1>
             <span className="ui-chip shrink-0">{currentLesson.type}</span>
-          </h1>
+          </div>
         </div>
         <div className="flex items-center gap-3 md:gap-5 shrink-0">
           <ol

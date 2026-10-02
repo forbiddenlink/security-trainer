@@ -98,7 +98,7 @@ export const NextBadgePreview: React.FC = () => {
             fill="none"
             stroke="currentColor"
             strokeWidth="3"
-            className="text-border/50"
+            className="text-border"
           />
           <circle
             cx="24"
@@ -107,7 +107,7 @@ export const NextBadgePreview: React.FC = () => {
             fill="none"
             stroke="currentColor"
             strokeWidth="3"
-            strokeLinecap="round"
+            strokeLinecap="butt"
             strokeDasharray={circ}
             strokeDashoffset={dash}
             className="text-primary transition-[stroke-dashoffset] duration-700"
@@ -132,7 +132,7 @@ export const NextBadgePreview: React.FC = () => {
 
       <Link
         to="/profile"
-        className="shrink-0 p-2 rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+        className="shrink-0 p-2 rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground transition-colors"
         aria-label="View all badges on profile"
       >
         <ArrowRight className="w-4 h-4" />

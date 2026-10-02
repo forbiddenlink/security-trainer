@@ -160,7 +160,7 @@ export const AuthModal: React.FC = () => {
       id="auth-error"
       tabIndex={-1}
       role="alert"
-      className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-destructive outline-none"
+      className="mb-4 p-3 border border-border border-l-[3px] border-l-destructive rounded-[var(--radius-sm)] flex items-center gap-2 text-destructive outline-none"
     >
       <AlertCircle className="w-5 h-5 shrink-0" />
       <span className="text-sm">{error}</span>
@@ -194,7 +194,7 @@ export const AuthModal: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-background/80 z-50"
             onClick={handleClose}
             aria-hidden="true"
           />
@@ -202,29 +202,31 @@ export const AuthModal: React.FC = () => {
           {/* Modal */}
           <motion.div
             ref={modalRef}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md ui-card ui-card-elevated rounded-[var(--radius-lg)] z-50 overflow-hidden"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md ui-card ui-card-elevated !p-0 z-50 overflow-hidden"
             role="dialog"
             aria-modal="true"
             aria-labelledby="auth-modal-title"
           >
-            <div className="relative p-6 border-b border-border/70 border-l-[3px] border-l-primary">
+            <div className="relative p-6 border-b border-border">
               <button
                 onClick={handleClose}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/70 transition-colors"
+                className="absolute top-4 right-4 p-2 rounded-[var(--radius-sm)] hover:text-foreground transition-colors"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5 text-muted-foreground" />
               </button>
               <h2
                 id="auth-modal-title"
-                className="text-2xl font-bold text-foreground"
+                className="font-display [font-stretch:75%] font-extrabold text-h3 text-foreground"
               >
                 {title}
               </h2>
-              <p className="text-muted-foreground mt-1">{subtitle}</p>
+              <p className="text-body-sm text-muted-foreground mt-1">
+                {subtitle}
+              </p>
             </div>
 
             {/* Content */}
@@ -233,20 +235,20 @@ export const AuthModal: React.FC = () => {
                 <div className="space-y-4">
                   <div
                     role="alert"
-                    className="p-3 bg-warning/10 border border-warning/30 rounded-lg text-sm text-foreground"
+                    className="p-3 border border-border border-l-[3px] border-l-warning rounded-[var(--radius-sm)] text-sm text-foreground"
                   >
                     Heads up: keeping one side{" "}
                     <strong>permanently discards the other</strong>. This can't
                     be undone.
                   </div>
-                  <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="p-4 border border-border rounded-[var(--radius-sm)]">
                     <h3 className="font-semibold mb-2">Cloud Progress</h3>
                     <p className="text-sm text-muted-foreground">
                       XP: {useAuthStore.getState().profile?.xp || 0} | Level:{" "}
                       {useAuthStore.getState().profile?.level || 1}
                     </p>
                   </div>
-                  <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="p-4 border border-border rounded-[var(--radius-sm)]">
                     <h3 className="font-semibold mb-2">Local Progress</h3>
                     <p className="text-sm text-muted-foreground">
                       XP: {gameStore.xp} | Level: {gameStore.level}
@@ -262,6 +264,7 @@ export const AuthModal: React.FC = () => {
                     </Button>
                     <Button
                       onClick={() => handleMergeChoice(false)}
+                      variant="signal"
                       className="flex-1"
                     >
                       Keep Local (discard cloud)
@@ -272,7 +275,7 @@ export const AuthModal: React.FC = () => {
                 <>
                   {resetSent ? (
                     <div className="text-center py-4">
-                      <CheckCircle2 className="w-10 h-10 text-primary mx-auto mb-3" />
+                      <CheckCircle2 className="w-6 h-6 text-accent mx-auto mb-3" />
                       <p className="text-sm text-muted-foreground">
                         If an account exists for{" "}
                         <span className="text-foreground">{email}</span>, a
@@ -296,7 +299,7 @@ export const AuthModal: React.FC = () => {
                         <div>
                           <label
                             htmlFor="reset-email"
-                            className="block text-sm font-medium text-foreground mb-1.5"
+                            className="ui-label block mb-1.5"
                           >
                             Email
                           </label>
@@ -319,6 +322,7 @@ export const AuthModal: React.FC = () => {
                         <Button
                           type="submit"
                           disabled={loading}
+                          variant="signal"
                           className="w-full h-11"
                         >
                           {loading && (
@@ -350,7 +354,7 @@ export const AuthModal: React.FC = () => {
                       <div>
                         <label
                           htmlFor="displayName"
-                          className="block text-sm font-medium text-foreground mb-1.5"
+                          className="ui-label block mb-1.5"
                         >
                           Display Name
                         </label>
@@ -370,10 +374,7 @@ export const AuthModal: React.FC = () => {
                     )}
 
                     <div>
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-medium text-foreground mb-1.5"
-                      >
+                      <label htmlFor="email" className="ui-label block mb-1.5">
                         Email
                       </label>
                       <div className="relative">
@@ -395,10 +396,7 @@ export const AuthModal: React.FC = () => {
 
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label
-                          htmlFor="password"
-                          className="block text-sm font-medium text-foreground"
-                        >
+                        <label htmlFor="password" className="ui-label block">
                           Password
                         </label>
                         {authModalMode === "login" && (
@@ -436,7 +434,7 @@ export const AuthModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md hover:bg-muted/70 text-muted-foreground"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-[var(--radius-sm)] hover:text-foreground text-muted-foreground"
                           aria-label={
                             showPassword ? "Hide password" : "Show password"
                           }
@@ -454,6 +452,7 @@ export const AuthModal: React.FC = () => {
                     <Button
                       type="submit"
                       disabled={loading}
+                      variant="signal"
                       className="w-full h-11"
                     >
                       {loading && <Loader2 className="w-5 h-5 animate-spin" />}

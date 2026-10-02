@@ -57,7 +57,7 @@ Overlays: `AuthModal`, `ProfileEditModal`, `ReviewModal`, `LevelUpToast`, `Achie
 ## Content types
 
 - Module (42 exported from `src/data/modules/index.ts`): id, title, difficulty, category, XP, lessons.
-- Lesson: theory (59), quiz (75), lab (25). Labs verified by `src/utils/labVerification.ts` registry.
+- Lesson: 255 total at runtime: theory (90), quiz (124), lab (41). (Corrected 2026-10-02; an earlier grep count of 159 missed lessons built by helpers.) Labs verified by `src/utils/labVerification.ts` registry.
 - Learning paths: 6. CTF challenges: 29 across categories. Badges: defined in `src/data/badges.ts`.
 
 ## Features and journeys
