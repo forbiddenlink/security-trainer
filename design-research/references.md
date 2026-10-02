@@ -1,127 +1,125 @@
 # SecTrainer design references (Phase 2A)
 
-Snapshot 2026-10-02. 13 live sites screenshotted at 1440x900 and 390x844 (shots in `shots/refs/<slug>-desktop.png` and `-mobile.png`) and the desktop shot viewed. Source note: the 5 out-of-industry sites came from the `inspo` archive (a screenshot index of shipped sites). The 8 in-industry sites are picks from the devtools and security-training canon; I did not verify them against Awwwards, Godly, SiteInspire or Land-book listings, so treat "source" as "inspo" or "curated". Mobile shots were captured but not reviewed.
+Snapshot 2026-10-02. All 12 main references were found on live Siteinspire listing pages, opened live, screenshotted at 1440x900 and 390x844 (`shots/refs/<slug>-desktop.png`, `-mobile.png`), and the desktop shot viewed. Mobile shots were captured, not reviewed.
 
-## Out of industry
+Gallery status: Siteinspire loaded and is the confirming source (category pages cited per site). Land-book returned a Cloudflare 403. godly.website redirects to recent.design, which is a different gallery, so Godly is unconfirmed. Awwwards loaded (`shots/galleries/awwwards-tech-desktop.png`) but its card links render client-side and I could not extract site names, so nothing here claims an Awwwards listing. Siteinspire has no devtools category, so "in industry" means software or tech studios (3 of 12); 9 are out of industry.
 
-### 1. Grilli Type (type foundry)
+## Main references (Siteinspire-confirmed)
 
-- URL: https://grillitype.com | Source: inspo | Industry: type foundry | Out
-- Shots: `shots/refs/grilli-desktop.png`, `grilli-mobile.png`
-- Hero is a technical test-card diagram: thin olive and pink line art, tiny mono labels ("LOOKING FOR SIGNAL"), progress bars, crosshair circles. This is the best "mission control" illustration language seen: schematic, not skeuomorphic.
-- Left label column ("Retail typefaces") beside a content column, divided by 1px rules. A ready Swiss grid for lesson and dossier pages.
-- Type-specimen rows with hairline dividers work as a module list.
-- Do not copy: the white background and the olive and pink palette. Take the line-art vocabulary into dark mode.
+### 1. Whole Earth Index
 
-### 2. Herzog & de Meuron (architecture)
+- URL: https://wholeearth.info | Seen on: https://www.siteinspire.com/websites/category/grid-layout | Industry: archive/publishing | Out
+- Pure black page, serif intro paragraph, mono italic footnote, then a 3x2 grid divided by 1px white rules with circled numerals (1 to 6) in each cell.
+- Take: ruled grid with numbered cells is a ready template for a module or dossier index. Black plus white only, no accent.
+- Do not copy: logo-only cells; SecTrainer cells need status and XP.
 
-- URL: https://herzogdemeuron.com | Source: inspo | Industry: architecture | Out
-- Shots: `shots/refs/herzog-desktop.png`, `herzog-mobile.png`
-- Monospace body and UI text ("Search for something...") with a heavy grotesk wordmark. Mono is used for everything functional, tastefully.
-- Pill filter chips in two tiers: outlined (primary sections) and filled gray (secondary). Direct fit for module category filters (OWASP, Cloud, AI).
-- A single acid-yellow ticker bar at the bottom is the only accent. One loud element on a calm page.
-- Do not copy: image-led layout. SecTrainer has no photography.
+### 2. Beats in Space
 
-### 3. Construction Desourdy (construction)
+- URL: https://www.beatsinspace.net | Seen on: .../category/grid-layout | Industry: music | Out
+- Dense data-rich page: durations in mono-like tabular numerals (01:00:55), catalogue IDs (AM223), dates and genre tags in tiny caps on every row. One acid-yellow now-playing bar is the only strong color.
+- Take: metadata-in-small-caps row pattern for module rows (ID, duration, tags). Single highlighted "active" bar for the current lab.
+- Do not copy: lavender page tint and watermark logo.
 
-- URL: https://www.constructiondesourdy.com/en/services | Source: inspo | Industry: construction | Out
-- Shots: `shots/refs/desourdy-desktop.png`, `desourdy-mobile.png`
-- Oversized black grotesk display at 3 lines, tight leading, hairline rule, then a two-column split with a vertical divider. Strong page-title pattern for path and module headers.
-- Small bold section labels ("Services", "Construction") pinned to column edges like form-field captions, which suits a dossier look.
-- Do not copy: scale. Hero-size type would eat the dashboard fold.
+### 3. KieranTimberlake
 
-### 4. Heatherwick Studio (architecture)
+- URL: https://kierantimberlake.com | Seen on: .../category/grid-layout | Industry: architecture | Out
+- Tight split view with vertical rotated labels at both edges ("New Science Building") and a thumbnail rail. Mono-ish grotesk wordmark.
+- Take: vertical edge labels plus thumbnail strip for switching between modules in a path. Compact nav.
+- Do not copy: photography-driven page.
 
-- URL: https://heatherwick.com | Source: inspo | Industry: architecture | Out
-- Shots: `shots/refs/heatherwick-desktop.png`, `heatherwick-mobile.png`
-- Light high-contrast serif wordmark over a darkened full-bleed image, tiny letterspaced caps nav (PROJECTS STUDIO / SEARCH). Shows how a serif display can sit on dark with restraint.
-- Idea for the classified feel: serif title plus tracked mono caps for metadata.
-- Do not copy: the full-bleed video hero. It is content-free for an app.
+### 4. CcType Foundry
 
-### 5. Thrill Jockey (music label)
+- URL: https://cctype.com | Seen on: .../category/typographic | Industry: type foundry | Out
+- Full-bleed gray with horizontal rules slicing a word at growing weights and sizes. Hairlines double as structure and motion frame.
+- Take: weight and size scale as a level-up metaphor (a heading growing heavier per level). Rules between bands.
+- Do not copy: scale. Fine for a hero moment only.
 
-- URL: https://thrilljockey.com | Source: inspo | Industry: music | Out
-- Shots: `shots/refs/thrilljockey-desktop.png`, `thrilljockey-mobile.png`
-- Dense uniform cover grid, bold sans captions, section headers in caps ("PRE-ORDERS", "OUT NOW"). A model for a badge or module catalogue: equal tiles, one-line captions, no card chrome.
-- Do not copy: bright blue logotype, white page, thin hierarchy between tiles.
+### 5. Collection
 
-## In industry (devtools, security, education)
+- URL: https://www.collection.industries/en | Seen on: .../category/typographic | Industry: creative agency | Out
+- A small black heraldic crest centered on white, small-caps serif nav in the four corners. Reads as official, institutional.
+- Take: crest or seal as the "agency" identity mark; small-caps corner nav for a briefing feel.
+- Do not copy: white page and the huge cropped headline.
 
-### 6. Linear
+### 6. This Design
 
-- URL: https://linear.app | Source: curated | Industry: devtools | In
-- Shots: `shots/refs/linear-desktop.png`, `linear-mobile.png`
-- Near-black page with the real app UI shown in a framed panel: left nav, issue title, properties column, activity feed. Shows dashboard density without clutter; low-contrast gray hierarchy (3 text tones).
-- Status icons carry meaning without color overload (amber half-circle for in-progress). Use for lab and module state.
-- Do not copy: product screenshot as hero. SecTrainer should be the app.
+- URL: https://this.design | Seen on: .../category/typographic | Industry: design studio | Out
+- Black page, grotesk headline mixed with italic serif ("empathy") and angle-bracket glyphs around "technology". Small "New" and "Update" chips on cards.
+- Take: mixing grotesk with one italic serif word is a cheap editorial voice; angle brackets as a code nod. Status chips on cards.
+- Do not copy: photo-led card carousel.
 
-### 7. Raycast
+### 7. The Future in Black
 
-- URL: https://www.raycast.com | Source: curated | Industry: devtools | In
-- Shots: `shots/refs/raycast-desktop.png`, `raycast-mobile.png`
-- Single saturated red on near-black, with a monospace install line ("Install via Homebrew") under the CTA. Mono microcopy as a trust cue.
-- Do not copy: the glowing diagonal gradient hero. That is the generic effect this brief avoids.
+- URL: https://www.thefutureinblack.com | Seen on: .../category/typographic | Industry: cultural intelligence studio | Out
+- Condensed heavy grotesk title cut in half by a portrait; live city clock ("New York, USA 17:29") top right.
+- Take: live local time or mission clock in the header; overlap layering for a featured card.
+- Do not copy: white background with black type; ours is dark.
 
-### 8. Ghostty
+### 8. MMXX Artists
 
-- URL: https://ghostty.org | Source: curated | Industry: terminal emulator | In
-- Shots: `shots/refs/ghostty-desktop.png`, `ghostty-mobile.png`
-- Hero is a real terminal window (traffic lights, title bar) with an ASCII logo in two colors. The most tasteful terminal aesthetic found: one framed window, nothing else, quiet outlined buttons.
-- Use for the briefing intro or empty states: ASCII crest in a window frame.
-- Do not copy: the full-page sparseness. A dashboard needs density.
+- URL: https://mmxxartists.com | Seen on: .../category/typographic | Industry: fashion/photography | Out
+- 50/50 split, flat yellow left with a huge condensed all-caps name, framed image right. Heavy condensed type does all the work.
+- Take: split screen for lesson intro (briefing left, artifact right); one flat color field.
+- Do not copy: saturated yellow, photography.
 
-### 9. CryptoHack
+### 9. Lift Type
 
-- URL: https://cryptohack.org | Source: curated | Industry: security training | In
-- Shots: `shots/refs/cryptohack-desktop.png`, `cryptohack-mobile.png`
-- Closest direct competitor to the product shape. Monospace caps for nav and headings, persistent left rail with icons, a live "Recent solves" table (user, time) on the right. Live activity feeds make gamified platforms feel populated.
-- Single warm yellow-orange on navy.
-- Do not copy: the cartoon mascots and flat sticker illustration; they clash with a spy theme.
+- URL: https://www.lift-type.fr | Seen on: .../category/typographic | Industry: type foundry | Out
+- Black circle and square tiles carrying single letters, a grid/list view toggle (two icon buttons), flat saturated cards below.
+- Take: grid/list toggle on the module catalogue; geometric tile letters as badge shapes.
+- Do not copy: playful rotation and bright card colors.
 
-### 10. TryHackMe
+### 10. 1984 Ventures
 
-- URL: https://tryhackme.com | Source: curated | Industry: security training | In
-- Shots: `shots/refs/tryhackme-desktop.png`, `tryhackme-mobile.png`
-- Icon-over-label top nav (Learn, Practice, Compete) maps cleanly to learning paths and CTF. Lime CTA on navy is high contrast and readable.
-- Do not copy: astronaut mascot, wireframe-wave footer, and the light section drop below the dark hero (two themes on one page).
+- URL: https://1984.vc | Seen on: .../category/grid-layout | Industry: venture/AI | In
+- Serif headline on gray, mono stacked logo ("1 9 / 8 4"), three tall flat color panels (lime, plum, white) as category tiles, outlined "Apply" button.
+- Take: tall category panels for the three tracks; stacked mono wordmark; outlined CTA over filled.
+- Do not copy: lime and plum together, which reads loud against a quiet dark UI.
 
-### 11. Zed
+### 11. Bakken & Baeck
 
-- URL: https://zed.dev | Source: curated | Industry: devtools | In
-- Shots: `shots/refs/zed-desktop.png`, `zed-mobile.png`
-- Light mode done well: faint blueprint grid with registration-mark crosshairs at intersections, italic serif headline, keycap badges on buttons (D, C, S). Keycaps are a cheap, on-theme micro-detail.
-- Three-column feature strip with hairline dividers.
-- Do not copy: the pale blue wash; use the registration marks in the light theme only.
+- URL: https://bakkenbaeck.com | Seen on: .../category/web-and-interactive-design | Industry: product studio | In
+- Case-study strip shows real product UI fragments: a waveform timeline with second markers, a spec card with pixel measurement guides (16PX, 24PX).
+- Take: show real technical artifacts (timelines, measurement overlays) as decoration; pill nav bar floating at top.
+- Do not copy: white page; logo strip.
 
-### 12. Resend
+### 12. Pear
 
-- URL: https://resend.com | Source: curated | Industry: devtools | In
-- Shots: `shots/refs/resend-desktop.png`, `resend-mobile.png`
-- Serif display (tight, high-contrast) against a Geist-like sans on pure black. Serif plus sans on dark is the editorial pairing most relevant to the redesign.
-- Do not copy: the 3D cube render and gradient-on-text effect.
-
-### 13. Exercism
-
-- URL: https://exercism.org | Source: curated | Industry: education | In
-- Shots: `shots/refs/exercism-desktop.png`, `exercism-mobile.png`
-- Hexagon badges per language are a strong, ownable badge shape; yellow highlighter on one word in the headline.
-- Do not copy: pastel illustration style or the purple primary. This is the generic friendly-edtech look the redesign should avoid.
+- URL: https://pear.no | Seen on: .../category/typographic | Industry: software studio | In
+- Blueprint-style left rail: vertical hairline with tick marks and a crosshair star at a line intersection, tracked mono caps on the CTA ("REQUEST PARTNERSHIP"), serif headline over a classical painting.
+- Take: tick-mark rail and crosshair markers for progress indicators; mono-caps buttons with arrow. Classical art as dossier "evidence plate".
+- Do not copy: saturated blue field.
 
 ## Patterns across references
 
-- Mono is for function, serif or grotesk is for voice. Herzog, CryptoHack, Raycast and Zed all use monospace only for UI chrome, metadata and commands, never for paragraphs.
-- Dark pages use 3 gray tones plus exactly one accent (Linear, Raycast, CryptoHack, Herzog's yellow). No second accent.
-- Hairline rules and column labels beat cards. Grilli, Desourdy and Zed build structure from 1px lines and left-edge captions.
-- Framed terminal window is the single permitted skeuomorph (Ghostty); everything else stays flat.
-- Live activity (CryptoHack recent solves) and status icons (Linear) carry the gamified feel better than mascots.
-- Schematic line art (Grilli test card, Zed registration marks) gives a classified-dossier tone without stock "hacker" imagery.
-- Serif display on dark (Resend, Heatherwick) is a differentiator from the all-grotesk devtools norm.
-- Keycaps, tickers and tiny tracked caps are cheap micro-details with high identity return.
+- Structure comes from 1px rules and numbered cells, not cards (Whole Earth, CcType, Pear, KieranTimberlake).
+- Metadata is tiny, tracked, often mono: IDs, durations, dates, tags (Beats in Space, Pear, 1984).
+- One serif voice plus grotesk or mono for function (This Design, 1984, Pear, Collection).
+- Black pages carry zero or one accent; the accent marks the active item only (Beats in Space bar, Whole Earth none).
+- Real technical artifacts beat illustration: timelines, spec overlays, tick rails (Bakken & Baeck, Pear).
+- Institutional marks (crest, stacked mono wordmark, live clock) create a briefing tone without stock hacker imagery.
+- Grid/list toggle and thumbnail rails are lightweight catalogue controls (Lift Type, KieranTimberlake).
+
+## Not assessable (Siteinspire-listed, loaded, but shot caught only an intro or loader)
+
+- Komma Komma (https://kommakomma.is): blank quote-mark intro screen.
+- archivio-uno (https://archivio-uno.com): counter animation only.
+- Nothin' (https://www.noth.in): loader with "100" counter.
+- Excluded as weak fit: AREA 17 (cookie banner, plain agency page).
 
 ## Blocked
 
-- Hack The Box (https://www.hackthebox.com): Cookiebot consent modal covers the hero in the desktop shot; page content not assessable. Not described.
+- Hack The Box (https://www.hackthebox.com): cookie consent modal covered the hero. Also not gallery-confirmed.
 
-## Loaded but not cited
+## Supplementary (inspo archive or curated; NOT gallery-confirmed, not counted)
 
-Vercel (light, product-less hero), Bandcamp and ArchDaily (loaded, not viewed; weak fit).
+Loaded and viewed live; ideas kept for context only.
+
+- Grilli Type (grillitype.com), inspo: technical test-card line art and label-column grid. Strongest dossier illustration idea.
+- Herzog & de Meuron (herzogdemeuron.com), inspo: mono UI text, two-tier pill filters, one yellow ticker.
+- Construction Desourdy (constructiondesourdy.com/en/services), inspo: 3-line heavy grotesk title, vertical-divider split.
+- Heatherwick (heatherwick.com), inspo: serif on dark with tracked caps nav.
+- Thrill Jockey (thrilljockey.com), inspo: uniform catalogue grid.
+- Ghostty (ghostty.org), curated: framed terminal window with ASCII crest, the tasteful terminal skeuomorph.
+- CryptoHack (cryptohack.org), curated: mono caps nav, left rail, live recent-solves feed.
+- Linear (linear.app), Raycast (raycast.com), Zed (zed.dev), Resend (resend.com), TryHackMe (tryhackme.com), Exercism (exercism.org): curated devtools and training sites; Zed's registration-mark grid and Resend's serif-on-black are the useful bits.

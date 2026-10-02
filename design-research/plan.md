@@ -6,13 +6,14 @@ Written against: `f310453` (design/upgrade, 2026-10-02). Frozen once Phase 4 sta
 
 **Point of view.** SecTrainer is a calibrated instrument, not a SaaS dashboard. Every page reads like a field manual printed on a test card: hairline rules, a left label rail, monospace readouts, condensed headlines, and one signal color that only lights up where the learner should act. The current build gestures at "ops" with scattered labels (CLASSIFIED, OP-01) on generic rounded cards. The new system turns that gesture into a grammar: numbered sections, ruled panels, readouts, and reticle line art.
 
-**References it draws from** (see `references.md`):
+**References it draws from** (see `references.md`; main list is Siteinspire-confirmed):
 
-- Grilli Type: test-card line art (crosshairs, tick rulers, tiny mono captions), label column plus hairline-rule grid. Source of the imagery style and the label rail.
-- Herzog & de Meuron: monospace UI text, two-tier pill filters (outlined primary, filled secondary), a single acid-yellow accent used as a signal. Source of the filter chips and the signal color discipline.
-- Ghostty: one framed terminal window, restraint around a single technical object. Source of how the lab and empty states frame the terminal.
-- CryptoHack / TryHackMe (in-industry): live progress readouts and catalog density. Used for information design only, not visual style.
-- Linear / Raycast: command palette and keyboard-first navigation as a product pattern.
+- Whole Earth Index: structure from 1px rules and numbered cells instead of cards. Source of the numbered section grammar and the ruled module index.
+- Beats in Space: dense metadata rows (IDs, durations, tags in small tabular caps) with one acid-yellow bar marking the active item. Source of the module row pattern and the single-signal-color rule.
+- Pear: blueprint tick rail, crosshair markers, mono-caps CTAs. Source of the reticle mark, tick-ruler progress, and button labels.
+- KieranTimberlake and CcType Foundry: hairline grids and label rails. Source of the left label rail.
+- Bakken & Baeck: real technical artifacts (timelines, spec overlays) instead of illustration. Source of the range instrument in the hero.
+- Supplementary (not gallery-confirmed, see references.md): Grilli Type test-card line art, Herzog & de Meuron two-tier filter pills, Ghostty framed terminal, CryptoHack/TryHackMe catalog density, Linear/Raycast command palette pattern.
 
 **Type system**
 
