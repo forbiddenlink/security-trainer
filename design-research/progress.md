@@ -12,9 +12,9 @@ Pre-existing uncommitted edits to `.husky/pre-commit` and `CLAUDE.md` belong to 
 - [x] Phase 2: Research (`references.md`, `features.md`)
 - [x] Phase 3: Decide (`plan.md`)
 - [x] Phase 4: Foundation + homepage
-- [ ] Phase 5: Roll out to every template
-- [ ] Phase 6: Verify
-- [ ] Phase 7: Report
+- [x] Phase 5: Roll out to every template
+- [x] Phase 6: Verify
+- [x] Phase 7: Report (`report.md`). Stopped; not merged.
 
 ## Template tracker
 
@@ -48,3 +48,13 @@ Pre-existing uncommitted edits to `.husky/pre-commit` and `CLAUDE.md` belong to 
 - Live Range sections now hide entirely off localhost (`src/lib/liveRange.ts`); the dashboard section would otherwise be an empty disclosure in production.
 - Fixed pre-existing bug: CTF flags were stored with `hashFlagSync` but checked with SHA-256 `validateFlag`, so every correct flag was rejected. The e2e test passed falsely because `/Correct/i` matched "Incorrect flag". Store now uses `validateFlagSync`; regression test in `gameStore.test.ts`; e2e assertion tightened.
 - Heading base styles moved into `@layer base` so component classes like `.ui-label` apply to headings.
+
+## Phase 6 results (2026-10-02)
+
+- `pnpm build`: pass (chunk-size warning only, pre-existing).
+- `tsc -b`: clean. `pnpm lint`: 0 errors, 2 warnings (pre-existing, `Terminal.tsx`).
+- `pnpm biome:check`: fails before checking any file. `biome.json` uses keys (`organizeImports`, `ignore`) that the installed Biome 1.9.4 rejects. Same failure on the pre-change tree (verified with `git stash`). Not fixed: tooling config, out of scope.
+- Unit: 27 files, 391 tests pass (`vitest run --testTimeout=60000`; the long timeout is needed because machine load average was ~79).
+- E2E: 12/12 pass, twice in a row. Specs updated for the new UI; 2 real defects found by them were fixed (duplicate lesson h1; CTF flag acceptance).
+- Lighthouse (preview build, simulated throttling): mobile `/` perf 0.61, a11y 0.97, best practices 0.96, SEO 1.00. Production (old design) under the same conditions: perf 0.60, a11y 0.96. Desktop `/modules` 0.56/0.97, lesson 0.55/0.96, CTF 0.56/0.96. FCP is a flat 6.0s in every run, while real unthrottled load measures 239ms; the simulated FCP is dominated by the render-blocking Google Fonts stylesheet and the shared lesson-content chunk, both unchanged from production.
+- Journeys clicked in Chrome: dashboard first mission, theory to quiz, quiz answer unlocks Next, lab deploy verdict, command palette (Ctrl+K, Cmd+K, `/`, Enter navigates), catalog filters restored from URL, path start deep link, mobile drawer to CTF, CTF select and back button, flag hint confirm and solve, final exam fail and retry, theme toggle. Only console errors: localhost Live Range probes (`ERR_CONNECTION_REFUSED`, expected with no docker lab running).
