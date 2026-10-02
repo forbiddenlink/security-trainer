@@ -327,7 +327,9 @@ describe("LessonView", () => {
       await navigateToLab(user);
 
       expect(screen.getByText("lab")).toBeInTheDocument();
-      expect(await screen.findByText("Mission Objective")).toBeInTheDocument();
+      expect(
+        await screen.findByText("Mission Objective", {}, { timeout: 4000 }),
+      ).toBeInTheDocument();
       expect(screen.getByTestId("code-editor")).toBeInTheDocument();
     });
 

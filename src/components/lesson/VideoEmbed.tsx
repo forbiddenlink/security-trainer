@@ -33,7 +33,7 @@ export const VideoEmbed: React.FC<VideoEmbedProps> = memo(
 
     if (!videoId) {
       return (
-        <div className="my-6 p-4 border border-warning/30 bg-warning/10 rounded-lg text-sm text-warning">
+        <div className="my-6 p-4 border border-warning/50 rounded-[var(--radius-md)] text-sm text-warning">
           Invalid video URL: {url}
         </div>
       );
@@ -49,7 +49,7 @@ export const VideoEmbed: React.FC<VideoEmbedProps> = memo(
         role="figure"
         aria-label={caption || title || "Video"}
       >
-        <div className="relative aspect-video bg-slate-900 border border-border rounded-lg overflow-hidden">
+        <div className="relative aspect-video bg-[#0c0d0b] border border-border rounded-[var(--radius-md)] overflow-hidden">
           {isLoaded ? (
             <iframe
               src={embedUrl}
@@ -74,10 +74,10 @@ export const VideoEmbed: React.FC<VideoEmbedProps> = memo(
 
               {/* Play button overlay */}
               <div className="relative z-10 flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:bg-primary group-hover:scale-110 transition-all">
-                  <Play className="w-8 h-8 text-primary-foreground ml-1" />
+                <div className="w-14 h-14 rounded-[var(--radius-sm)] bg-signal flex items-center justify-center transition-transform group-hover:scale-105">
+                  <Play className="w-6 h-6 text-signal-ink ml-0.5" />
                 </div>
-                <span className="px-3 py-1 bg-black/70 rounded text-sm font-medium text-white">
+                <span className="px-2.5 py-1 bg-black/75 rounded-[var(--radius-xs)] font-mono text-[11px] uppercase tracking-[0.12em] text-white">
                   Click to play
                 </span>
               </div>

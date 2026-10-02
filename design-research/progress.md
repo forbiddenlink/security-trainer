@@ -18,22 +18,22 @@ Pre-existing uncommitted edits to `.husky/pre-commit` and `CLAUDE.md` belong to 
 
 ## Template tracker
 
-| Template                             | Status                                                                                                           |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| Dashboard `/`                        | done: 2 rounds; final scores POV 4.5, type 4.5, layout 4, color 4, motion 4, audience 4, memorability 4, craft 4 |
-| Modules `/modules`                   | pending                                                                                                          |
-| Lesson theory                        | pending                                                                                                          |
-| Lesson quiz                          | pending                                                                                                          |
-| Lesson lab                           | pending                                                                                                          |
-| Paths `/paths`                       | pending                                                                                                          |
-| Path detail                          | pending                                                                                                          |
-| CTF `/ctf`                           | pending                                                                                                          |
-| Reviews `/reviews`                   | pending                                                                                                          |
-| Leaderboard                          | pending                                                                                                          |
-| Profile                              | pending                                                                                                          |
-| Final exam `/challenge`              | pending                                                                                                          |
-| Privacy                              | pending                                                                                                          |
-| Auth modal / toasts / error boundary | pending                                                                                                          |
+| Template                             | Status                                                                                                                                          |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard `/`                        | done: 2 rounds; final scores POV 4.5, type 4.5, layout 4, color 4, motion 4, audience 4, memorability 4, craft 4                                |
+| Modules `/modules`                   | done: URL-state filters (category, level, status, sort), random mission, time estimates, ruled rows; 2 rounds; all rubric items >= 4            |
+| Lesson theory                        | done: owned prose styles (no typography plugin was installed, so prose classes did nothing), outline rail, Mermaid render bug fixed; 2 rounds   |
+| Lesson quiz                          | done: lettered options, inset signal states, verdict rule; 1 round + fixes                                                                      |
+| Lesson lab                           | done: overlap bug fixed (Live Range moved below workspace), framed editor/terminal, signal Monaco/xterm themes, reference-fix debrief; 2 rounds |
+| Paths `/paths`                       | pending                                                                                                                                         |
+| Path detail                          | pending                                                                                                                                         |
+| CTF `/ctf`                           | pending                                                                                                                                         |
+| Reviews `/reviews`                   | pending                                                                                                                                         |
+| Leaderboard                          | pending                                                                                                                                         |
+| Profile                              | pending                                                                                                                                         |
+| Final exam `/challenge`              | pending                                                                                                                                         |
+| Privacy                              | pending                                                                                                                                         |
+| Auth modal / toasts / error boundary | pending                                                                                                                                         |
 
 ## Phase 4 notes (2026-10-02)
 
@@ -42,3 +42,7 @@ Pre-existing uncommitted edits to `.husky/pre-commit` and `CLAUDE.md` belong to 
 - Header no longer renders an H1 (pages own their H1). Empty avatar placeholder removed when Supabase is not configured.
 - Returning-learner screenshots: `STORAGE=design-research/tools/returning.json SUFFIX=-returning node design-research/tools/shoot.mjs ...`.
 - Known flake: under full-suite load, 4 LessonView tests sometimes hit the 5s timeout; they pass in isolation (pre-existing, not caused by this work).
+
+- 2026-10-02: machine load average ~79 during test runs; unit tests that lazy-load LabView time out at the 5s default. Verify with `pnpm exec vitest run --testTimeout=60000`. LessonView passes 25/25 that way.
+- Fixed pre-existing bug: `MermaidDiagram` waited on a ref that only mounts after loading, so no diagram ever rendered.
+- Live Range sections now hide entirely off localhost (`src/lib/liveRange.ts`); the dashboard section would otherwise be an empty disclosure in production.

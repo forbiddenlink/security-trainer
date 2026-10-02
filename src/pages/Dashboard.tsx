@@ -23,6 +23,7 @@ import {
   getRemainingMinutes,
 } from "../lib/moduleMeta";
 import type { Module } from "../types";
+import { isLocalRangeAvailable } from "../lib/liveRange";
 
 const TOTAL_LESSONS = MODULES.reduce((n, m) => n + m.lessons.length, 0);
 const TOTAL_LABS = MODULES.reduce(
@@ -291,28 +292,30 @@ export const Dashboard: React.FC = () => {
         </div>
       </Section>
 
-      <Section
-        index="03"
-        label="Live range"
-        id="live-range-heading"
-        title="Local practice targets"
-      >
-        <details className="group ui-card">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-body-sm">
-            <span>
-              Run Juice Shop, DVWA and WebGoat on your machine for open-ended
-              practice.
-            </span>
-            <ChevronDown
-              className="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"
-              aria-hidden="true"
-            />
-          </summary>
-          <div className="mt-4">
-            <LiveLabTargets showAll />
-          </div>
-        </details>
-      </Section>
+      {isLocalRangeAvailable && (
+        <Section
+          index="03"
+          label="Live range"
+          id="live-range-heading"
+          title="Local practice targets"
+        >
+          <details className="group ui-card">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-body-sm">
+              <span>
+                Run Juice Shop, DVWA and WebGoat on your machine for open-ended
+                practice.
+              </span>
+              <ChevronDown
+                className="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"
+                aria-hidden="true"
+              />
+            </summary>
+            <div className="mt-4">
+              <LiveLabTargets showAll />
+            </div>
+          </details>
+        </Section>
+      )}
     </div>
   );
 };

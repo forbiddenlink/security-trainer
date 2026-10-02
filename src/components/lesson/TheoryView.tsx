@@ -27,7 +27,7 @@ const CodeBlock: Components["code"] = ({ className, children, ...props }) => {
   if (!className) {
     return (
       <code
-        className="text-primary bg-muted px-1.5 py-0.5 rounded text-sm"
+        className="font-mono text-[0.875em] bg-muted px-1.5 py-0.5 rounded-[var(--radius-xs)]"
         {...props}
       >
         {children}
@@ -47,9 +47,16 @@ const CodeBlock: Components["code"] = ({ className, children, ...props }) => {
  * Custom pre block that preserves styling
  */
 const PreBlock: Components["pre"] = ({ children, ...props }) => {
+  // Mermaid blocks render their own figure; don't wrap them in a code frame.
+  if (
+    React.isValidElement<{ className?: string }>(children) &&
+    /language-mermaid/.test(children.props.className ?? "")
+  ) {
+    return <>{children}</>;
+  }
   return (
     <pre
-      className="bg-muted border border-border rounded-lg p-4 overflow-x-auto"
+      className="bg-[#0c0d0b] text-[#ecebe4] border border-border rounded-[var(--radius-md)] p-4 overflow-x-auto font-mono text-[13px] leading-relaxed"
       {...props}
     >
       {children}
@@ -105,12 +112,9 @@ export const TheoryView: React.FC<TheoryViewProps> = memo(({ content }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center gap-2 mb-6">
-        <span className="range-dot" aria-hidden="true" />
-        <span className="range-readout">INTEL BRIEF // CLASSIFIED READING</span>
-      </div>
-      <div className="prose dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-primary prose-a:text-primary prose-li:text-foreground prose-table:border-border prose-th:border-border prose-td:border-border max-w-none">
+    <article className="max-w-[70ch]">
+      <p className="ui-label mb-6">Briefing</p>
+      <div className="brief-prose">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw]}
@@ -119,7 +123,7 @@ export const TheoryView: React.FC<TheoryViewProps> = memo(({ content }) => {
           {processedContent}
         </ReactMarkdown>
       </div>
-    </div>
+    </article>
   );
 });
 

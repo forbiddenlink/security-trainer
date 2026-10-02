@@ -52,7 +52,7 @@ for (const pair of pairs) {
       const file = join(outDir, `${name}-${v.key}${sfx}.png`);
       await page.screenshot({ path: file, fullPage: fullPage && v.key === "desktop" ? false : false });
       if (fullPage && v.key === "desktop") {
-        await page.screenshot({ path: join(outDir, `${name}-${v.key}-full.png`), fullPage: true, timeout: 30000 }).catch(() => {});
+        await page.screenshot({ path: join(outDir, `${name}-${v.key}${sfx}-full.png`), fullPage: true, timeout: 30000 }).catch(() => {});
       }
       const title = (await page.title()).slice(0, 80);
       console.log(`OK ${name} ${v.key} status=${status} title="${title}"`);

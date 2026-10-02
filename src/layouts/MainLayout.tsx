@@ -26,6 +26,8 @@ export const MainLayout: React.FC = () => {
   const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), []);
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const { pathname } = useLocation();
+  // Lesson routes are full-bleed workspaces: no page padding, no footer.
+  const isWorkspace = /^\/modules\/[^/]+/.test(pathname);
 
   useEffect(() => {
     const seg = pathname.split("/")[1] ?? "";
@@ -65,56 +67,62 @@ export const MainLayout: React.FC = () => {
           tabIndex={-1}
           className="flex-1 relative z-0 outline-none"
         >
-          <div className="mx-auto w-full max-w-[1240px] px-4 py-6 md:px-8 md:py-10">
+          {isWorkspace ? (
             <Outlet />
-          </div>
-          <footer className="mx-auto w-full max-w-[1240px] px-4 md:px-8 pb-8 pt-6 mt-8">
-            <div className="border-t border-border pt-6 grid gap-6 md:grid-cols-[1fr_auto] items-start">
-              <div className="flex items-start gap-3">
-                <RangeMark className="w-6 h-6 text-foreground shrink-0" />
-                <div>
-                  <p className="font-display font-extrabold [font-stretch:75%] text-h4 leading-none">
-                    SecTrainer
-                  </p>
-                  <p className="mt-1.5 text-body-sm text-muted-foreground max-w-md">
-                    Free, hands-on application security training. Progress saves
-                    in this browser; sign in only if you want to sync.
-                  </p>
-                </div>
-              </div>
-              <nav
-                aria-label="Footer"
-                className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-caption uppercase tracking-[0.12em]"
-              >
-                <Link
-                  to="/modules"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Modules
-                </Link>
-                <Link
-                  to="/paths"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Paths
-                </Link>
-                <Link
-                  to="/privacy"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Privacy &amp; Terms
-                </Link>
-                <a
-                  href="https://github.com/forbiddenlink/security-trainer"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  GitHub<span className="sr-only"> (opens in a new tab)</span>
-                </a>
-              </nav>
+          ) : (
+            <div className="mx-auto w-full max-w-[1240px] px-4 py-6 md:px-8 md:py-10">
+              <Outlet />
             </div>
-          </footer>
+          )}
+          {!isWorkspace && (
+            <footer className="mx-auto w-full max-w-[1240px] px-4 md:px-8 pb-8 pt-6 mt-8">
+              <div className="border-t border-border pt-6 grid gap-6 md:grid-cols-[1fr_auto] items-start">
+                <div className="flex items-start gap-3">
+                  <RangeMark className="w-6 h-6 text-foreground shrink-0" />
+                  <div>
+                    <p className="font-display font-extrabold [font-stretch:75%] text-h4 leading-none">
+                      SecTrainer
+                    </p>
+                    <p className="mt-1.5 text-body-sm text-muted-foreground max-w-md">
+                      Free, hands-on application security training. Progress
+                      saves in this browser; sign in only if you want to sync.
+                    </p>
+                  </div>
+                </div>
+                <nav
+                  aria-label="Footer"
+                  className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-caption uppercase tracking-[0.12em]"
+                >
+                  <Link
+                    to="/modules"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Modules
+                  </Link>
+                  <Link
+                    to="/paths"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Paths
+                  </Link>
+                  <Link
+                    to="/privacy"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Privacy &amp; Terms
+                  </Link>
+                  <a
+                    href="https://github.com/forbiddenlink/security-trainer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    GitHub<span className="sr-only"> (opens in a new tab)</span>
+                  </a>
+                </nav>
+              </div>
+            </footer>
+          )}
         </main>
         <CommandPalette />
         <LevelUpToast />

@@ -303,6 +303,7 @@ h3 {
   font-family: var(--font-display);
   font-stretch: 78%;
   letter-spacing: -0.015em;
+  word-spacing: 0.06em;
   text-wrap: balance;
 }
 
@@ -667,6 +668,131 @@ p {
     background: var(--color-muted);
     border-radius: 0;
     overflow: hidden;
+  }
+}
+
+/* Long-form lesson copy (no typography plugin: explicit, owned rules) */
+@layer components {
+  .brief-prose {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--color-foreground);
+  }
+  .brief-prose > * + * {
+    margin-top: 1em;
+  }
+  .brief-prose h1,
+  .brief-prose h2 {
+    font-size: var(--text-h2);
+    font-weight: 800;
+    font-stretch: 80%;
+    line-height: 1.1;
+    margin-top: 2em;
+    padding-top: 0.75em;
+    border-top: 1px solid var(--color-border);
+  }
+  .brief-prose > :first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .brief-prose h3 {
+    font-size: var(--text-h3);
+    font-weight: 700;
+    font-stretch: 85%;
+    line-height: 1.2;
+    margin-top: 1.75em;
+  }
+  .brief-prose h4 {
+    font-weight: 600;
+    margin-top: 1.5em;
+  }
+  .brief-prose h1 + *,
+  .brief-prose h2 + *,
+  .brief-prose h3 + *,
+  .brief-prose h4 + * {
+    margin-top: 0.5em;
+  }
+  .brief-prose p,
+  .brief-prose li {
+    color: color-mix(
+      in oklab,
+      var(--color-foreground) 88%,
+      var(--color-muted-foreground)
+    );
+  }
+  .brief-prose strong {
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+  .brief-prose a {
+    color: var(--color-foreground);
+    text-decoration: underline;
+    text-decoration-color: var(--color-primary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+  .brief-prose ul,
+  .brief-prose ol {
+    padding-left: 1.25em;
+  }
+  .brief-prose ul {
+    list-style: none;
+  }
+  .brief-prose ul > li {
+    position: relative;
+  }
+  .brief-prose ul > li::before {
+    content: "";
+    position: absolute;
+    left: -1.1em;
+    top: 0.72em;
+    width: 0.45em;
+    height: 1px;
+    background: var(--color-foreground);
+  }
+  .brief-prose ol {
+    list-style: decimal-leading-zero;
+  }
+  .brief-prose ol > li::marker {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    color: var(--color-muted-foreground);
+  }
+  .brief-prose li + li {
+    margin-top: 0.4em;
+  }
+  .brief-prose blockquote {
+    border-left: 3px solid var(--color-primary);
+    padding: 0.25em 0 0.25em 1em;
+    color: var(--color-muted-foreground);
+  }
+  .brief-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-body-sm);
+    display: block;
+    overflow-x: auto;
+  }
+  .brief-prose th {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-muted-foreground);
+    text-align: left;
+    font-weight: 500;
+  }
+  .brief-prose th,
+  .brief-prose td {
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.6em 0.75em 0.6em 0;
+    vertical-align: top;
+  }
+  .brief-prose hr {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: 2em 0;
   }
 }
 

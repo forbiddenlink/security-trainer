@@ -18,11 +18,13 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
+  Check,
   BookOpen,
   Code,
   HelpCircle,
 } from "lucide-react";
 import { clsx } from "clsx";
+import { formatMinutes, getRemainingMinutes } from "../lib/moduleMeta";
 import { motion, AnimatePresence } from "framer-motion";
 import { prefersReducedMotion } from "../utils/prefersReducedMotion";
 
@@ -39,6 +41,7 @@ export const LessonView: React.FC = () => {
     addXp,
     isLessonDueForReview,
     completedModules,
+    completedLessons,
   } = useGameStore();
 
   // Check if this is a review session
@@ -175,26 +178,60 @@ export const LessonView: React.FC = () => {
     }
   };
 
+  const opNumber = String(MODULES.indexOf(module) + 1).padStart(2, "0");
+  const minutesLeft = getRemainingMinutes(module, completedLessons);
+
   return (
-    <div className="flex flex-col h-[calc(100dvh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6">
-      <div className="border-b border-border/70 bg-card/92 backdrop-blur px-4 py-3 md:px-6 flex items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-0.5">
+    <div className="flex flex-col min-h-[calc(100dvh-64px)]">
+      <div className="sticky top-16 z-10 border-b border-border bg-background/92 backdrop-blur px-4 py-3 md:px-8 flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="flex items-center gap-2 range-readout mb-1 truncate">
             <span className="range-dot" aria-hidden="true" />
-            <span className="range-readout">{module.title}</span>
-          </div>
-          <h2 className="text-h4 flex items-center gap-2">
-            {currentLesson.title}
-            <span className="ui-chip border-primary/30 bg-primary/10 text-primary capitalize">
-              {currentLesson.type}
+            <span className="truncate">
+              OP-{opNumber} · <span>{module.title}</span>
             </span>
-          </h2>
+          </p>
+          <h1 className="text-h4 font-body [font-stretch:100%] tracking-normal flex items-center gap-2 min-w-0">
+            <span className="truncate">{currentLesson.title}</span>
+            <span className="ui-chip shrink-0">{currentLesson.type}</span>
+          </h1>
         </div>
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-3 md:gap-5 shrink-0">
+          <ol
+            className="hidden md:flex items-center gap-1"
+            aria-label="Lesson steps"
+          >
+            {module.lessons.map((lesson, idx) => {
+              const done = completedLessons.includes(lesson.id);
+              const isCurrent = idx === currentLessonIndex;
+              return (
+                <li key={lesson.id}>
+                  <button
+                    type="button"
+                    onClick={() => jumpToLesson(idx)}
+                    className="group grid h-6 place-items-center px-0.5"
+                    aria-label={`Go to step ${idx + 1}: ${lesson.title}${done ? " (completed)" : ""}`}
+                    aria-current={isCurrent ? "step" : undefined}
+                  >
+                    <span
+                      className={clsx(
+                        "block h-1.5 w-6 transition-colors",
+                        isCurrent
+                          ? "bg-primary"
+                          : done
+                            ? "bg-foreground/70"
+                            : "bg-muted group-hover:bg-foreground/30",
+                      )}
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
           <div className="relative">
             <button
               onClick={() => setShowLessonMenu(!showLessonMenu)}
-              className="h-9 inline-flex items-center gap-2 text-body-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 rounded-[var(--radius-sm)] hover:bg-muted/40"
+              className="h-9 inline-flex items-center gap-2 font-mono text-caption uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors px-3 rounded-[var(--radius-sm)] border border-border hover:border-foreground"
               aria-expanded={showLessonMenu}
               aria-haspopup="true"
               aria-label={`Step ${currentLessonIndex + 1} of ${module.lessons.length}. Click to see all lessons.`}
@@ -216,32 +253,39 @@ export const LessonView: React.FC = () => {
                   aria-hidden="true"
                 />
                 <div
-                  className="absolute right-0 top-full mt-2 w-80 max-w-[88vw] ui-card ui-card-elevated z-50 py-2 max-h-80 overflow-auto"
+                  className="absolute right-0 top-full mt-2 w-80 max-w-[88vw] ui-card ui-card-elevated z-50 !p-1.5 max-h-80 overflow-auto"
                   role="menu"
                   aria-label="Lesson navigation"
                 >
                   {module.lessons.map((lesson, idx) => {
                     const Icon = getLessonIcon(lesson.type);
                     const isCurrent = idx === currentLessonIndex;
+                    const done = completedLessons.includes(lesson.id);
                     return (
                       <button
                         key={lesson.id}
                         onClick={() => jumpToLesson(idx)}
                         role="menuitem"
                         className={clsx(
-                          "w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-muted/40 transition-colors",
-                          isCurrent && "bg-primary/10 text-primary",
+                          "w-full text-left px-3 py-2.5 flex items-center gap-3 rounded-[var(--radius-sm)] hover:bg-muted transition-colors",
+                          isCurrent && "bg-muted",
                         )}
                       >
                         <span
                           className={clsx(
-                            "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
+                            "w-6 h-6 rounded-[var(--radius-xs)] grid place-items-center font-mono text-[11px] font-semibold",
                             isCurrent
                               ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-muted-foreground",
+                              : done
+                                ? "bg-foreground/80 text-background"
+                                : "border border-border text-muted-foreground",
                           )}
                         >
-                          {idx + 1}
+                          {done && !isCurrent ? (
+                            <Check className="w-3.5 h-3.5" />
+                          ) : (
+                            idx + 1
+                          )}
                         </span>
                         <Icon
                           className="w-4 h-4 text-muted-foreground"
@@ -249,9 +293,6 @@ export const LessonView: React.FC = () => {
                         />
                         <span className="flex-1 truncate text-sm">
                           {lesson.title}
-                        </span>
-                        <span className="text-xs text-muted-foreground capitalize">
-                          {lesson.type}
                         </span>
                       </button>
                     );
@@ -261,7 +302,7 @@ export const LessonView: React.FC = () => {
             )}
           </div>
           <Progress
-            className="hidden md:block w-36"
+            className="sr-only"
             value={currentLessonIndex + 1}
             min={1}
             max={module.lessons.length}
@@ -270,38 +311,77 @@ export const LessonView: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentLesson.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="h-full overflow-auto px-4 py-6 md:px-8 md:py-8"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+            className="px-4 py-8 md:px-8 md:py-10"
           >
             {currentLesson.type === "theory" && (
-              <div className="space-y-6 max-w-3xl">
-                <TheoryView content={currentLesson.content || ""} />
-                <LiveLabTargets moduleId={module.id} />
+              <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_260px] max-w-[1100px]">
+                <div className="space-y-8 min-w-0">
+                  <TheoryView content={currentLesson.content || ""} />
+                  <LiveLabTargets moduleId={module.id} />
+                </div>
+                <aside className="hidden xl:block" aria-label="Mission outline">
+                  <div className="sticky top-40 border-t border-border pt-4">
+                    <p className="ui-label mb-3">Mission outline</p>
+                    <ol className="space-y-1">
+                      {module.lessons.map((lesson, idx) => {
+                        const done = completedLessons.includes(lesson.id);
+                        const isCurrent = idx === currentLessonIndex;
+                        return (
+                          <li key={lesson.id}>
+                            <button
+                              type="button"
+                              onClick={() => jumpToLesson(idx)}
+                              className={clsx(
+                                "w-full text-left flex gap-3 py-1.5 text-[13px] leading-snug",
+                                isCurrent
+                                  ? "text-foreground font-medium"
+                                  : "text-muted-foreground hover:text-foreground",
+                              )}
+                            >
+                              <span className="font-mono text-[11px] tabular-nums w-5 shrink-0 pt-px">
+                                {done ? "✓" : String(idx + 1).padStart(2, "0")}
+                              </span>
+                              <span>{lesson.title}</span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                    <p className="mt-4 pt-3 border-t border-border font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground tabular-nums">
+                      {formatMinutes(minutesLeft)} left in mission
+                    </p>
+                  </div>
+                </aside>
               </div>
             )}
 
             {currentLesson.type === "quiz" && currentLesson.quiz && (
-              <QuizView
-                key={currentLesson.id}
-                quiz={currentLesson.quiz}
-                onComplete={() => setQuizCompleted(true)}
-              />
+              <div className="max-w-2xl">
+                <QuizView
+                  key={currentLesson.id}
+                  quiz={currentLesson.quiz}
+                  onComplete={() => setQuizCompleted(true)}
+                />
+              </div>
             )}
 
             {currentLesson.type === "lab" && currentLesson.lab && (
-              <div className="h-full flex flex-col gap-4">
-                <div className="flex-1 min-h-0">
+              <div className="space-y-6">
+                <div className="lg:h-[calc(100dvh-64px-77px-73px-80px)] lg:min-h-[560px]">
                   <Suspense
                     fallback={
-                      <div className="flex items-center justify-center h-full">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                      <div className="grid h-[480px] place-items-center ui-card">
+                        <p className="font-mono text-caption uppercase tracking-[0.12em] text-muted-foreground">
+                          Loading workspace…
+                        </p>
                       </div>
                     }
                   >
@@ -313,7 +393,7 @@ export const LessonView: React.FC = () => {
                     />
                   </Suspense>
                 </div>
-                <LiveLabTargets moduleId={module.id} className="shrink-0" />
+                <LiveLabTargets moduleId={module.id} />
               </div>
             )}
           </motion.div>
@@ -321,7 +401,7 @@ export const LessonView: React.FC = () => {
       </div>
 
       <nav
-        className="border-t border-border/70 bg-card/92 backdrop-blur px-4 py-3 md:px-6 flex justify-between items-center"
+        className="sticky bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur px-4 py-3 md:px-8 flex justify-between items-center gap-3"
         aria-label="Lesson navigation"
       >
         <Button
@@ -333,13 +413,21 @@ export const LessonView: React.FC = () => {
           <ChevronLeft className="w-4 h-4" aria-hidden="true" /> Back
         </Button>
 
+        <p className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground tabular-nums">
+          {currentLesson.type === "quiz" && !quizCompleted
+            ? "Answer correctly to continue"
+            : currentLesson.type === "lab" && !labCompleted
+              ? "Deploy a passing patch to continue"
+              : `${formatMinutes(minutesLeft)} left`}
+        </p>
+
         <Button
           onClick={handleNext}
           disabled={
             (currentLesson.type === "quiz" && !quizCompleted) ||
             (currentLesson.type === "lab" && !labCompleted)
           }
-          variant={isLastLesson ? "accent" : "primary"}
+          variant={isLastLesson ? "signal" : "primary"}
           className="px-5"
           aria-label={
             isLastLesson
@@ -355,14 +443,16 @@ export const LessonView: React.FC = () => {
       {/* Mission complete panel with next-mission recommendation */}
       {showComplete && (
         <div
-          className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur px-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur px-4"
           role="dialog"
           aria-modal="true"
           aria-label="Mission complete"
         >
-          <div className="ui-card ui-card-elevated ui-card-lg max-w-md w-full text-center space-y-4">
-            <span className="range-readout justify-center">Debrief</span>
-            <h3 className="text-h3">Mission Complete</h3>
+          <div className="ui-card ui-card-elevated ui-card-lg range-ticks relative max-w-md w-full text-center space-y-4">
+            <span className="range-readout justify-center">
+              Debrief · OP-{opNumber}
+            </span>
+            <h2 className="text-h2">Mission Complete</h2>
             <p className="text-muted-foreground">
               You cleared{" "}
               <span className="text-foreground">{module.title}</span> and banked
@@ -371,8 +461,8 @@ export const LessonView: React.FC = () => {
             <div className="flex flex-col gap-2 pt-1">
               {nextModule ? (
                 <Button
-                  variant="primary"
-                  className="w-full justify-center"
+                  variant="signal"
+                  className="w-full justify-center h-auto min-h-12 py-3"
                   onClick={() => navigate(`/modules/${nextModule.id}`)}
                 >
                   Start Next Mission: {nextModule.title}
