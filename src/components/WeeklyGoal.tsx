@@ -39,6 +39,7 @@ export const WeeklyGoal: React.FC = () => {
           )}
         </p>
       </div>
+      {/* biome-ignore lint/a11y/useSemanticElements: native <meter> cannot carry the tier tick marks */}
       <div
         className="relative mt-5 h-2 bg-muted"
         role="meter"
