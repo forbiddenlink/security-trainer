@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { formatMinutes, getRemainingMinutes } from "../lib/moduleMeta";
+import { getOwaspCategories } from "../data/owaspTop10";
 import { motion, AnimatePresence } from "framer-motion";
 import { prefersReducedMotion } from "../utils/prefersReducedMotion";
 
@@ -189,6 +190,20 @@ export const LessonView: React.FC = () => {
             <span className="range-dot" aria-hidden="true" />
             <span className="truncate">
               OP-{opNumber} · <span>{module.title}</span>
+              {getOwaspCategories(module.id).map((c) => (
+                <span key={c.id}>
+                  {" · "}
+                  <a
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline-offset-2 hover:underline hover:text-foreground"
+                    title={`OWASP Top 10:2025 ${c.name} (opens owasp.org)`}
+                  >
+                    OWASP {c.id}:2025
+                  </a>
+                </span>
+              ))}
             </span>
           </p>
           <div className="flex items-center gap-2 min-w-0">

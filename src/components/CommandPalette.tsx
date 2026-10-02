@@ -15,6 +15,7 @@ import {
 import { estimateModuleMinutes, formatMinutes } from "../lib/moduleMeta";
 import { useFocusTrap } from "../utils/useFocusTrap";
 import { OPEN_PALETTE_EVENT as OPEN_EVENT } from "../lib/paletteEvents";
+import { getOwaspCategories } from "../data/owaspTop10";
 
 const PAGES: PaletteItem[] = [
   {
@@ -89,7 +90,9 @@ function buildItems(): PaletteItem[] {
     title: m.title,
     href: `/modules/${m.id}`,
     subtitle: `${m.difficulty} · ${formatMinutes(estimateModuleMinutes(m))}`,
-    keywords: `${m.description} ${m.category ?? ""}`,
+    keywords: `${m.description} ${m.category ?? ""} ${getOwaspCategories(m.id)
+      .map((c) => `owasp ${c.id} ${c.name}`)
+      .join(" ")}`,
   }));
   const paths: PaletteItem[] = LEARNING_PATHS.map((p) => ({
     id: `l-${p.id}`,

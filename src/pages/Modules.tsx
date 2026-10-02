@@ -12,6 +12,7 @@ import {
 import { clsx } from "clsx";
 import { MODULES } from "../data/modules";
 import { useGameStore } from "../store/gameStore";
+import { getOwaspCategories } from "../data/owaspTop10";
 import { Button, EmptyState, Input, Progress } from "../components/ui";
 import {
   estimateModuleMinutes,
@@ -448,6 +449,15 @@ export const Modules: React.FC = () => {
                         {MODULE_CATEGORIES[module.id].label}
                       </span>
                     )}
+                    {getOwaspCategories(module.id).map((c) => (
+                      <span
+                        key={c.id}
+                        className="ui-chip font-mono"
+                        title={`OWASP Top 10:2025 ${c.id} ${c.name}`}
+                      >
+                        OWASP {c.id}:2025
+                      </span>
+                    ))}
                   </div>
                   <h2 className="text-h3">
                     {isLocked ? (
