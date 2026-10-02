@@ -64,7 +64,9 @@ test.describe("Security Trainer expanded flows", () => {
     const flagInput = page.getByPlaceholder("FLAG{...}");
     await flagInput.fill("FLAG{c00kies_are_delicious}");
     await page.getByRole("button", { name: /Submit/i }).click();
-    await expect(page.getByText(/Correct|earned|Completed/i)).toBeVisible({
+    // Exact text: the old /Correct/i also matched "Incorrect flag", which hid
+    // that no flag could ever be accepted.
+    await expect(page.getByText("Challenge Completed!")).toBeVisible({
       timeout: 10_000,
     });
   });

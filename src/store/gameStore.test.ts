@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useGameStore } from "./gameStore";
+import { getChallengeById } from "../data/ctfChallenges";
 
 describe("gameStore", () => {
   beforeEach(() => {
@@ -195,6 +196,27 @@ describe("gameStore", () => {
       useGameStore.getState().checkStreak();
 
       expect(useGameStore.getState().badges).toContain("recruit");
+    });
+  });
+
+  describe("submitFlag", () => {
+    it("accepts the correct flag for a shipped challenge", async () => {
+      const challenge = getChallengeById("ctf-web-001")!;
+      const result = await useGameStore
+        .getState()
+        .submitFlag(challenge.id, "FLAG{c00kies_are_delicious}", challenge);
+
+      expect(result.correct).toBe(true);
+      expect(useGameStore.getState().isCTFSolved(challenge.id)).toBe(true);
+    });
+
+    it("rejects a wrong flag", async () => {
+      const challenge = getChallengeById("ctf-web-001")!;
+      const result = await useGameStore
+        .getState()
+        .submitFlag(challenge.id, "FLAG{nope}", challenge);
+
+      expect(result.correct).toBe(false);
     });
   });
 });

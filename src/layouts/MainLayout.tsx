@@ -26,8 +26,8 @@ export const MainLayout: React.FC = () => {
   const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), []);
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const { pathname } = useLocation();
-  // Lesson routes are full-bleed workspaces: no page padding, no footer.
-  const isWorkspace = /^\/modules\/[^/]+/.test(pathname);
+  // Lesson and CTF routes are full-bleed workspaces: no page padding, no footer.
+  const isWorkspace = /^\/(modules\/[^/]+|ctf)/.test(pathname);
 
   useEffect(() => {
     const seg = pathname.split("/")[1] ?? "";

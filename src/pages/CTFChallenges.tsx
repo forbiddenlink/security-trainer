@@ -1,4 +1,7 @@
 import React, { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
 import { prefersReducedMotion } from "../utils/prefersReducedMotion";
 import { clsx } from "clsx";
@@ -6,7 +9,6 @@ import {
   Flag,
   Lock,
   Search,
-  Filter,
   ChevronDown,
   Lightbulb,
   AlertCircle,
@@ -20,13 +22,12 @@ import {
   TerminalIcon,
   ChevronUp,
 } from "lucide-react";
-import { Button, Card, EmptyState, Input } from "../components/ui";
+import { Button, EmptyState, Input } from "../components/ui";
 import { LiveLabTargets } from "../components/LiveLabTargets";
 import { Terminal, type TerminalCommand } from "../components/Terminal";
 import { useGameStore } from "../store/gameStore";
 import { CTF_CHALLENGES, getChallengeById } from "../data/ctfChallenges";
 import {
-  getCategoryColor,
   getCategoryLabel,
   CTF_CATEGORIES,
   normalizeFlag,
@@ -57,13 +58,6 @@ const difficultyColors = {
   insane: "text-stamp",
 };
 
-const difficultyBgColors = {
-  easy: "bg-accent/10 border-accent/30",
-  medium: "bg-warning/10 border-warning/30",
-  hard: "bg-destructive/10 border-destructive/30",
-  insane: "bg-stamp/10 border-stamp/30",
-};
-
 interface ChallengeCardProps {
   challenge: CTFChallenge;
   onSelect: (id: string) => void;
@@ -79,70 +73,50 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
   const solved = isCTFSolved(challenge.id);
   const progress = getCTFProgress(challenge.id);
   const Icon = categoryIcons[challenge.category];
-  const colorClass = getCategoryColor(challenge.category);
 
   return (
     <button
+      type="button"
       onClick={() => onSelect(challenge.id)}
+      aria-current={isSelected ? "true" : undefined}
       className={clsx(
-        "w-full text-left p-4 rounded-[var(--radius-sm)] border transition-all duration-200",
+        "group w-full text-left px-4 py-3 flex items-center gap-3 border-l-[3px] transition-colors",
         isSelected
-          ? "bg-primary/10 border-primary/50"
-          : "bg-card/60 border-border/50 hover:border-primary/30 hover:bg-card/80 mission-card",
+          ? "bg-muted border-l-primary"
+          : "border-l-transparent hover:bg-muted/60",
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div
-            className={clsx(
-              "w-10 h-10 rounded-[var(--radius-sm)] flex items-center justify-center",
-              solved ? "bg-accent/20" : "bg-muted/60",
-            )}
-          >
-            {solved ? (
-              <CheckCircle className="w-5 h-5 text-accent" />
-            ) : (
-              <Icon className={clsx("w-5 h-5", colorClass)} />
-            )}
-          </div>
-          <div>
-            <h3
-              className={clsx(
-                "font-semibold text-sm",
-                solved
-                  ? "text-muted-foreground line-through"
-                  : "text-foreground",
-              )}
-            >
-              {challenge.title}
-            </h3>
-            <div className="flex items-center gap-2 mt-1">
-              <span
-                className={clsx(
-                  "text-xs px-2 py-0.5 rounded-full border",
-                  difficultyBgColors[challenge.difficulty || "easy"],
-                  difficultyColors[challenge.difficulty || "easy"],
-                )}
-              >
-                {challenge.difficulty || "easy"}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {getCategoryLabel(challenge.category)}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div
-            className={clsx(
-              "font-mono font-bold",
-              solved ? "text-accent" : "text-primary",
-            )}
-          >
-            {solved ? progress?.pointsEarned : challenge.points} pts
-          </div>
-        </div>
-      </div>
+      <span
+        className={clsx(
+          "grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-xs)]",
+          solved ? "bg-foreground text-background" : "border border-border",
+        )}
+        aria-hidden="true"
+      >
+        {solved ? (
+          <CheckCircle className="w-4 h-4" />
+        ) : (
+          <Icon className="w-4 h-4 text-muted-foreground" />
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-semibold text-body-sm">
+          {challenge.title}
+        </span>
+        <span className="mt-0.5 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em]">
+          <span className={difficultyColors[challenge.difficulty || "easy"]}>
+            {challenge.difficulty || "easy"}
+          </span>
+          <span className="text-muted-foreground">
+            {getCategoryLabel(challenge.category)}
+          </span>
+          {solved && <span className="text-muted-foreground">· Solved</span>}
+        </span>
+      </span>
+      <span className="font-mono text-body-sm tabular-nums text-muted-foreground group-hover:text-foreground">
+        {solved ? progress?.pointsEarned : challenge.points}
+        <span className="text-[11px]"> pts</span>
+      </span>
     </button>
   );
 };
@@ -345,6 +319,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
   const [flagInput, setFlagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
+  const [confirmHintId, setConfirmHintId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error" | "info";
     message: string;
@@ -353,7 +328,6 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
   const solved = isCTFSolved(challenge.id);
   const progress = getCTFProgress(challenge.id);
   const Icon = categoryIcons[challenge.category];
-  const colorClass = getCategoryColor(challenge.category);
 
   // Stabilize hintsRevealed so it doesn't create a new array reference each render
   const hintsRevealed = useMemo(
@@ -425,127 +399,170 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
 
   const handleRevealHint = (hintId: string) => {
     if (solved || hintsRevealed.includes(hintId)) return;
-
-    const hint = challenge.hints.find((h) => h.id === hintId);
-    if (
-      hint &&
-      window.confirm(
-        `Revealing this hint will cost ${hint.cost} points. Continue?`,
-      )
-    ) {
-      revealHint(challenge.id, hintId);
-    }
+    revealHint(challenge.id, hintId);
+    setConfirmHintId(null);
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      className="h-full flex flex-col"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+      className="flex flex-col max-w-3xl"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div
-            className={clsx(
-              "w-12 h-12 rounded-[var(--radius-sm)] flex items-center justify-center",
-              solved ? "bg-accent/20" : "bg-muted/60",
-            )}
-          >
-            {solved ? (
-              <CheckCircle className="w-6 h-6 text-accent" />
-            ) : (
-              <Icon className={clsx("w-6 h-6", colorClass)} />
-            )}
-          </div>
-          <div>
-            <h2 className="text-h3">{challenge.title}</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <span
-                className={clsx(
-                  "text-xs px-2 py-0.5 rounded-full border",
-                  difficultyBgColors[challenge.difficulty || "easy"],
-                  difficultyColors[challenge.difficulty || "easy"],
-                )}
-              >
-                {challenge.difficulty || "easy"}
-              </span>
-              <span className={clsx("text-sm", colorClass)}>
-                {getCategoryLabel(challenge.category)}
-              </span>
-              {challenge.author && (
-                <span className="text-xs text-muted-foreground">
-                  by {challenge.author}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div
-            className={clsx(
-              "text-h2 font-mono font-bold",
-              solved ? "text-accent" : "text-primary",
-            )}
-          >
-            {solved ? progress?.pointsEarned : potentialPoints}
-            <span className="text-sm font-normal text-muted-foreground ml-1">
-              pts
-            </span>
-          </div>
-          {!solved && potentialPoints < challenge.points && (
-            <div className="text-xs text-warning">
-              -{challenge.points - potentialPoints} from hints
-            </div>
+      <header className="border-b border-border pb-6 mb-6">
+        <p className="range-readout mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="range-dot" aria-hidden="true" />
+          <span className="flex items-center gap-1.5">
+            <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+            {getCategoryLabel(challenge.category)}
+          </span>
+          <span aria-hidden="true">·</span>
+          <span className={difficultyColors[challenge.difficulty || "easy"]}>
+            {challenge.difficulty || "easy"}
+          </span>
+          {challenge.author && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>by {challenge.author}</span>
+            </>
           )}
+        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <h2 className="text-h1">{challenge.title}</h2>
+          <div className="text-right">
+            <p className="font-display text-h2 font-extrabold [font-stretch:75%] tabular-nums leading-none">
+              {solved ? progress?.pointsEarned : potentialPoints}
+              <span className="ml-1 font-mono text-caption font-normal text-muted-foreground">
+                pts
+              </span>
+            </p>
+            {!solved && potentialPoints < challenge.points && (
+              <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-warning">
+                -{challenge.points - potentialPoints} from hints
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Solved banner */}
       {solved && (
-        <div className="mb-6 p-4 rounded-[var(--radius-sm)] bg-accent/10 border border-accent/30 flex items-center gap-3">
-          <Trophy className="w-5 h-5 text-accent" />
+        <div className="mb-6 border-l-[3px] border-accent pl-4 py-1 flex items-center gap-3">
+          <Trophy className="w-5 h-5 text-accent" aria-hidden="true" />
           <div>
-            <div className="font-semibold text-accent">
-              Challenge Completed!
-            </div>
-            <div className="text-sm text-muted-foreground">
+            <p className="font-semibold text-accent">Challenge Completed!</p>
+            <p className="text-body-sm text-muted-foreground">
               Solved on{" "}
               {progress?.solvedAt
                 ? new Date(progress.solvedAt).toLocaleDateString()
                 : "N/A"}
               {progress?.attempts &&
                 ` in ${progress.attempts} attempt${progress.attempts > 1 ? "s" : ""}`}
-            </div>
+            </p>
           </div>
         </div>
       )}
 
       {/* Description */}
-      <Card className="mb-6 flex-shrink-0">
+      <section className="mb-8">
         <h3 className="ui-label mb-3">Description</h3>
-        <div className="prose prose-invert prose-sm max-w-none">
-          <pre className="whitespace-pre-wrap text-sm text-foreground/90 font-sans leading-relaxed">
+        <div className="brief-prose max-w-[68ch]">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {challenge.description}
-          </pre>
+          </ReactMarkdown>
         </div>
         {challenge.tags && challenge.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border/50">
+          <ul className="flex flex-wrap gap-2 mt-4" aria-label="Tags">
             {challenge.tags.map((tag) => (
-              <span
+              <li
                 key={tag}
-                className="text-xs px-2 py-1 rounded bg-muted/50 text-muted-foreground"
+                className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground border border-border rounded-[var(--radius-xs)] px-2 py-0.5"
               >
-                #{tag}
-              </span>
+                {tag}
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-      </Card>
+      </section>
+
+      {/* Flag submission sits high: it is the one action that matters */}
+      <section className="mb-8 ui-card ui-card-md" aria-label="Submit flag">
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="ctf-flag-input" className="ui-label mb-2 block">
+            Flag
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex-1 relative">
+              <Flag
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="ctf-flag-input"
+                type="text"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder="FLAG{...}"
+                value={flagInput}
+                onChange={(e) => setFlagInput(e.target.value)}
+                disabled={solved || isSubmitting}
+                className="pl-10 font-mono"
+                aria-describedby="ctf-flag-status"
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={solved || isSubmitting || !flagInput.trim()}
+              variant={solved ? "outline" : "signal"}
+              aria-label={solved ? "Challenge solved" : "Submit flag"}
+            >
+              {isSubmitting ? "Checking..." : solved ? "Solved" : "Submit flag"}
+            </Button>
+          </div>
+        </form>
+        <div id="ctf-flag-status" aria-live="polite">
+          <AnimatePresence mode="wait">
+            {feedback && (
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className={clsx(
+                  "mt-3 pl-3 border-l-[3px] flex items-center gap-2 text-body-sm",
+                  feedback.type === "success" && "border-accent text-accent",
+                  feedback.type === "error" &&
+                    "border-destructive text-destructive",
+                  feedback.type === "info" && "border-primary text-foreground",
+                )}
+              >
+                {feedback.type === "success" ? (
+                  <CheckCircle
+                    className="w-4 h-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <AlertCircle
+                    className="w-4 h-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                )}
+                {feedback.message}
+              </motion.p>
+            )}
+          </AnimatePresence>
+          {progress?.attempts && !solved ? (
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+              {progress.attempts} attempt{progress.attempts > 1 ? "s" : ""} made
+            </p>
+          ) : null}
+        </div>
+      </section>
 
       {challenge.category === "web" && (
-        <div className="mb-6">
+        <div className="mb-8">
           <LiveLabTargets
             tags={[challenge.category, ...(challenge.tags ?? [])]}
           />
@@ -554,69 +571,88 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
 
       {/* Hints */}
       {challenge.hints.length > 0 && (
-        <Card className="mb-6 flex-shrink-0">
+        <section className="mb-8">
           <h3 className="ui-label mb-3 flex items-center gap-2">
-            <Lightbulb className="w-4 h-4" />
+            <Lightbulb className="w-3.5 h-3.5" aria-hidden="true" />
             Hints ({hintsRevealed.length}/{challenge.hints.length})
           </h3>
-          <div className="space-y-3">
+          <ol className="divide-y divide-border border-y border-border">
             {challenge.hints.map((hint, idx) => {
               const isRevealed = hintsRevealed.includes(hint.id);
+              const isConfirming = confirmHintId === hint.id;
               return (
-                <div
-                  key={hint.id}
-                  className={clsx(
-                    "p-3 rounded-[var(--radius-sm)] border",
-                    isRevealed
-                      ? "bg-warning/5 border-warning/30"
-                      : "bg-muted/30 border-border/50",
-                  )}
-                >
+                <li key={hint.id} className="py-3">
                   {isRevealed ? (
-                    <div>
-                      <div className="text-xs text-warning mb-1">
+                    <div className="border-l-2 border-warning pl-3">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-warning mb-1">
                         Hint {idx + 1} (-{hint.cost} pts)
+                      </p>
+                      <p className="text-body-sm">{hint.text}</p>
+                    </div>
+                  ) : isConfirming ? (
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-body-sm">
+                        Reveal hint {idx + 1}? It costs{" "}
+                        <span className="font-mono text-destructive">
+                          {hint.cost} pts
+                        </span>
+                        .
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setConfirmHintId(null)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="primary"
+                          onClick={() => handleRevealHint(hint.id)}
+                        >
+                          Reveal hint
+                        </Button>
                       </div>
-                      <p className="text-sm">{hint.text}</p>
                     </div>
                   ) : (
                     <button
-                      onClick={() => handleRevealHint(hint.id)}
+                      type="button"
+                      onClick={() => setConfirmHintId(hint.id)}
                       disabled={solved}
-                      className="w-full flex items-center justify-between text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                      className="w-full flex items-center justify-between text-body-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                     >
                       <span className="flex items-center gap-2">
-                        <Lock className="w-4 h-4" />
+                        <Lock className="w-4 h-4" aria-hidden="true" />
                         Hint {idx + 1}
                       </span>
-                      <span className="text-destructive font-mono">
+                      <span className="font-mono text-[12px]">
                         -{hint.cost} pts
                       </span>
                     </button>
                   )}
-                </div>
+                </li>
               );
             })}
-          </div>
-        </Card>
+          </ol>
+        </section>
       )}
 
       {/* Interactive Terminal */}
-      <div className="mb-6">
+      <div className="mb-8">
         <button
           onClick={() => setShowTerminal(!showTerminal)}
-          className={clsx(
-            "w-full flex items-center justify-between p-3 rounded-[var(--radius-sm)] border transition-all duration-200",
-            showTerminal
-              ? "bg-primary/10 border-primary/50"
-              : "bg-muted/30 border-border/50 hover:border-primary/30",
-          )}
+          type="button"
+          aria-expanded={showTerminal}
+          className="w-full flex items-center justify-between gap-3 h-12 px-4 rounded-[var(--radius-sm)] border border-border hover:border-foreground transition-colors"
         >
-          <span className="flex items-center gap-2 text-sm font-medium">
-            <TerminalIcon className="w-4 h-4 text-primary" />
+          <span className="flex items-center gap-2 text-body-sm font-semibold">
+            <TerminalIcon className="w-4 h-4" aria-hidden="true" />
             CTF Terminal
-            <span className="text-xs text-muted-foreground font-normal">
-              (decode, encode, caesar, xor, and more)
+            <span className="hidden sm:inline font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground font-normal">
+              decode · encode · caesar · xor
             </span>
           </span>
           {showTerminal ? (
@@ -636,7 +672,7 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
               className="overflow-hidden mt-2"
             >
               <Terminal
-                theme="matrix"
+                theme="signal"
                 welcomeMessage={`CTF Terminal - ${challenge.title}\nType "tools" for available commands.`}
                 prompt="ctf>"
                 commands={createCTFTerminalCommands(challenge, (flag) => {
@@ -652,95 +688,47 @@ const ChallengeDetail: React.FC<ChallengeDetailProps> = ({ challenge }) => {
           )}
         </AnimatePresence>
       </div>
-
-      {/* Flag submission */}
-      <div className="mt-auto">
-        <form onSubmit={handleSubmit}>
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
-              <label htmlFor="ctf-flag-input" className="sr-only">
-                Flag submission
-              </label>
-              <Flag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="ctf-flag-input"
-                type="text"
-                autoComplete="off"
-                placeholder="FLAG{...}"
-                value={flagInput}
-                onChange={(e) => setFlagInput(e.target.value)}
-                disabled={solved || isSubmitting}
-                className="pl-10 font-mono"
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={solved || isSubmitting || !flagInput.trim()}
-              variant={solved ? "accent" : "primary"}
-            >
-              {isSubmitting ? "Checking..." : solved ? "Solved" : "Verify Flag"}
-            </Button>
-          </div>
-        </form>
-
-        {/* Feedback */}
-        <AnimatePresence mode="wait">
-          {feedback && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={clsx(
-                "mt-3 p-3 rounded-[var(--radius-sm)] flex items-center gap-2 text-sm",
-                feedback.type === "success" &&
-                  "bg-accent/10 border border-accent/30 text-accent",
-                feedback.type === "error" &&
-                  "bg-destructive/10 border border-destructive/30 text-destructive",
-                feedback.type === "info" &&
-                  "bg-primary/10 border border-primary/30 text-primary",
-              )}
-            >
-              {feedback.type === "success" && (
-                <CheckCircle className="w-4 h-4" />
-              )}
-              {feedback.type === "error" && <AlertCircle className="w-4 h-4" />}
-              {feedback.type === "info" && <AlertCircle className="w-4 h-4" />}
-              {feedback.message}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Attempt counter */}
-        {progress?.attempts && !solved && (
-          <div className="mt-2 text-xs text-muted-foreground">
-            {progress.attempts} attempt{progress.attempts > 1 ? "s" : ""} made
-          </div>
-        )}
-      </div>
     </motion.div>
   );
 };
 
+const DIFFICULTIES = ["easy", "medium", "hard", "insane"] as const;
+
 export const CTFChallenges: React.FC = () => {
   const { ctfTotalPoints, ctfProgress } = useGameStore();
-  const [selectedChallenge, setSelectedChallenge] = useState<string | null>(
-    null,
-  );
+  // Selection lives in the URL so the command palette and shared links can
+  // open a specific challenge, and the browser back button closes it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requested = searchParams.get("challenge");
+  const selectedChallenge =
+    requested && getChallengeById(requested) ? requested : null;
+  const setSelectedChallenge = (id: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("challenge", id);
+    else next.delete("challenge");
+    setSearchParams(next);
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CTFCategory | "all">(
     "all",
   );
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
-  const [showFilters, setShowFilters] = useState(false);
 
   // Stats
   const solvedCount = Object.values(ctfProgress).filter((p) => p.solved).length;
   const totalChallenges = CTF_CHALLENGES.length;
+  const totalPoints = CTF_CHALLENGES.reduce((sum, c) => sum + c.points, 0);
+  const categoryCounts = useMemo(() => {
+    const counts: Partial<Record<CTFCategory, number>> = {};
+    CTF_CHALLENGES.forEach((c) => {
+      counts[c.category] = (counts[c.category] ?? 0) + 1;
+    });
+    return counts;
+  }, []);
 
   // Filter challenges
   const filteredChallenges = useMemo(() => {
     return CTF_CHALLENGES.filter((c) => {
-      // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch =
@@ -749,17 +737,12 @@ export const CTFChallenges: React.FC = () => {
           c.tags?.some((t) => t.toLowerCase().includes(query));
         if (!matchesSearch) return false;
       }
-
-      // Category filter
       if (categoryFilter !== "all" && c.category !== categoryFilter) {
         return false;
       }
-
-      // Difficulty filter
       if (difficultyFilter !== "all" && c.difficulty !== difficultyFilter) {
         return false;
       }
-
       return true;
     });
   }, [searchQuery, categoryFilter, difficultyFilter]);
@@ -779,134 +762,126 @@ export const CTFChallenges: React.FC = () => {
   const selectedChallengeData = selectedChallenge
     ? getChallengeById(selectedChallenge)
     : null;
+  const hasFilters =
+    searchQuery !== "" ||
+    categoryFilter !== "all" ||
+    difficultyFilter !== "all";
 
   return (
-    <div className="h-[calc(100dvh-88px)] -mx-4 -my-4 md:-mx-6 md:-my-6 flex flex-col lg:flex-row">
-      {/* Sidebar - Challenge list */}
+    <div className="flex flex-col lg:flex-row min-h-[calc(100dvh-64px)]">
+      {/* Challenge list */}
       <div
         className={clsx(
-          "border-r border-border/70 flex flex-col bg-card/50",
-          selectedChallenge ? "hidden lg:flex lg:w-96" : "flex w-full lg:w-96",
+          "border-r border-border flex-col lg:w-[380px] lg:shrink-0 lg:sticky lg:top-16 lg:h-[calc(100dvh-64px)]",
+          selectedChallenge ? "hidden lg:flex" : "flex w-full",
         )}
       >
-        {/* Header with stats */}
-        <div className="p-4 border-b border-border/70">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-h3 flex items-center gap-2">
-              <Flag className="w-5 h-5 text-primary" />
-              CTF Challenges
-            </h1>
-            <div className="text-right">
-              <div className="font-mono font-bold text-primary">
-                {ctfTotalPoints} pts
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {solvedCount}/{totalChallenges} solved
-              </div>
+        <div className="px-4 pt-6 pb-4 border-b border-border space-y-4">
+          <div>
+            <p className="range-readout mb-2">
+              <span className="range-dot" aria-hidden="true" />
+              Capture the flag · {solvedCount}/{totalChallenges} solved
+            </p>
+            <div className="flex items-baseline justify-between gap-3">
+              <h1 className="text-h2 whitespace-nowrap">CTF Challenges</h1>
+              <p className="font-mono text-body-sm tabular-nums whitespace-nowrap">
+                {ctfTotalPoints.toLocaleString()}
+                <span className="text-muted-foreground">
+                  /{totalPoints.toLocaleString()} pts
+                </span>
+              </p>
             </div>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <div className="relative">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
-              type="text"
+              type="search"
               placeholder="Search challenges..."
+              aria-label="Search challenges"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
 
-          {/* Filter toggle */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          <div
+            className="-mx-4 px-4 flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&>*]:shrink-0"
+            role="group"
+            aria-label="Category"
           >
-            <Filter className="w-4 h-4" />
-            Filters
-            <ChevronDown
-              className={clsx(
-                "w-4 h-4 transition-transform",
-                showFilters && "rotate-180",
-              )}
-            />
-          </button>
-
-          {/* Filters */}
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
+            <button
+              type="button"
+              className="filter-pill"
+              aria-pressed={categoryFilter === "all"}
+              onClick={() => setCategoryFilter("all")}
+            >
+              All
+            </button>
+            {CTF_CATEGORIES.filter((cat) => categoryCounts[cat]).map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                className="filter-pill"
+                aria-pressed={categoryFilter === cat}
+                onClick={() =>
+                  setCategoryFilter(categoryFilter === cat ? "all" : cat)
+                }
               >
-                <div className="pt-3 space-y-3">
-                  {/* Category filter */}
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Category
-                    </label>
-                    <select
-                      value={categoryFilter}
-                      onChange={(e) =>
-                        setCategoryFilter(e.target.value as CTFCategory | "all")
-                      }
-                      className="ui-input w-full"
-                    >
-                      <option value="all">All Categories</option>
-                      {CTF_CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {getCategoryLabel(cat)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Difficulty filter */}
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Difficulty
-                    </label>
-                    <select
-                      value={difficultyFilter}
-                      onChange={(e) => setDifficultyFilter(e.target.value)}
-                      className="ui-input w-full"
-                    >
-                      <option value="all">All Difficulties</option>
-                      <option value="easy">Easy</option>
-                      <option value="medium">Medium</option>
-                      <option value="hard">Hard</option>
-                      <option value="insane">Insane</option>
-                    </select>
-                  </div>
-                </div>
-              </motion.div>
+                {getCategoryLabel(cat)}
+                <span className="opacity-60">{categoryCounts[cat]}</span>
+              </button>
+            ))}
+          </div>
+          <div
+            className="flex flex-wrap items-center gap-1.5"
+            role="group"
+            aria-label="Difficulty"
+          >
+            {DIFFICULTIES.map((d) => (
+              <button
+                key={d}
+                type="button"
+                className="filter-pill filter-pill-soft !h-8"
+                aria-pressed={difficultyFilter === d}
+                onClick={() =>
+                  setDifficultyFilter(difficultyFilter === d ? "all" : d)
+                }
+              >
+                {d}
+              </button>
+            ))}
+            {hasFilters && (
+              <button
+                type="button"
+                className="ml-auto font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCategoryFilter("all");
+                  setDifficultyFilter("all");
+                }}
+              >
+                Clear
+              </button>
             )}
-          </AnimatePresence>
+          </div>
         </div>
 
-        {/* Challenge list */}
-        <div className="flex-1 overflow-auto p-4 space-y-6">
+        <div className="flex-1 lg:overflow-auto pb-6">
           {Object.entries(challengesByCategory).map(
             ([category, challenges]) => (
-              <div key={category}>
-                <div className="flex items-center gap-2 mb-3">
-                  {React.createElement(categoryIcons[category as CTFCategory], {
-                    className: clsx(
-                      "w-4 h-4",
-                      getCategoryColor(category as CTFCategory),
-                    ),
-                  })}
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                    {getCategoryLabel(category as CTFCategory)}
-                  </h3>
-                  <span className="text-xs text-muted-foreground">
-                    ({challenges.length})
-                  </span>
-                </div>
-                <div className="space-y-2">
+              <section
+                key={category}
+                aria-label={getCategoryLabel(category as CTFCategory)}
+              >
+                <h2 className="sticky top-0 z-[1] bg-background/95 backdrop-blur px-4 pt-4 pb-2 flex items-center justify-between ui-label">
+                  {getCategoryLabel(category as CTFCategory)}
+                  <span className="tabular-nums">{challenges.length}</span>
+                </h2>
+                <div className="divide-y divide-border/70">
                   {challenges.map((challenge) => (
                     <ChallengeCard
                       key={challenge.id}
@@ -916,7 +891,7 @@ export const CTFChallenges: React.FC = () => {
                     />
                   ))}
                 </div>
-              </div>
+              </section>
             ),
           )}
 
@@ -931,22 +906,22 @@ export const CTFChallenges: React.FC = () => {
         </div>
       </div>
 
-      {/* Main content - Challenge detail */}
+      {/* Challenge detail */}
       <div
         className={clsx(
-          "flex-1 p-4 md:p-6 overflow-auto ops-grid-bg",
-          selectedChallenge ? "flex" : "hidden lg:flex",
+          "flex-1 min-w-0 px-4 py-6 md:px-8 md:py-10",
+          selectedChallenge ? "block" : "hidden lg:block",
         )}
       >
         <AnimatePresence mode="wait">
           {selectedChallengeData ? (
-            <div className="w-full">
+            <div className="w-full" key={selectedChallengeData.id}>
               <button
                 type="button"
-                className="lg:hidden mb-4 text-body-sm text-primary hover:underline"
+                className="lg:hidden mb-6 inline-flex items-center gap-2 font-mono text-caption uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
                 onClick={() => setSelectedChallenge(null)}
               >
-                ← Back to challenges
+                ← All challenges
               </button>
               <ChallengeDetail
                 key={selectedChallengeData.id}
@@ -955,38 +930,31 @@ export const CTFChallenges: React.FC = () => {
             </div>
           ) : (
             <motion.div
+              key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-full w-full flex flex-col items-center justify-center text-center"
+              className="max-w-xl pt-10"
             >
-              <EmptyState
-                title="Select a Challenge"
-                description="Choose a challenge from the list to view its description, hints, and submit your flag."
-                icon={<Flag className="w-8 h-8 text-primary" />}
-              />
-              <div className="mt-2 grid grid-cols-3 gap-6 text-center">
-                <div>
-                  <div className="text-h1 font-mono text-primary">
-                    {totalChallenges}
+              <p className="ui-label mb-3">No challenge selected</p>
+              <p className="text-h2 font-display font-extrabold [font-stretch:80%] leading-tight">
+                Pick a target from the board. Read the brief, use the terminal,
+                capture the flag.
+              </p>
+              <dl className="mt-10 grid grid-cols-3 border-t border-border pt-6">
+                {[
+                  ["Challenges", totalChallenges],
+                  ["Solved", solvedCount],
+                  ["Points", ctfTotalPoints],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <dt className="ui-label">{label}</dt>
+                    <dd className="mt-1 font-display text-display font-extrabold [font-stretch:75%] tabular-nums leading-none">
+                      {value}
+                    </dd>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    Challenges
-                  </div>
-                </div>
-                <div>
-                  <div className="text-h1 font-mono text-accent">
-                    {solvedCount}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Solved</div>
-                </div>
-                <div>
-                  <div className="text-h1 font-mono text-warning">
-                    {ctfTotalPoints}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Points</div>
-                </div>
-              </div>
+                ))}
+              </dl>
             </motion.div>
           )}
         </AnimatePresence>

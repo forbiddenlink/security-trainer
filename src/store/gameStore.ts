@@ -710,9 +710,10 @@ export const useGameStore = create<GameStore>()(
           return { correct: false, pointsEarned: 0 };
         }
 
-        // Hash the input flag and compare
-        const { validateFlag } = await import("../lib/ctf");
-        const isCorrect = await validateFlag(flag, challenge.flag);
+        // Challenge flags are stored with hashFlagSync (src/data/ctfChallenges.ts),
+        // so compare with the same hash. The SHA-256 validateFlag never matched.
+        const { validateFlagSync } = await import("../lib/ctf");
+        const isCorrect = validateFlagSync(flag, challenge.flag);
 
         const hintsRevealed = existing?.hintsRevealed || [];
         const attempts = (existing?.attempts || 0) + 1;
