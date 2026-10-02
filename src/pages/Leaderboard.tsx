@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { Trophy, Medal, Crown, User } from "lucide-react";
-import { motion } from "framer-motion";
+import { clsx } from "clsx";
 import { useAuthStore } from "../store/authStore";
+import { useGameStore } from "../store/gameStore";
 import { Button, Skeleton } from "../components/ui";
 import { isSupabaseConfigured } from "../lib/supabase";
 import { getSafeAvatarUrl } from "../utils/urlValidation";
@@ -16,6 +16,9 @@ export const Leaderboard: React.FC = () => {
     fetchLeaderboard,
     openAuthModal,
   } = useAuthStore();
+  const localXp = useGameStore((st) => st.xp);
+  const localLevel = useGameStore((st) => st.level);
+  const localBadges = useGameStore((st) => st.badges.length);
 
   useEffect(() => {
     if (isSupabaseConfigured()) {
@@ -23,206 +26,162 @@ export const Leaderboard: React.FC = () => {
     }
   }, [fetchLeaderboard]);
 
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Crown className="w-6 h-6 text-warning" />;
-      case 2:
-        return <Medal className="w-6 h-6 text-muted-foreground" />;
-      case 3:
-        return <Medal className="w-6 h-6 text-warning" />;
-      default:
-        return (
-          <span className="w-6 h-6 flex items-center justify-center text-muted-foreground font-bold">
-            {rank}
-          </span>
-        );
-    }
-  };
-
-  const getRankBgClass = (rank: number, isCurrentUser: boolean) => {
-    if (isCurrentUser) {
-      return "bg-primary/10 border-primary/30";
-    }
-    switch (rank) {
-      case 1:
-        return "bg-warning/10 border-warning/30";
-      case 2:
-        return "bg-muted/30 border-border";
-      case 3:
-        return "bg-warning/5 border-warning/20";
-      default:
-        return "bg-card border-border";
-    }
-  };
+  const header = (
+    <header className="border-b border-border pb-8 mb-8">
+      <p className="range-readout mb-3">
+        <span className="range-dot" aria-hidden="true" />
+        Service record · ranked by XP
+      </p>
+      <h1 className="text-display">Leaderboard</h1>
+      <p className="mt-4 text-muted-foreground max-w-[60ch]">
+        Top security agents ranked by experience points.
+      </p>
+    </header>
+  );
 
   if (!isSupabaseConfigured()) {
+    // No shared database in this deployment: show the learner's own record
+    // instead of a dead end.
     return (
-      <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-        <div className="ui-card ui-card-lg ops-briefing range-panel range-ticks relative overflow-hidden">
-          <div className="relative z-10 text-center py-8">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="range-dot" aria-hidden="true" />
-              <span className="range-readout">
-                INTEL FEED // CLEARANCE REQUIRED
-              </span>
-            </div>
-            <div className="p-5 rounded-full bg-primary/8 border border-primary/20 inline-flex mb-6">
-              <Trophy className="w-14 h-14 text-primary" aria-hidden="true" />
-            </div>
-            <h2 className="text-h2 mb-3">Rankings Classified</h2>
-            <p className="text-body text-muted-foreground max-w-sm mx-auto">
-              Agent rankings require database clearance. Configure Supabase to
-              access the global leaderboard.
-            </p>
-          </div>
-        </div>
+      <div className="max-w-4xl">
+        {header}
+        <section className="border border-dashed border-border rounded-[var(--radius-md)] p-6 md:p-8">
+          <p className="ui-label mb-2">Rankings offline</p>
+          <h2 className="text-h2 mb-3">Rankings Classified</h2>
+          <p className="text-muted-foreground max-w-[56ch]">
+            Global rankings need the shared database, which is not configured
+            for this deployment. Your progress still saves on this device.
+          </p>
+          <dl className="mt-8 grid grid-cols-3 gap-6 border-t border-border pt-6">
+            {[
+              ["Your XP", localXp.toLocaleString()],
+              ["Level", localLevel],
+              ["Badges", localBadges],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="ui-label">{label}</dt>
+                <dd className="mt-1 font-display text-h1 font-extrabold [font-stretch:75%] tabular-nums leading-none">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </div>
     );
   }
 
   return (
-    <div
-      className="max-w-4xl mx-auto animate-in fade-in duration-500"
-      role="main"
-    >
-      <section className="ui-card ui-card-lg ops-briefing relative overflow-hidden mb-8">
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <Trophy className="w-8 h-8 text-warning" />
-            <h1 className="text-h1">Leaderboard</h1>
-          </div>
-          <p className="text-muted-foreground text-body">
-            Top security agents ranked by experience points
-          </p>
-        </div>
-      </section>
+    <div className="max-w-4xl">
+      {header}
 
       {user && profile && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 ui-card ui-card-md border-primary/30"
+        <section
+          className="mb-8 flex items-center justify-between gap-4 border-l-[3px] border-primary pl-4"
+          aria-label="Your standing"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full border border-primary/40 bg-muted flex items-center justify-center text-foreground font-semibold text-body">
-                {profile.display_name?.[0]?.toUpperCase() || "A"}
-              </div>
-              <div>
-                <h3 className="text-h4">{profile.display_name || "Agent"}</h3>
-                <p className="text-muted-foreground text-body-sm">
-                  Your current standing
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-h1 text-primary">#{userRank || "-"}</p>
-              <p className="text-muted-foreground text-body-sm">
-                {profile.xp.toLocaleString()} XP
-              </p>
-            </div>
+          <div>
+            <p className="ui-label">Your current standing</p>
+            <p className="text-h4 mt-1">{profile.display_name || "Agent"}</p>
           </div>
-        </motion.div>
+          <div className="text-right">
+            <p className="font-display text-h1 font-extrabold [font-stretch:75%] tabular-nums leading-none">
+              #{userRank || "-"}
+            </p>
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground tabular-nums">
+              {profile.xp.toLocaleString()} XP
+            </p>
+          </div>
+        </section>
       )}
 
-      {/* Not logged in prompt */}
       {!user && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 ui-card ui-card-md bg-muted/40 text-center"
-        >
-          <User className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="text-h4 mb-2">Join the Leaderboard</h3>
-          <p className="text-muted-foreground text-body mb-4">
-            Sign in to save your progress and compete with other agents.
-          </p>
-          <Button onClick={() => openAuthModal("login")} className="px-5">
+        <section className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border border-dashed border-border rounded-[var(--radius-md)] p-5">
+          <div>
+            <h2 className="text-h4">Join the Leaderboard</h2>
+            <p className="text-muted-foreground text-body-sm mt-1">
+              Sign in to save your progress and compete with other agents.
+            </p>
+          </div>
+          <Button onClick={() => openAuthModal("login")} variant="outline">
             Sign In
           </Button>
-        </motion.div>
+        </section>
       )}
 
-      <div className="space-y-3">
-        {leaderboardLoading && leaderboard.length === 0 ? (
-          <div className="space-y-3" aria-hidden="true">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                className="h-16 w-full rounded-[var(--radius-md)]"
-              />
-            ))}
-          </div>
-        ) : leaderboard.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Trophy className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>No agents on the leaderboard yet. Be the first!</p>
-          </div>
-        ) : (
-          leaderboard.map((entry, index) => {
+      {leaderboardLoading && leaderboard.length === 0 ? (
+        <div
+          className="space-y-2"
+          role="status"
+          aria-busy="true"
+          aria-label="Loading rankings"
+        >
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
+        </div>
+      ) : leaderboard.length === 0 ? (
+        <p className="py-12 text-muted-foreground">
+          No agents on the leaderboard yet. Be the first!
+        </p>
+      ) : (
+        <ol className="border-t border-border" aria-label="Rankings">
+          {leaderboard.map((entry, index) => {
+            const rank = entry.rank || index + 1;
             const isCurrentUser = user?.id === entry.id;
+            const avatar = getSafeAvatarUrl(entry.avatar_url);
             return (
-              <motion.div
+              <li
                 key={entry.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`flex items-center gap-4 p-4 rounded-[var(--radius-md)] border ${getRankBgClass(entry.rank || index + 1, isCurrentUser)} transition-all duration-150 hover:border-primary/50`}
+                className={clsx(
+                  "flex items-center gap-4 border-b border-border py-3 pl-3",
+                  isCurrentUser &&
+                    "bg-muted shadow-[inset_3px_0_0_var(--color-primary)]",
+                )}
               >
-                {/* Rank */}
-                <div className="w-10 flex justify-center">
-                  {getRankIcon(entry.rank || index + 1)}
-                </div>
-
-                {/* Avatar */}
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                    entry.rank === 1
-                      ? "bg-warning text-card"
-                      : entry.rank === 2
-                        ? "bg-muted text-muted-foreground"
-                        : entry.rank === 3
-                          ? "bg-warning/70 text-card"
-                          : "bg-primary text-primary-foreground"
-                  }`}
+                <span
+                  className={clsx(
+                    "w-10 font-display font-extrabold [font-stretch:75%] tabular-nums",
+                    rank <= 3 ? "text-h3" : "text-h4 text-muted-foreground",
+                  )}
                 >
-                  {getSafeAvatarUrl(entry.avatar_url) ? (
+                  {String(rank).padStart(2, "0")}
+                </span>
+                <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[var(--radius-xs)] border border-border font-mono text-caption font-semibold">
+                  {avatar ? (
                     <img
-                      src={getSafeAvatarUrl(entry.avatar_url)}
+                      src={avatar}
                       alt={`${entry.display_name || "Agent"}'s avatar`}
-                      className="w-full h-full rounded-full object-cover"
+                      className="h-full w-full object-cover"
                     />
                   ) : (
                     entry.display_name?.[0]?.toUpperCase() || "A"
                   )}
-                </div>
-
-                {/* Name */}
-                <div className="flex-1">
-                  <h3
-                    className={`font-semibold ${isCurrentUser ? "text-primary" : ""}`}
-                  >
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">
                     {entry.display_name || "Anonymous Agent"}
                     {isCurrentUser && (
-                      <span className="ml-2 text-xs text-primary">(You)</span>
+                      <span className="ml-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                        (You)
+                      </span>
                     )}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
                     Level {entry.level}
                   </p>
                 </div>
-
-                {/* XP */}
-                <div className="text-right">
-                  <p className="text-h4">{entry.xp.toLocaleString()}</p>
-                  <p className="ui-label">XP</p>
-                </div>
-              </motion.div>
+                <p className="pr-3 text-right font-mono tabular-nums">
+                  {entry.xp.toLocaleString()}
+                  <span className="ml-1 text-[11px] text-muted-foreground">
+                    XP
+                  </span>
+                </p>
+              </li>
             );
-          })
-        )}
-      </div>
+          })}
+        </ol>
+      )}
     </div>
   );
 };

@@ -1,12 +1,11 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { useGameStore } from "../store/gameStore";
 
 export const StreakIndicator: React.FC = () => {
-  const { streakDays, getStreakMultiplier } = useGameStore();
-  const multiplier = getStreakMultiplier();
-  const bonusPercent = Math.round((multiplier - 1) * 100);
+  const streakDays = useGameStore((s) => s.streakDays);
+  const getStreakMultiplier = useGameStore((s) => s.getStreakMultiplier);
+  const bonusPercent = Math.round((getStreakMultiplier() - 1) * 100);
 
   // Only show if streak is active (at least 1 day)
   if (streakDays < 1) {
@@ -15,28 +14,15 @@ export const StreakIndicator: React.FC = () => {
 
   return (
     <div
-      className="hidden md:flex items-center gap-2 px-3 h-9 bg-warning/10 rounded-full border border-warning/30 cursor-help"
-      title={`${streakDays}-day streak! +${bonusPercent}% XP bonus`}
+      className="hidden md:flex items-center gap-2 px-3 h-10 rounded-[var(--radius-sm)] border border-border font-mono text-caption tabular-nums"
+      title={`${streakDays}-day streak, +${bonusPercent}% XP bonus`}
     >
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          rotate: [0, -5, 5, 0],
-        }}
-        transition={{
-          duration: 1.5,
-          repeat: Infinity,
-          repeatType: "loop",
-        }}
-      >
-        <Flame
-          className="w-4 h-4 text-warning fill-warning"
-          aria-hidden="true"
-        />
-      </motion.div>
-      <span className="font-semibold text-warning">{streakDays}</span>
+      <Flame className="w-4 h-4 text-warning" aria-hidden="true" />
+      <span className="font-semibold text-foreground" aria-hidden="true">
+        {streakDays}d
+      </span>
       {bonusPercent > 0 && (
-        <span className="text-xs text-warning font-medium">
+        <span className="text-muted-foreground" aria-hidden="true">
           +{bonusPercent}%
         </span>
       )}

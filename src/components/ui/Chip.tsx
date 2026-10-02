@@ -8,11 +8,11 @@ interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const toneClasses: Record<ChipTone, string> = {
-  default: "border-border bg-muted/60 text-muted-foreground",
-  primary: "border-primary/35 text-primary bg-primary/8",
-  accent: "border-accent/35 text-accent bg-accent/8",
-  warning: "border-warning/35 text-warning bg-warning/8",
-  destructive: "border-destructive/35 text-destructive bg-destructive/8",
+  default: "border-border text-muted-foreground",
+  primary: "border-primary/50 text-primary",
+  accent: "border-accent/50 text-accent",
+  warning: "border-warning/50 text-warning",
+  destructive: "border-destructive/50 text-destructive",
 };
 
 export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(

@@ -71,6 +71,8 @@ export interface UserState {
   activityLog: string[];
   // Streak freeze tokens
   streakFreezeCount: number;
+  /** XP earned per UTC day, last 14 days, for the weekly goal */
+  xpByDay: Record<string, number>;
 }
 
 export interface CTFProgressState {

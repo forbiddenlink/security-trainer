@@ -1,5 +1,8 @@
-import posthog from "posthog-js";
+import type { PostHog } from "posthog-js";
 
+// Loaded on demand so the analytics SDK never sits in the first-page bundle.
+// Events fired before it finishes loading are dropped.
+let posthog: PostHog | null = null;
 let initialized = false;
 
 /**
@@ -26,25 +29,28 @@ export function initPostHog(): void {
   const host = import.meta.env.VITE_POSTHOG_HOST || "https://us.i.posthog.com";
 
   if (key) {
-    posthog.init(key, {
-      api_host: host,
-      person_profiles: "identified_only",
-      capture_pageview: true,
-      capture_pageleave: true,
-      persistence: "localStorage+cookie",
-      autocapture: {
-        dom_event_allowlist: ["click", "submit"],
-        element_allowlist: ["button", "a"],
-      },
-    });
     initialized = true;
+    void import("posthog-js").then(({ default: client }) => {
+      client.init(key, {
+        api_host: host,
+        person_profiles: "identified_only",
+        capture_pageview: true,
+        capture_pageleave: true,
+        persistence: "localStorage+cookie",
+        autocapture: {
+          dom_event_allowlist: ["click", "submit"],
+          element_allowlist: ["button", "a"],
+        },
+      });
+      posthog = client;
+    });
   }
 }
 
 // Security training analytics events
 export const trackSecurityEvent = {
   lessonStarted: (moduleId: string, lessonId: string, lessonType: string) => {
-    posthog.capture("lesson_started", {
+    posthog?.capture("lesson_started", {
       module_id: moduleId,
       lesson_id: lessonId,
       lesson_type: lessonType,
@@ -52,7 +58,7 @@ export const trackSecurityEvent = {
   },
 
   lessonCompleted: (moduleId: string, lessonId: string, xpEarned: number) => {
-    posthog.capture("lesson_completed", {
+    posthog?.capture("lesson_completed", {
       module_id: moduleId,
       lesson_id: lessonId,
       xp_earned: xpEarned,
@@ -60,7 +66,7 @@ export const trackSecurityEvent = {
   },
 
   quizAnswered: (lessonId: string, correct: boolean, questionIndex: number) => {
-    posthog.capture("quiz_answered", {
+    posthog?.capture("quiz_answered", {
       lesson_id: lessonId,
       correct,
       question_index: questionIndex,
@@ -68,7 +74,7 @@ export const trackSecurityEvent = {
   },
 
   labAttempted: (lessonId: string, success: boolean, attempts: number) => {
-    posthog.capture("lab_attempted", {
+    posthog?.capture("lab_attempted", {
       lesson_id: lessonId,
       success,
       attempts,
@@ -76,28 +82,28 @@ export const trackSecurityEvent = {
   },
 
   moduleCompleted: (moduleId: string, totalXp: number) => {
-    posthog.capture("module_completed", {
+    posthog?.capture("module_completed", {
       module_id: moduleId,
       total_xp: totalXp,
     });
   },
 
   badgeEarned: (badgeId: string, badgeName: string) => {
-    posthog.capture("badge_earned", {
+    posthog?.capture("badge_earned", {
       badge_id: badgeId,
       badge_name: badgeName,
     });
   },
 
   levelUp: (newLevel: number, totalXp: number) => {
-    posthog.capture("level_up", {
+    posthog?.capture("level_up", {
       new_level: newLevel,
       total_xp: totalXp,
     });
   },
 
   struggleDetected: (moduleId: string, lessonId: string, failCount: number) => {
-    posthog.capture("struggle_detected", {
+    posthog?.capture("struggle_detected", {
       module_id: moduleId,
       lesson_id: lessonId,
       fail_count: failCount,
@@ -105,10 +111,10 @@ export const trackSecurityEvent = {
   },
 
   missionBriefingPlayed: (moduleId: string) => {
-    posthog.capture("mission_briefing_played", {
+    posthog?.capture("mission_briefing_played", {
       module_id: moduleId,
     });
   },
 };
 
-export { posthog };
+export const getPostHog = (): PostHog | null => posthog;

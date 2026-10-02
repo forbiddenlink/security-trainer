@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { renderWithRouter, userEvent } from "../../test/testUtils";
 import { Sidebar } from "../Sidebar";
 
@@ -53,8 +53,8 @@ describe("Sidebar", () => {
     it("renders all eight navigation items", () => {
       renderWithRouter(<Sidebar />);
 
-      const navLinks = screen.getAllByRole("link");
-      expect(navLinks).toHaveLength(8);
+      const nav = screen.getByRole("navigation", { name: "Primary" });
+      expect(within(nav).getAllByRole("link")).toHaveLength(8);
     });
 
     it("has a link to Intel Review", () => {
@@ -101,7 +101,7 @@ describe("Sidebar", () => {
     it("displays Clearance label", () => {
       renderWithRouter(<Sidebar />);
 
-      expect(screen.getByText(/Clearance:/i)).toBeInTheDocument();
+      expect(screen.getByText(/^Clearance$/i)).toBeInTheDocument();
     });
 
     it("displays clearance level", () => {
@@ -110,10 +110,10 @@ describe("Sidebar", () => {
       expect(screen.getByText(/Level \d+/)).toBeInTheDocument();
     });
 
-    it("displays system version", () => {
+    it("displays the product tagline", () => {
       renderWithRouter(<Sidebar />);
 
-      expect(screen.getByText("v1.0.0")).toBeInTheDocument();
+      expect(screen.getByText("Signal range")).toBeInTheDocument();
     });
   });
 
@@ -124,7 +124,7 @@ describe("Sidebar", () => {
 
       const dashboardLink = screen.getByRole("link", { name: /dashboard/i });
       // Check that it has the active class
-      expect(dashboardLink).toHaveClass("bg-primary/10");
+      expect(dashboardLink).toHaveClass("bg-muted");
     });
   });
 

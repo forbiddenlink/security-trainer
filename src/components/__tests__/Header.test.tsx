@@ -42,13 +42,13 @@ describe("Header", () => {
 
       renderWithRouter(<Header />);
 
-      expect(screen.getByText("Level 3")).toBeInTheDocument();
+      expect(screen.getByText("L3")).toBeInTheDocument();
     });
 
     it("shows level 1 by default", () => {
       renderWithRouter(<Header />);
 
-      expect(screen.getByText("Level 1")).toBeInTheDocument();
+      expect(screen.getByText("L1")).toBeInTheDocument();
     });
   });
 
@@ -59,7 +59,7 @@ describe("Header", () => {
       renderWithRouter(<Header />);
 
       // The XP text shows "current / required"
-      expect(screen.getByText("500 / 1000 XP")).toBeInTheDocument();
+      expect(screen.getByText("500 / 1,000 XP")).toBeInTheDocument();
     });
 
     it("calculates next level XP correctly", () => {
@@ -68,7 +68,7 @@ describe("Header", () => {
 
       renderWithRouter(<Header />);
 
-      expect(screen.getByText("1500 / 2000 XP")).toBeInTheDocument();
+      expect(screen.getByText("1,500 / 2,000 XP")).toBeInTheDocument();
     });
   });
 
@@ -82,7 +82,7 @@ describe("Header", () => {
       renderWithRouter(<Header />);
 
       // Streak days should be displayed
-      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("3d")).toBeInTheDocument();
       // Bonus percentage should be shown (+10% per day, max 7)
       expect(screen.getByText("+30%")).toBeInTheDocument();
     });
@@ -95,7 +95,7 @@ describe("Header", () => {
       renderWithRouter(<Header />);
 
       // checkStreak runs on mount and sets streak to 1
-      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("1d")).toBeInTheDocument();
       expect(screen.getByText("+10%")).toBeInTheDocument();
     });
   });
@@ -115,11 +115,13 @@ describe("Header", () => {
       expect(buttons.length).toBeGreaterThan(0);
     });
 
-    it("renders user avatar element", () => {
+    it("renders a command palette trigger", () => {
       renderWithRouter(<Header />);
 
       expect(
-        screen.getByRole("img", { name: /user avatar/i }),
+        screen.getByRole("button", {
+          name: /search modules, paths and challenges/i,
+        }),
       ).toBeInTheDocument();
     });
   });
@@ -128,13 +130,11 @@ describe("Header", () => {
     it("renders a progress bar for level progress", () => {
       setupGameStore({ xp: 500, level: 1 });
 
-      const { container } = renderWithRouter(<Header />);
+      renderWithRouter(<Header />);
 
-      // Check for progress bar container
-      const progressBar = container.querySelector(
-        ".rounded-full.overflow-hidden",
-      );
-      expect(progressBar).toBeInTheDocument();
+      expect(
+        screen.getByRole("progressbar", { name: /500 of 1000 XP/i }),
+      ).toBeInTheDocument();
     });
   });
 });

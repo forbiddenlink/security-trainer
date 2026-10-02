@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, memo } from "react";
+import { useThemeStore } from "../../store/themeStore";
 
 interface MermaidDiagramProps {
   chart: string;
@@ -6,7 +7,7 @@ interface MermaidDiagramProps {
 }
 
 /**
- * Renders a Mermaid diagram with dark theme styling
+ * Renders a Mermaid diagram styled to the current app theme
  * Lazy loads mermaid library for better bundle splitting
  */
 export const MermaidDiagram: React.FC<MermaidDiagramProps> = memo(
@@ -15,37 +16,42 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = memo(
     const [svg, setSvg] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const resolvedTheme = useThemeStore((s) => s.resolvedTheme);
 
     useEffect(() => {
+      // No ref guard here: the container only mounts after loading finishes,
+      // so waiting on it meant diagrams never rendered.
       const renderDiagram = async () => {
-        if (!containerRef.current) return;
-
         try {
           setLoading(true);
 
           // Lazy load mermaid
           const mermaid = (await import("mermaid")).default;
 
-          // Initialize with dark theme
+          // Match the app theme: ruled line art, one signal accent.
+          const dark = resolvedTheme === "dark";
           mermaid.initialize({
             startOnLoad: false,
-            theme: "dark",
+            theme: "base",
             themeVariables: {
-              primaryColor: "#3b82f6",
-              primaryTextColor: "#f8fafc",
-              primaryBorderColor: "#3b82f6",
-              lineColor: "#64748b",
-              secondaryColor: "#1e293b",
-              tertiaryColor: "#0f172a",
-              background: "#0f172a",
-              mainBkg: "#1e293b",
-              nodeBorder: "#3b82f6",
-              clusterBkg: "#1e293b",
-              titleColor: "#f8fafc",
-              edgeLabelBackground: "#1e293b",
+              primaryColor: dark ? "#161813" : "#fbfbf7",
+              primaryTextColor: dark ? "#ecebe4" : "#12130f",
+              primaryBorderColor: dark ? "#a3a397" : "#12130f",
+              lineColor: dark ? "#a3a397" : "#55554c",
+              secondaryColor: dark ? "#1d1f1a" : "#e7e6dd",
+              tertiaryColor: dark ? "#121410" : "#f3f2ec",
+              background: dark ? "#121410" : "#fbfbf7",
+              mainBkg: dark ? "#161813" : "#fbfbf7",
+              nodeBorder: dark ? "#a3a397" : "#12130f",
+              clusterBkg: dark ? "#121410" : "#f3f2ec",
+              titleColor: dark ? "#ecebe4" : "#12130f",
+              edgeLabelBackground: dark ? "#121410" : "#f3f2ec",
+              actorBorder: dark ? "#d7f75b" : "#3b4a07",
+              noteBkgColor: "#d7f75b",
+              noteTextColor: "#12130f",
             },
             securityLevel: "strict",
-            fontFamily: "ui-monospace, monospace",
+            fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
           });
 
           // Generate unique ID for this diagram
@@ -63,13 +69,13 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = memo(
       };
 
       renderDiagram();
-    }, [chart]);
+    }, [chart, resolvedTheme]);
 
     if (loading) {
       return (
-        <div className="my-6 p-8 border border-border bg-slate-900/50 rounded-lg flex items-center justify-center">
+        <div className="my-6 p-8 border border-dashed border-border rounded-[var(--radius-md)] flex items-center justify-center">
           <div className="flex items-center gap-3 text-muted-foreground">
-            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
             <span>Loading diagram...</span>
           </div>
         </div>
@@ -78,21 +84,22 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = memo(
 
     if (error) {
       return (
-        <div className="my-6 p-4 border border-destructive/30 bg-destructive/10 rounded-lg text-sm text-destructive">
+        <div className="my-6 p-4 border border-destructive/50 rounded-[var(--radius-md)] text-sm text-destructive">
           {error}
         </div>
       );
     }
 
     return (
-      <figure className="my-6" role="figure" aria-label={caption || "Diagram"}>
+      <figure className="my-6" aria-label={caption || "Diagram"}>
         <div
           ref={containerRef}
-          className="flex justify-center p-4 bg-slate-900/50 border border-border rounded-lg overflow-x-auto"
+          className="flex justify-center p-4 bg-card border border-border rounded-[var(--radius-md)] overflow-x-auto"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: SVG comes from mermaid.render with securityLevel "strict" on lesson content we ship
           dangerouslySetInnerHTML={{ __html: svg }}
         />
         {caption && (
-          <figcaption className="mt-2 text-center text-sm text-muted-foreground italic">
+          <figcaption className="mt-2 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
             {caption}
           </figcaption>
         )}

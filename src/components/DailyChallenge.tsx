@@ -37,16 +37,10 @@ export const DailyChallenge: React.FC = () => {
 
   if (!challenge) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-9 w-9 grid place-items-center rounded-[var(--radius-sm)] bg-warning/10 text-warning">
-            <Star className="w-5 h-5" />
-          </div>
-          <h3 className="text-lg font-semibold tracking-tight">
-            Daily Challenge
-          </h3>
-        </div>
-        <p className="text-muted-foreground">
+      <Card className="ui-card-md">
+        <p className="ui-label mb-2">Daily · +50 XP</p>
+        <h3 className="text-h3 mb-2">Daily Challenge</h3>
+        <p className="text-body-sm text-muted-foreground">
           All lessons completed! Check back tomorrow for a new challenge.
         </p>
       </Card>
@@ -55,71 +49,65 @@ export const DailyChallenge: React.FC = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
-      className={`ui-card relative overflow-hidden p-6 ${
-        dailyChallengeCompleted
-          ? "bg-accent/10 border-accent/30"
-          : "border-warning/35 border-l-[3px] border-l-warning"
+      transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
+      className={`ui-card ui-card-md mission-card flex flex-col ${
+        dailyChallengeCompleted ? "border-accent/50" : ""
       }`}
     >
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div
-              className={`h-9 w-9 grid place-items-center rounded-[var(--radius-sm)] ${
-                dailyChallengeCompleted
-                  ? "bg-accent/10 text-accent"
-                  : "bg-warning/10 text-warning"
-              }`}
-            >
-              {dailyChallengeCompleted ? (
-                <CheckCircle className="w-5 h-5" />
-              ) : (
-                <Star className="w-5 h-5" />
-              )}
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold tracking-tight">
-                Daily Challenge
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {dailyChallengeCompleted ? "Completed!" : "+50 Bonus XP"}
-              </p>
-            </div>
-          </div>
-
-          {!dailyChallengeCompleted && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              <span className="font-mono">{timeRemaining}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="bg-background/50 rounded-lg p-4 mb-4">
-          <p className="text-sm text-muted-foreground mb-1">
-            {challenge.moduleTitle}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="ui-label flex items-center gap-2">
+            {dailyChallengeCompleted ? (
+              <CheckCircle
+                className="w-3.5 h-3.5 text-accent"
+                aria-hidden="true"
+              />
+            ) : (
+              <Star className="w-3.5 h-3.5" aria-hidden="true" />
+            )}
+            <span>
+              {dailyChallengeCompleted ? "Completed!" : "+50 Bonus XP"}
+            </span>
           </p>
-          <p className="font-semibold">{challenge.lessonTitle}</p>
+          <h3 className="text-h3 mt-2">Daily Challenge</h3>
         </div>
-
-        {dailyChallengeCompleted ? (
-          <div className="flex items-center justify-center gap-2 py-2.5 px-4 bg-accent/20 text-accent rounded-[var(--radius-sm)] font-medium">
-            <CheckCircle className="w-5 h-5" />
-            Challenge Complete!
-          </div>
-        ) : (
-          <Link
-            to={`/modules/${challenge.moduleId}/${challenge.lessonId}`}
-            className="group inline-flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-warning px-4 font-semibold text-black transition-colors hover:bg-warning/90"
+        {!dailyChallengeCompleted && (
+          <div
+            className="flex items-center gap-1.5 font-mono text-caption tabular-nums text-muted-foreground"
+            title="Time until a new daily challenge"
           >
-            Start Challenge
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
+            <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{timeRemaining}</span>
+          </div>
         )}
       </div>
+
+      <div className="mt-5 border-t border-border pt-4 flex-1">
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          {challenge.moduleTitle}
+        </p>
+        <p className="mt-1 text-h4">{challenge.lessonTitle}</p>
+      </div>
+
+      {dailyChallengeCompleted ? (
+        <div className="mt-5 flex items-center gap-2 font-mono text-caption uppercase tracking-[0.12em] text-accent">
+          <CheckCircle className="w-4 h-4" aria-hidden="true" />
+          Challenge Complete!
+        </div>
+      ) : (
+        <Link
+          to={`/modules/${challenge.moduleId}/${challenge.lessonId}`}
+          className="ui-button-secondary mt-5 self-start group"
+        >
+          Start Challenge
+          <ArrowRight
+            className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
+            aria-hidden="true"
+          />
+        </Link>
+      )}
     </motion.div>
   );
 };

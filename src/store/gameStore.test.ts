@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useGameStore } from "./gameStore";
+import { getChallengeById } from "../data/ctfChallenges";
 
 describe("gameStore", () => {
   beforeEach(() => {
@@ -10,6 +11,17 @@ describe("gameStore", () => {
   });
 
   describe("addXp", () => {
+    it("logs earned XP under today's date, even across a level-up", () => {
+      const { addXp } = useGameStore.getState();
+      addXp(900);
+      addXp(300);
+
+      const today = new Date().toISOString().split("T")[0];
+      const state = useGameStore.getState();
+      expect(state.level).toBe(2);
+      expect(state.xpByDay[today]).toBe(1200);
+    });
+
     it("adds XP to the current total", () => {
       const { addXp } = useGameStore.getState();
 
@@ -195,6 +207,27 @@ describe("gameStore", () => {
       useGameStore.getState().checkStreak();
 
       expect(useGameStore.getState().badges).toContain("recruit");
+    });
+  });
+
+  describe("submitFlag", () => {
+    it("accepts the correct flag for a shipped challenge", async () => {
+      const challenge = getChallengeById("ctf-web-001")!;
+      const result = await useGameStore
+        .getState()
+        .submitFlag(challenge.id, "FLAG{c00kies_are_delicious}", challenge);
+
+      expect(result.correct).toBe(true);
+      expect(useGameStore.getState().isCTFSolved(challenge.id)).toBe(true);
+    });
+
+    it("rejects a wrong flag", async () => {
+      const challenge = getChallengeById("ctf-web-001")!;
+      const result = await useGameStore
+        .getState()
+        .submitFlag(challenge.id, "FLAG{nope}", challenge);
+
+      expect(result.correct).toBe(false);
     });
   });
 });

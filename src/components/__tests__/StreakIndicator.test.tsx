@@ -39,14 +39,14 @@ describe("StreakIndicator", () => {
       setupStore(1);
       render(<StreakIndicator />);
 
-      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("1d")).toBeInTheDocument();
     });
 
     it("shows correct streak day count", () => {
       setupStore(5);
       render(<StreakIndicator />);
 
-      expect(screen.getByText("5")).toBeInTheDocument();
+      expect(screen.getByText("5d")).toBeInTheDocument();
     });
   });
 
@@ -87,7 +87,7 @@ describe("StreakIndicator", () => {
       setupStore(5);
       render(<StreakIndicator />);
 
-      const indicator = screen.getByTitle("5-day streak! +50% XP bonus");
+      const indicator = screen.getByTitle("5-day streak, +50% XP bonus");
       expect(indicator).toBeInTheDocument();
     });
 

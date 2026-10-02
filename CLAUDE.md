@@ -19,9 +19,12 @@ Live: https://security-trainer.vercel.app
   `@upstash/redis`
 - Testing: Vitest + Testing Library (unit), Playwright (e2e)
 - Analytics: PostHog (optional, respects Do-Not-Track / GPC)
-- Lint/format: both ESLint + Prettier (via husky/lint-staged on commit) and
-  Biome scripts exist side by side; there is no single source of truth,
-  check which one a given file is actually formatted with before assuming.
+- Lint/format: Prettier formats (husky/lint-staged runs it on commit) and
+  ESLint lints. Biome 2 runs as a second linter only: its formatter and
+  import sorting are off in `biome.json` so it never fights Prettier.
+  `pnpm lint` and `pnpm biome:check` both pass with 0 errors.
+- Fonts: self-hosted via `@fontsource` (Archivo variable, IBM Plex Sans and
+  Mono), imported in `src/main.tsx`. No Google Fonts request.
 - pnpm (`pnpm@10.34.5`)
 
 ## Commands
@@ -53,7 +56,15 @@ handoff doc that showed npm was removed 2026-09-19).
 - `src/types/`: TypeScript interfaces
 - `src/utils/labVerification.ts`: statically-defined lab verification
   registry (no dynamic code execution)
-- `src/lib/`: external service clients (Supabase)
+- `src/data/owaspTop10.ts`: module to OWASP Top 10:2025 mapping. Only map a
+  module when its core CWE is listed on that category's owasp.org page.
+- `src/lib/`: external service clients (Supabase) and pure helpers with
+  unit tests next to them: `moduleMeta` (time estimates, next lesson),
+  `weeklyGoal` (rolling 7-day XP tiers), `rank` (field rank from modules
+  and paths), `paletteSearch` (Cmd+K), `liveRange` (local Docker targets,
+  localhost only)
+- `design-research/`: the 2026-10 design upgrade (plan, report,
+  before/after screenshots, `needs-approval.md`)
 - `api/socratic-hint.ts`: serverless endpoint for the Socratic AI tutor
 - `supabase/schema.sql`, `supabase/migrations/`: DB schema and migrations
 - `e2e/`: Playwright specs
@@ -68,15 +79,27 @@ handoff doc that showed npm was removed 2026-09-19).
   toasts) inside store actions, not React effects.
 - Never add dynamic code execution for lab verification; use the
   registry pattern.
+- Design system "Signal Range": tokens on `:root` in `src/index.css`;
+  reuse `btn-signal` (the one primary action per screen), `btn-ghost-rule`,
+  `filter-pill`, `ui-card`, `ui-chip`, `ui-label`, `range-readout` and the
+  `RuledSection` component before writing new styles.
+- Shareable view state lives in query params, not new routes:
+  `/modules?q=&cat=&level=&status=&sort=`, `/ctf?challenge=&hide=solved`.
+- New persisted store fields need a default in `INITIAL_STATE` and an entry
+  in `partialize`; old saves load without them, so read them defensively.
 
 ## Env vars
 
 Client (`VITE_` prefix, all optional, app runs with reduced functionality
 without them):
+
 - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-- `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`
+- `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` (PostHog is loaded lazily)
+- `VITE_AUTH_GITHUB`: set to `true` only after the GitHub provider is
+  enabled in Supabase Auth; the GitHub sign-in button stays hidden otherwise
 
 Server (`api/socratic-hint.ts`, the AI tutor endpoint):
+
 - `GROQ_API_KEY`, `AI_DISABLED`, `AI_DAILY_BUDGET`
 - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
 - `HINTS_ALLOW_NO_RATELIMIT`
@@ -94,3 +117,13 @@ real config.
 - `pnpm.overrides` in `package.json` pins several transitive deps for
   security advisories (vite, rollup, undici, dompurify, etc.); check why
   before removing.
+- CTF flags are stored as `hashFlagSync` digests and must be checked with
+  `validateFlagSync`. Mixing in SHA-256 rejects every correct flag (this
+  shipped once; `gameStore.test.ts` now guards it). In e2e, assert on exact
+  success text ("Challenge Completed!"), because `/Correct/i` also
+  matches "Incorrect flag".
+- Mermaid, its parser and layout engines, and xterm must stay out of the
+  eager `vendor` chunk (see `manualChunks` in `vite.config.ts`); forcing
+  Mermaid into a named chunk causes a circular-import crash.
+- Unit tests can time out on a loaded machine; use
+  `pnpm exec vitest run --testTimeout=60000`.

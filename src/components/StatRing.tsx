@@ -43,7 +43,7 @@ export const StatRing: React.FC<StatRingProps> = ({
           r={r}
           fill="none"
           stroke="currentColor"
-          className="text-muted/50"
+          className="text-border"
           strokeWidth={strokeWidth}
         />
         {/* Progress arc */}
@@ -55,7 +55,7 @@ export const StatRing: React.FC<StatRingProps> = ({
           stroke="currentColor"
           className={colorClass}
           strokeWidth={strokeWidth}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: dashoffset }}

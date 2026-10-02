@@ -72,7 +72,17 @@ export default defineConfig({
             id.includes("/node_modules/lodash-es") ||
             id.includes("/node_modules/elkjs") ||
             id.includes("/node_modules/katex") ||
-            id.includes("/node_modules/stylis")
+            id.includes("/node_modules/stylis") ||
+            // Mermaid's parser and layout engines and xterm were landing in the
+            // eager catch-all vendor chunk (about 2 MB of source on first load).
+            id.includes("/node_modules/@mermaid-js") ||
+            id.includes("/node_modules/langium") ||
+            id.includes("/node_modules/chevrotain") ||
+            id.includes("/node_modules/layout-base") ||
+            id.includes("/node_modules/cose-base") ||
+            id.includes("/node_modules/@upsetjs") ||
+            id.includes("/node_modules/roughjs") ||
+            id.includes("/node_modules/@xterm")
           ) {
             return undefined; // auto-split async chunk, never eager
           }

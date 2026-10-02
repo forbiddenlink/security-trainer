@@ -37,9 +37,14 @@ async function openApp(page: import("@playwright/test").Page, path: string) {
 test.describe("Security Trainer expanded flows", () => {
   test("module search filters missions", async ({ page }) => {
     await openApp(page, "/modules");
-    await page.getByLabel("Search modules").fill("SQL");
-    await expect(page.getByText("SQL Injection (SQLi)")).toBeVisible();
-    await expect(page.getByText("Cross-Site Scripting")).not.toBeVisible();
+    await page.getByLabel("Search modules", { exact: true }).fill("SQL");
+    const list = page.getByRole("list", { name: "Modules" });
+    await expect(
+      list.getByRole("link", { name: "SQL Injection (SQLi)", exact: true }),
+    ).toBeVisible();
+    await expect(
+      list.getByRole("link", { name: /Cross-Site Scripting/ }),
+    ).toHaveCount(0);
   });
 
   test("CTF challenge select and flag format validation", async ({ page }) => {
@@ -64,7 +69,9 @@ test.describe("Security Trainer expanded flows", () => {
     const flagInput = page.getByPlaceholder("FLAG{...}");
     await flagInput.fill("FLAG{c00kies_are_delicious}");
     await page.getByRole("button", { name: /Submit/i }).click();
-    await expect(page.getByText(/Correct|earned|Completed/i)).toBeVisible({
+    // Exact text: the old /Correct/i also matched "Incorrect flag", which hid
+    // that no flag could ever be accepted.
+    await expect(page.getByText("Challenge Completed!")).toBeVisible({
       timeout: 10_000,
     });
   });
@@ -93,7 +100,7 @@ test.describe("Security Trainer expanded flows", () => {
   test("reviews page loads", async ({ page }) => {
     await openApp(page, "/reviews");
     await expect(
-      page.getByRole("heading", { name: /Intel Refresher/i }),
+      page.getByRole("heading", { name: /Intel Review/i, level: 1 }),
     ).toBeVisible();
   });
 

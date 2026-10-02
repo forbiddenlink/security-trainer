@@ -41,11 +41,12 @@ async function openApp(page: import("@playwright/test").Page, path = "/") {
 test.describe("Security Trainer smoke tests", () => {
   test("onboarding and dashboard", async ({ page }) => {
     await openApp(page, "/");
-    await expect(page.getByText("Welcome back, Agent.")).toBeVisible();
-    await expect(page.getByLabel("Statistics")).toBeVisible();
+    // Seeded agent has no progress, so the dashboard shows the first-mission hero.
     await expect(
-      page.getByRole("link", { name: /Resume Training|Continue Mission/i }),
+      page.getByRole("heading", { level: 1, name: /Break it here/i }),
     ).toBeVisible();
+    await page.getByRole("link", { name: /Start mission/i }).click();
+    await expect(page.getByLabel(/Lesson progress/i)).toBeAttached();
   });
 
   test("modules list and lesson navigation", async ({ page }) => {
@@ -55,16 +56,21 @@ test.describe("Security Trainer smoke tests", () => {
     ).toBeVisible();
 
     await page
-      .getByRole("link", { name: /Start Mission|Continue/i })
-      .first()
+      .getByRole("link", { name: "Introduction to OWASP", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: "What is OWASP?", exact: true }),
+      page.getByRole("heading", {
+        level: 1,
+        name: "What is OWASP?",
+        exact: true,
+      }),
     ).toBeVisible();
-    await expect(page.getByLabel(/Lesson progress/i)).toBeVisible();
+    await expect(page.getByLabel(/Lesson progress/i)).toBeAttached();
 
     await page.getByLabel("Go to next lesson").click();
-    await expect(page.getByText("Knowledge Check")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Knowledge Check" }),
+    ).toBeVisible();
   });
 
   test("learning paths page", async ({ page }) => {
@@ -80,7 +86,12 @@ test.describe("Security Trainer smoke tests", () => {
   test("category filter on modules page", async ({ page }) => {
     await openApp(page, "/modules");
     await page.getByRole("button", { name: /Web Security/i }).click();
-    await expect(page.getByText("Introduction to OWASP")).toBeVisible();
-    await expect(page.getByText("API Security")).not.toBeVisible();
+    const list = page.getByRole("list", { name: "Modules" });
+    await expect(
+      list.getByRole("link", { name: "Introduction to OWASP", exact: true }),
+    ).toBeVisible();
+    await expect(
+      list.getByRole("link", { name: "API Security", exact: true }),
+    ).toHaveCount(0);
   });
 });

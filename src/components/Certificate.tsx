@@ -1,7 +1,8 @@
 import React, { useRef, useCallback } from "react";
 import { toPng } from "html-to-image";
 import download from "downloadjs";
-import { Shield, Award, CheckCircle } from "lucide-react";
+import { Award, CheckCircle } from "lucide-react";
+import { RangeMark } from "./RangeMark";
 import { useGameStore } from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
 
@@ -30,63 +31,74 @@ export const Certificate: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-end">
         <button
+          type="button"
           onClick={handleDownload}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-[var(--radius-sm)] font-medium text-sm flex items-center gap-2 transition-colors"
+          className="btn-ghost-rule !h-10 text-body-sm"
         >
-          <Award className="w-4 h-4" />
+          <Award className="w-4 h-4" aria-hidden="true" />
           Download Certificate
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-lg shadow-2xl border-4 border-double border-primary/50 relative group">
+      <div className="overflow-x-auto">
         {/* The actual certificate area to capture */}
         <div
           ref={ref}
-          className="bg-background text-foreground p-12 w-full max-w-[800px] aspect-[1.414/1] mx-auto flex flex-col items-center justify-center relative"
+          className="relative mx-auto flex aspect-[1.414/1] w-full min-w-[560px] max-w-[800px] flex-col bg-[#fbfbf7] p-10 text-[#12130f]"
         >
-          {/* Background Pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,var(--color-muted)_25%,transparent_25%,transparent_75%,var(--color-muted)_75%,var(--color-muted)),linear-gradient(45deg,var(--color-muted)_25%,transparent_25%,transparent_75%,var(--color-muted)_75%,var(--color-muted))] bg-[size:60px_60px] opacity-20 pointer-events-none" />
-          <div className="absolute inset-0 border-[16px] border-border/50 pointer-events-none" />
+          <div
+            className="pointer-events-none absolute inset-4 border border-[#12130f]"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-[22px] border border-[#12130f]/30"
+            aria-hidden="true"
+          />
+          <div className="relative flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-[#55554c]">
+            <span className="flex items-center gap-2">
+              <RangeMark className="h-5 w-5 text-[#12130f]" />
+              SecTrainer · Signal Range
+            </span>
+            <span>Clearance L{level}</span>
+          </div>
 
-          <Shield className="w-24 h-24 text-primary mb-6" />
+          <div className="relative flex flex-1 flex-col items-center justify-center text-center">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#55554c]">
+              Security Awareness Training Program
+            </p>
+            <p className="mt-3 font-display text-[2.5rem] font-extrabold uppercase leading-none [font-stretch:75%]">
+              Certificate of Completion
+            </p>
+            <p className="mt-8 text-[15px]">This certifies that</p>
+            <p className="mt-2 border-b-2 border-[#d7f75b] px-10 pb-1 font-display text-[2rem] font-bold [font-stretch:85%]">
+              {name}
+            </p>
+            <p className="mt-6 max-w-[46ch] text-[14px] leading-relaxed text-[#3a3b34]">
+              Has successfully demonstrated proficiency in identifying and
+              patching web security vulnerabilities, achieving{" "}
+              <strong>Level {level}</strong> Clearance.
+            </p>
+          </div>
 
-          <h1 className="text-4xl font-bold tracking-wider uppercase mb-2 text-center text-primary font-display">
-            Certificate of Completion
-          </h1>
-
-          <p className="text-muted-foreground tracking-widest uppercase text-sm mb-12">
-            Security Awareness Training Program
-          </p>
-
-          <p className="text-lg text-center mb-2">This certifies that</p>
-          <p className="text-3xl font-display italic text-primary mb-8 border-b-2 border-primary/20 pb-2 px-12">
-            {name}
-          </p>
-
-          <p className="text-center text-muted-foreground w-3/4 mb-12">
-            Has successfully demonstrated proficiency in identifying and
-            patching web security vulnerabilities, achieving{" "}
-            <strong>Level {level}</strong> Clearance.
-          </p>
-
-          <div className="flex justify-between w-full px-12 items-end">
-            <div className="text-center">
-              <p className="font-bold border-t pt-2 w-48 mx-auto">{date}</p>
-              <p className="text-xs text-muted-foreground uppercase">Date</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <CheckCircle className="w-10 h-10 text-accent mb-2 opacity-80" />
-              <p className="text-xs text-muted-foreground uppercase opacity-80">
-                Verified Secure
+          <div className="relative flex items-end justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-[#55554c]">
+            <div>
+              <p className="w-40 border-t border-[#12130f] pt-2 text-[13px] normal-case tracking-normal text-[#12130f]">
+                {date}
               </p>
+              <p className="mt-1">Date</p>
             </div>
-            <div className="text-center">
-              <p className="font-bold border-t pt-2 w-48 mx-auto">
+            <div className="flex flex-col items-center gap-1">
+              <CheckCircle
+                className="h-6 w-6 text-[#2f7a4a]"
+                aria-hidden="true"
+              />
+              <p>Verified Secure</p>
+            </div>
+            <div className="text-right">
+              <p className="w-40 border-t border-[#12130f] pt-2 text-[13px] normal-case tracking-normal text-[#12130f]">
                 Security Trainer AI
               </p>
-              <p className="text-xs text-muted-foreground uppercase">
-                Instructor
-              </p>
+              <p className="mt-1">Instructor</p>
             </div>
           </div>
         </div>

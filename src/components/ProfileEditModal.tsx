@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, AlertCircle, Loader2, Check } from "lucide-react";
+import { X, AlertCircle, Loader2, Check } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useFocusTrap } from "../utils/useFocusTrap";
 import { Button, Input } from "./ui";
@@ -70,10 +70,7 @@ const ProfileEditForm: React.FC<{
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label
-          htmlFor="displayName"
-          className="block text-body-sm font-medium mb-2"
-        >
+        <label htmlFor="displayName" className="ui-label block mb-2">
           Display Name
         </label>
         <Input
@@ -95,7 +92,7 @@ const ProfileEditForm: React.FC<{
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 p-3 rounded-[var(--radius-sm)] bg-destructive/10 border border-destructive/20 text-destructive text-body-sm"
+          className="flex items-center gap-2 p-3 rounded-[var(--radius-sm)] border border-border border-l-[3px] border-l-destructive text-destructive text-body-sm"
           role="alert"
         >
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -108,7 +105,7 @@ const ProfileEditForm: React.FC<{
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 p-3 rounded-[var(--radius-sm)] bg-accent/10 border border-accent/20 text-accent text-body-sm"
+          className="flex items-center gap-2 p-3 rounded-[var(--radius-sm)] border border-border border-l-[3px] border-l-accent text-accent text-body-sm"
           role="alert"
         >
           <Check className="w-4 h-4 flex-shrink-0" />
@@ -128,7 +125,7 @@ const ProfileEditForm: React.FC<{
         </Button>
         <Button
           type="submit"
-          variant="accent"
+          variant="signal"
           className="flex-1"
           disabled={loading || success}
         >
@@ -172,41 +169,43 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-background/80 z-50"
             onClick={onClose}
             aria-hidden="true"
           />
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
             <div
               ref={modalRef}
-              className="w-full max-w-md ui-card ui-card-elevated p-6 relative"
+              className="w-full max-w-md ui-card ui-card-lg ui-card-elevated relative"
               role="dialog"
               aria-modal="true"
               aria-labelledby="profile-edit-title"
             >
               {/* Close button */}
               <button
+                type="button"
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/50 transition-colors"
+                className="absolute top-4 right-4 p-2 rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Close profile editor"
               >
                 <X className="w-5 h-5" />
               </button>
 
               {/* Header */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
-                </div>
-                <h2 id="profile-edit-title" className="text-h3">
+              <div className="mb-5 pb-4 border-b border-border pr-10">
+                <p className="ui-label mb-2">Agent record</p>
+                <h2
+                  id="profile-edit-title"
+                  className="font-display [font-stretch:75%] font-extrabold text-h3"
+                >
                   Edit Profile
                 </h2>
               </div>

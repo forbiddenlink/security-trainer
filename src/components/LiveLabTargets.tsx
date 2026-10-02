@@ -7,6 +7,7 @@ import {
   type LiveTarget,
 } from "../data/liveTargets";
 import { Chip } from "./ui";
+import { isLocalRangeAvailable } from "../lib/liveRange";
 
 interface LiveLabTargetsProps {
   moduleId?: string;
@@ -16,12 +17,7 @@ interface LiveLabTargetsProps {
   className?: string;
 }
 
-/** Only meaningful on a localhost origin — over HTTPS (prod) an http://localhost
- *  probe is mixed-content blocked and would always report offline. */
-const canProbe =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1");
+const canProbe = isLocalRangeAvailable;
 
 async function probeTarget(url: string): Promise<boolean> {
   try {
@@ -56,9 +52,9 @@ const TargetRow: React.FC<{ target: LiveTarget }> = ({ target }) => {
       href={target.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="mission-card ui-card flex items-start gap-3 p-3 hover:border-primary/40 transition-colors"
+      className="mission-card ui-card flex items-start gap-3 p-3"
     >
-      <div className="ui-icon-box-sm ui-icon-box bg-primary/10 text-primary shrink-0">
+      <div className="ui-icon-box-sm ui-icon-box text-muted-foreground shrink-0">
         <Server className="w-4 h-4" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
@@ -78,10 +74,10 @@ const TargetRow: React.FC<{ target: LiveTarget }> = ({ target }) => {
                   : "Offline"}
           </Chip>
         </div>
-        <p className="text-caption text-muted-foreground normal-case tracking-normal mt-1">
+        <p className="text-[13px] text-muted-foreground mt-1">
           {target.description}
         </p>
-        <p className="text-mono text-primary mt-1.5 text-body-sm">
+        <p className="font-mono text-foreground mt-1.5 text-[13px] underline decoration-primary decoration-2 underline-offset-4">
           {target.url}
         </p>
       </div>
@@ -129,7 +125,7 @@ export const LiveLabTargets: React.FC<LiveLabTargetsProps> = ({
           <TargetRow key={t.id} target={t} />
         ))}
       </div>
-      <p className="text-caption text-muted-foreground mt-3 normal-case tracking-normal">
+      <p className="text-[13px] text-muted-foreground mt-3">
         Start with <code className="text-mono">docker compose up -d</code> in{" "}
         <code className="text-mono">security-lab/</code>
       </p>

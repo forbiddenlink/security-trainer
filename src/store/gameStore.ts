@@ -17,6 +17,7 @@ import {
   REVIEW_XP_REWARDS,
   type ReviewQuality,
 } from "../utils/spacedRepetition";
+import { addXpToDay } from "../lib/weeklyGoal";
 
 // ============================================
 // GAME CONFIGURATION CONSTANTS
@@ -212,6 +213,7 @@ const INITIAL_STATE: UserState = {
   userRole: null,
   activityLog: [],
   streakFreezeCount: 0,
+  xpByDay: {},
 };
 
 // Helper to get today's date string
@@ -277,7 +279,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       addXp: (amount, moduleId) => {
-        const { xp, level, calculateXpWithMultipliers } = get();
+        const { xp, level, xpByDay, calculateXpWithMultipliers } = get();
 
         // Apply multipliers
         const finalAmount = calculateXpWithMultipliers(amount, moduleId);
@@ -297,6 +299,7 @@ export const useGameStore = create<GameStore>()(
           xp: currentXp,
           level: newLevel,
           showLevelUpToast: shouldShowToast,
+          xpByDay: addXpToDay(xpByDay, finalAmount),
         });
 
         // Award "Master Operator" badge on reaching the milestone level
@@ -515,7 +518,7 @@ export const useGameStore = create<GameStore>()(
         });
 
         // Add bonus XP (without multipliers for the bonus itself)
-        const { xp, level } = get();
+        const { xp, level, xpByDay } = get();
         let currentXp = xp + DAILY_CHALLENGE_BONUS_XP;
         let newLevel = level;
         let shouldShowToast = false;
@@ -530,6 +533,7 @@ export const useGameStore = create<GameStore>()(
           xp: currentXp,
           level: newLevel,
           showLevelUpToast: shouldShowToast,
+          xpByDay: addXpToDay(xpByDay, DAILY_CHALLENGE_BONUS_XP),
         });
         debouncedSyncToCloud();
       },
@@ -710,9 +714,10 @@ export const useGameStore = create<GameStore>()(
           return { correct: false, pointsEarned: 0 };
         }
 
-        // Hash the input flag and compare
-        const { validateFlag } = await import("../lib/ctf");
-        const isCorrect = await validateFlag(flag, challenge.flag);
+        // Challenge flags are stored with hashFlagSync (src/data/ctfChallenges.ts),
+        // so compare with the same hash. The SHA-256 validateFlag never matched.
+        const { validateFlagSync } = await import("../lib/ctf");
+        const isCorrect = validateFlagSync(flag, challenge.flag);
 
         const hintsRevealed = existing?.hintsRevealed || [];
         const attempts = (existing?.attempts || 0) + 1;
@@ -842,6 +847,7 @@ export const useGameStore = create<GameStore>()(
         userRole: state.userRole,
         activityLog: state.activityLog,
         streakFreezeCount: state.streakFreezeCount,
+        xpByDay: state.xpByDay,
       }),
     },
   ),

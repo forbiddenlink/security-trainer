@@ -301,17 +301,18 @@ export const LabView: React.FC<LabViewProps> = memo(
     );
 
     return (
-      <div className="flex flex-col lg:flex-row h-full gap-4">
-        <div className="lg:w-[34%] flex flex-col gap-4 overflow-auto pb-8">
-          <Card className="p-6 border-l-[3px] border-l-warning">
-            <h3 className="font-semibold tracking-tight flex items-center gap-2 mb-2">
+      <div className="flex flex-col lg:flex-row lg:h-full gap-4">
+        <div className="lg:w-[34%] flex flex-col gap-4 lg:overflow-auto lg:pr-1">
+          <Card className="ui-card-md">
+            <p className="ui-label flex items-center gap-2 mb-2">
               <AlertTriangle
-                className="w-5 h-5 text-warning"
+                className="w-3.5 h-3.5 text-warning"
                 aria-hidden="true"
               />
-              Mission Objective
-            </h3>
-            <p className="text-muted-foreground text-body-sm">
+              Objective
+            </p>
+            <h2 className="text-h3 mb-2">Mission Objective</h2>
+            <p className="text-body-sm text-muted-foreground">
               {lab.instructions}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -329,18 +330,18 @@ export const LabView: React.FC<LabViewProps> = memo(
           </Card>
 
           {/* Socratic Intel Tutor */}
-          <Card className="p-6" aria-label="Intel tutor">
+          <Card className="ui-card-md" aria-label="Intel tutor">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
-                <h3 className="font-semibold tracking-tight flex items-center gap-2">
+                <h3 className="text-h4 flex items-center gap-2">
                   <MessageCircleQuestion
-                    className="w-5 h-5 text-primary"
+                    className="w-4 h-4 text-muted-foreground"
                     aria-hidden="true"
                   />
                   Intel Briefing
                 </h3>
-                <p className="text-caption text-muted-foreground mt-1 normal-case tracking-normal">
-                  Socratic hints — discover the fix, don&apos;t copy it
+                <p className="text-[13px] text-muted-foreground mt-1">
+                  Socratic hints. Discover the fix; don&apos;t copy it.
                 </p>
               </div>
               <Chip tone="primary">{hintLevel}/3</Chip>
@@ -356,12 +357,12 @@ export const LabView: React.FC<LabViewProps> = memo(
                 {hints.map((h) => (
                   <li
                     key={h.level}
-                    className="rounded-[var(--radius-sm)] border border-border/70 bg-muted/30 p-3"
+                    className="border-l-2 border-primary pl-3 py-1"
                   >
                     <p className="ui-label mb-1">Hint L{h.level}</p>
                     <p className="text-body-sm text-foreground">{h.question}</p>
                     {h.conceptPointer && (
-                      <p className="text-caption text-muted-foreground mt-2 normal-case tracking-normal">
+                      <p className="text-[13px] text-muted-foreground mt-1.5">
                         Research: {h.conceptPointer}
                       </p>
                     )}
@@ -392,30 +393,33 @@ export const LabView: React.FC<LabViewProps> = memo(
             </Button>
           </Card>
 
-          <Card className="bg-muted/20 p-6 flex-1" aria-live="polite">
-            <p className="text-sm font-mono text-muted-foreground opacity-50">
-              Virtual Environment Active
-            </p>
-            {output && (
+          <div aria-live="polite" className="space-y-4">
+            {output ? (
               <div
                 className={clsx(
-                  "mt-4 p-4 rounded-[var(--radius-sm)] border animate-in fade-in slide-in-from-bottom-2",
+                  "ui-card ui-card-md border-l-[3px]",
                   output.type === "success"
-                    ? "bg-accent/10 border-accent/20 text-accent"
+                    ? "border-l-accent"
                     : output.type === "info"
-                      ? "bg-primary/8 border-primary/25 text-foreground"
-                      : "bg-destructive/10 border-destructive/20 text-destructive",
+                      ? "border-l-primary"
+                      : "border-l-destructive",
                 )}
                 role="alert"
               >
-                <div className="font-bold flex items-center gap-2">
+                <div
+                  className={clsx(
+                    "range-verdict-title",
+                    output.type === "success"
+                      ? "text-accent"
+                      : output.type === "info"
+                        ? "text-foreground"
+                        : "text-destructive",
+                  )}
+                >
                   {output.type === "success" ? (
                     <CheckCircle className="w-4 h-4" aria-hidden="true" />
                   ) : output.type === "info" ? (
-                    <Lightbulb
-                      className="w-4 h-4 text-primary"
-                      aria-hidden="true"
-                    />
+                    <Lightbulb className="w-4 h-4" aria-hidden="true" />
                   ) : (
                     <XCircle className="w-4 h-4" aria-hidden="true" />
                   )}
@@ -425,25 +429,56 @@ export const LabView: React.FC<LabViewProps> = memo(
                       ? "Intel Update"
                       : "Vulnerability Detected"}
                 </div>
-                <p className="text-sm mt-1">{output.message}</p>
+                <p className="text-body-sm mt-2">{output.message}</p>
                 {output.hints && output.hints.length > 0 && (
-                  <ul className="mt-3 space-y-1 text-sm text-foreground/80">
+                  <ul className="mt-3 space-y-1 text-body-sm text-muted-foreground">
                     {output.hints.map((hint, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <span className="text-warning mt-0.5">-</span>
+                        <span className="text-warning" aria-hidden="true">
+                          ›
+                        </span>
                         {hint}
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
+            ) : (
+              <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground border border-dashed border-border rounded-[var(--radius-md)] px-4 py-3">
+                Awaiting patch · edit the code, then deploy
+              </p>
             )}
-          </Card>
+            {patched && lab.solutionCode && (
+              <details className="ui-card ui-card-md group">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
+                  <span>
+                    <span className="ui-label block">Debrief</span>
+                    <span className="text-h4">
+                      Compare with the reference fix
+                    </span>
+                  </span>
+                  <span className="font-mono text-caption uppercase tracking-[0.12em] text-muted-foreground group-open:hidden">
+                    Show
+                  </span>
+                  <span className="font-mono text-caption uppercase tracking-[0.12em] text-muted-foreground hidden group-open:inline">
+                    Hide
+                  </span>
+                </summary>
+                <pre className="mt-4 max-h-72 overflow-auto rounded-[var(--radius-sm)] bg-[#0c0d0b] text-[#ecebe4] p-4 font-mono text-[12px] leading-relaxed">
+                  <code>{lab.solutionCode}</code>
+                </pre>
+                <p className="mt-2 text-[13px] text-muted-foreground">
+                  Your patch passed. The reference is one valid fix, not the
+                  only one.
+                </p>
+              </details>
+            )}
+          </div>
         </div>
 
-        <div className="lg:w-[66%] flex flex-col gap-2 h-full">
+        <div className="lg:w-[66%] flex flex-col h-[560px] lg:h-full border border-border rounded-[var(--radius-md)] overflow-hidden bg-card">
           <div
-            className="flex items-center gap-1 border-b border-border/50 pb-2"
+            className="flex items-center gap-1 border-b border-border px-2 h-11 shrink-0"
             role="tablist"
             aria-label="Lab workspace"
             onKeyDown={(e) => {
@@ -464,10 +499,10 @@ export const LabView: React.FC<LabViewProps> = memo(
               tabIndex={activeTab === "editor" ? 0 : -1}
               onClick={() => setActiveTab("editor")}
               className={clsx(
-                "flex items-center gap-2 px-3 py-1.5 rounded-t-[var(--radius-sm)] text-sm font-medium transition-colors",
+                "flex items-center gap-2 px-3 h-8 rounded-[var(--radius-sm)] font-mono text-caption uppercase tracking-[0.1em] transition-colors",
                 activeTab === "editor"
-                  ? "bg-primary/10 text-primary border-b-2 border-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Code className="w-4 h-4" aria-hidden="true" />
@@ -482,10 +517,10 @@ export const LabView: React.FC<LabViewProps> = memo(
               tabIndex={activeTab === "terminal" ? 0 : -1}
               onClick={() => setActiveTab("terminal")}
               className={clsx(
-                "flex items-center gap-2 px-3 py-1.5 rounded-t-[var(--radius-sm)] text-sm font-medium transition-colors",
+                "flex items-center gap-2 px-3 h-8 rounded-[var(--radius-sm)] font-mono text-caption uppercase tracking-[0.1em] transition-colors",
                 activeTab === "terminal"
-                  ? "bg-primary/10 text-primary border-b-2 border-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <TerminalIcon className="w-4 h-4" aria-hidden="true" />
@@ -494,7 +529,7 @@ export const LabView: React.FC<LabViewProps> = memo(
 
             {/* Keyboard shortcut hints */}
             <div
-              className="ml-auto flex items-center gap-2 text-[10px] text-muted-foreground/60 select-none"
+              className="ml-auto hidden xl:flex items-center gap-2 text-[10px] text-muted-foreground select-none pr-1"
               aria-hidden="true"
             >
               {activeTab === "editor" ? (
@@ -526,7 +561,7 @@ export const LabView: React.FC<LabViewProps> = memo(
           </div>
 
           <div
-            className="flex-1 min-h-[400px]"
+            className="flex-1 min-h-0"
             role="tabpanel"
             id={
               activeTab === "editor" ? "lab-panel-editor" : "lab-panel-terminal"
@@ -544,18 +579,21 @@ export const LabView: React.FC<LabViewProps> = memo(
               />
             ) : (
               <Terminal
-                theme="amber"
+                theme="signal"
                 welcomeMessage={`Lab Terminal — ${challenge.title}\nCommands: test | hint | hints | grep | syntax | lines | help`}
                 prompt="lab>"
                 commands={terminalCommands}
-                className="h-full"
+                className="h-full !border-0 !rounded-none"
               />
             )}
           </div>
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between gap-3 border-t border-border px-3 py-2.5 shrink-0">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+              {patched ? "Patch verified" : "Verification runs locally"}
+            </p>
             <Button
               onClick={handleVerify}
-              variant="accent"
+              variant="signal"
               className="px-5"
               disabled={patched}
               aria-label="Deploy patch and verify your code fix"

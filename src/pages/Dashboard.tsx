@@ -1,269 +1,292 @@
 import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { useGameStore } from "../store/gameStore";
 import { BadgeList } from "../components/BadgeList";
 import { DailyChallenge } from "../components/DailyChallenge";
 import { IntelRefresher } from "../components/IntelRefresher";
 import { RoleSelector } from "../components/RoleSelector";
+import { ROLES } from "../data/roles";
 import { LiveLabTargets } from "../components/LiveLabTargets";
 import { NextBadgePreview } from "../components/NextBadgePreview";
+import { RangeInstrument } from "../components/RangeInstrument";
+import { RandomMission } from "../components/RandomMission";
+import { Progress } from "../components/ui";
 import { MODULES } from "../data/modules";
-import { Card } from "../components/ui";
-import { StatRing } from "../components/StatRing";
+import { LEARNING_PATHS } from "../data/learningPaths";
+import { CTF_CHALLENGES } from "../data/ctfChallenges";
 import {
-  ArrowRight,
-  Trophy,
-  Crosshair,
-  Flame,
-  Zap,
-  Snowflake,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+  estimateModuleMinutes,
+  formatMinutes,
+  getModuleStatus,
+  getNextLesson,
+  getRemainingMinutes,
+} from "../lib/moduleMeta";
+import type { Module } from "../types";
+import { isLocalRangeAvailable } from "../lib/liveRange";
+import { RuledSection } from "../components/RuledSection";
+import { WeeklyGoal } from "../components/WeeklyGoal";
+
+const TOTAL_LESSONS = MODULES.reduce((n, m) => n + m.lessons.length, 0);
+const TOTAL_LABS = MODULES.reduce(
+  (n, m) => n + m.lessons.filter((l) => l.type === "lab").length,
+  0,
+);
+
+const opNumber = (module: Module): string =>
+  String(MODULES.indexOf(module) + 1).padStart(2, "0");
+
+const lessonHref = (module: Module, lessonId?: string): string =>
+  lessonId ? `/modules/${module.id}/${lessonId}` : `/modules/${module.id}`;
+
+/** First module of the path that matches the learner's role, else module 01. */
+function recommendedModule(userRole: string | null): Module {
+  const role = ROLES.find((r) => r.id === userRole);
+  const path = LEARNING_PATHS.find((p) => p.id === role?.recommendedPathId);
+  const id = path?.modules[0];
+  return MODULES.find((m) => m.id === id) ?? MODULES[0];
+}
 
 export const Dashboard: React.FC = () => {
   const xp = useGameStore((s) => s.xp);
   const level = useGameStore((s) => s.level);
   const completedModules = useGameStore((s) => s.completedModules);
+  const completedLessons = useGameStore((s) => s.completedLessons);
   const currentModuleId = useGameStore((s) => s.currentModuleId);
   const streakDays = useGameStore((s) => s.streakDays);
-  const streakFreezeCount = useGameStore((s) => s.streakFreezeCount);
-  const getStreakMultiplier = useGameStore((s) => s.getStreakMultiplier);
   const userRole = useGameStore((s) => s.userRole);
+
   const currentModule = useMemo(
     () => MODULES.find((m) => m.id === currentModuleId),
     [currentModuleId],
   );
-  const nextLevelXp = level * 1000;
-  const streakMultiplier = getStreakMultiplier();
-  const bonusPercent = Math.round((streakMultiplier - 1) * 100);
+  const inProgressModule = useMemo(
+    () =>
+      MODULES.find(
+        (m) =>
+          getModuleStatus(m, completedModules, completedLessons) ===
+          "in-progress",
+      ),
+    [completedModules, completedLessons],
+  );
 
-  const isNewVisitor = xp === 0 && completedModules.length === 0;
+  const isNewVisitor =
+    xp === 0 && completedModules.length === 0 && completedLessons.length === 0;
+  const nextLevelXp = level * 1000;
+  const firstMission = recommendedModule(userRole);
+  const resumeModule =
+    (currentModule && !completedModules.includes(currentModule.id)
+      ? currentModule
+      : undefined) ??
+    inProgressModule ??
+    MODULES.find((m) => !completedModules.includes(m.id)) ??
+    firstMission;
+  const resumeLesson = getNextLesson(resumeModule, completedLessons);
+  const resumeDone = resumeModule.lessons.filter((l) =>
+    completedLessons.includes(l.id),
+  ).length;
+  const catalogProgress = completedModules.length / MODULES.length;
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      {isNewVisitor && (
+    <div className="space-y-14 md:space-y-20">
+      {isNewVisitor ? (
         <section
-          className="ui-card ui-card-lg ops-briefing range-panel range-ticks relative overflow-hidden"
-          aria-label="What SecTrainer is"
+          className="grid gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] items-center reveal"
+          aria-labelledby="hero-heading"
         >
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="min-w-0">
+            <p className="flex items-center gap-2 range-readout mb-6">
               <span className="range-dot" aria-hidden="true" />
-              <span className="range-readout">
-                CLEARANCE LEVEL ZERO // WELCOME, RECRUIT
-              </span>
-            </div>
-            <h1 className="text-h1 mb-2">Learn web security by doing.</h1>
-            <p className="text-muted-foreground max-w-2xl text-body-sm md:text-body">
-              SecTrainer is a free, hands-on trainer for web security —{" "}
-              {MODULES.length}+ modules across the OWASP Top 10, injection, auth
-              flaws, cloud, and compliance, with in-browser code labs, quizzes,
-              and CTF challenges. No signup required; your progress saves in
-              this browser. Pick a track below to begin.
+              Range open · no signup · progress saves locally
             </p>
+            <h1 id="hero-heading" className="text-display max-w-[14ch]">
+              Break it here. Fix it at work.
+            </h1>
+            <p className="mt-6 text-body md:text-[1.0625rem] text-muted-foreground max-w-[56ch]">
+              SecTrainer is a free, hands-on trainer for application security.{" "}
+              {MODULES.length} modules on the OWASP Top 10, injection, auth,
+              cloud and AI security, with in-browser code labs, quizzes and CTF
+              flags.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <Link
+                to={lessonHref(firstMission, firstMission.lessons[0]?.id)}
+                className="btn-signal"
+              >
+                Start mission {opNumber(firstMission)}
+                <span className="hidden sm:inline -ml-2">
+                  : {firstMission.title}
+                </span>
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+              <Link to="/modules" className="btn-ghost-rule">
+                Browse all {MODULES.length} modules
+              </Link>
+            </div>
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+              <span className="sm:hidden">{firstMission.title} · </span>
+              {firstMission.lessons.length} lessons ·{" "}
+              {formatMinutes(estimateModuleMinutes(firstMission))} ·{" "}
+              {firstMission.difficulty}
+            </p>
+            <div className="mt-10 pt-6 border-t border-border">
+              <RoleSelector />
+            </div>
           </div>
+          <RangeInstrument
+            progress={0}
+            readouts={[
+              { label: "Modules", value: MODULES.length },
+              { label: "Lessons", value: TOTAL_LESSONS },
+              { label: "Code labs", value: TOTAL_LABS },
+              { label: "CTF flags", value: CTF_CHALLENGES.length },
+            ]}
+          />
         </section>
-      )}
-      {!userRole && xp === 0 && completedModules.length === 0 ? (
-        <RoleSelector />
       ) : (
         <section
-          className="ui-card ui-card-lg ops-briefing range-panel range-ticks relative overflow-hidden"
-          aria-label="Welcome section"
+          className="grid gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] items-stretch reveal"
+          aria-labelledby="hero-heading"
         >
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="range-dot" aria-hidden="true" />
-                <span className="range-readout">Range Status // Online</span>
+          <div className="min-w-0 flex flex-col">
+            <p className="flex items-center gap-2 range-readout mb-6">
+              <span className="range-dot" aria-hidden="true" />
+              Range status · online · level {level}
+            </p>
+            <h1 id="hero-heading" className="text-h1">
+              Welcome back, Agent.
+            </h1>
+            <div className="mt-8 flex-1 ui-card ui-card-lg mission-card">
+              <p className="ui-label">Resume · OP-{opNumber(resumeModule)}</p>
+              <h2 className="mt-2 text-h2">
+                <Link
+                  to={lessonHref(resumeModule)}
+                  className="hover:underline underline-offset-4 decoration-1"
+                >
+                  {resumeModule.title}
+                </Link>
+              </h2>
+              {resumeLesson && (
+                <p className="mt-2 text-body-sm text-muted-foreground">
+                  Next up:{" "}
+                  <span className="text-foreground">{resumeLesson.title}</span>{" "}
+                  ({resumeLesson.type})
+                </p>
+              )}
+              <div className="mt-6">
+                <div className="flex justify-between font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground mb-2 tabular-nums">
+                  <span>
+                    {resumeDone} / {resumeModule.lessons.length} lessons
+                  </span>
+                  <span>
+                    {formatMinutes(
+                      getRemainingMinutes(resumeModule, completedLessons),
+                    )}{" "}
+                    left
+                  </span>
+                </div>
+                <Progress
+                  value={resumeDone}
+                  max={resumeModule.lessons.length}
+                  aria-label={`${resumeDone} of ${resumeModule.lessons.length} lessons complete in ${resumeModule.title}`}
+                />
               </div>
-              <h1 className="text-h1 mb-2">Welcome back, Agent.</h1>
-              <p className="text-muted-foreground text-body-sm md:text-body max-w-lg">
-                Current Clearance Level:{" "}
-                <span className="text-primary font-semibold">
-                  Level {level}
-                </span>
-                {currentModule ? (
-                  <>
-                    . Active dossier:{" "}
-                    <Link
-                      to={`/modules/${currentModule.id}`}
-                      className="text-foreground font-medium underline-offset-4 hover:underline"
-                    >
-                      {currentModule.title}
-                    </Link>
-                  </>
-                ) : (
-                  ". No active mission assigned."
-                )}
-              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to={lessonHref(resumeModule, resumeLesson?.id)}
+                  className="btn-signal"
+                  aria-label={`Continue ${resumeModule.title}`}
+                >
+                  Continue mission
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </Link>
+                <Link to="/modules" className="btn-ghost-rule">
+                  All modules
+                </Link>
+              </div>
             </div>
-            <Link
-              to={currentModule ? `/modules/${currentModule.id}` : "/modules"}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-primary px-5 font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
-              aria-label="Resume training modules"
-            >
-              {currentModule ? "Continue Mission" : "Resume Training"}
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </Link>
           </div>
+          <RangeInstrument
+            progress={catalogProgress}
+            readouts={[
+              { label: "XP", value: xp },
+              {
+                label: `To L${level + 1}`,
+                value: Math.max(0, nextLevelXp - xp),
+              },
+              {
+                label: "Missions",
+                value: `${completedModules.length}/${MODULES.length}`,
+              },
+              { label: "Streak days", value: streakDays },
+            ]}
+          />
         </section>
       )}
 
-      <section
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-        aria-label="Statistics"
+      <RuledSection
+        index="01"
+        label="Today"
+        id="today-heading"
+        title="Today’s orders"
       >
-        {/* XP Card - Hero stat with ring */}
-        <Card className="ui-card-md md:col-span-2 lg:col-span-1">
-          <p className="ui-label mb-3" id="score-label">
-            Current Score
-          </p>
-          <div className="flex items-center gap-4">
-            <StatRing value={xp} max={nextLevelXp} colorClass="text-primary">
-              <Zap className="w-4 h-4 text-primary" aria-hidden="true" />
-            </StatRing>
-            <div>
-              <h3 className="ui-stat-value" aria-labelledby="score-label">
-                {xp}
-                <span className="text-body-sm text-muted-foreground font-normal ml-1">
-                  XP
-                </span>
-              </h3>
-              <p className="text-body-sm text-muted-foreground mt-0.5">
-                {nextLevelXp - xp} XP to next level
-              </p>
-            </div>
+        <div className="grid gap-4 md:grid-cols-2 items-stretch">
+          <DailyChallenge />
+          <RandomMission />
+          <div className="md:col-span-2">
+            <WeeklyGoal />
           </div>
-        </Card>
-
-        {/* Modules Completed */}
-        <Card className="ui-card-md">
-          <p className="ui-label mb-3" id="modules-label">
-            Missions Complete
-          </p>
-          <div className="flex items-center gap-4">
-            <StatRing
-              value={completedModules.length}
-              max={MODULES.length}
-              colorClass="text-accent"
-            >
-              <Crosshair className="w-4 h-4 text-accent" aria-hidden="true" />
-            </StatRing>
-            <div>
-              <h3 className="ui-stat-value" aria-labelledby="modules-label">
-                {completedModules.length}
-                <span className="text-body-sm text-muted-foreground font-normal ml-1">
-                  / {MODULES.length}
-                </span>
-              </h3>
-            </div>
+          <div className="md:col-span-2 empty:hidden">
+            <IntelRefresher />
           </div>
-        </Card>
+        </div>
+      </RuledSection>
 
-        {/* Active Mission */}
-        <Card className="ui-card-md">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="ui-icon-box bg-warning/10 text-warning">
-              <Trophy className="w-4 h-4" aria-hidden="true" />
-            </div>
-            <p className="ui-label" id="mission-label">
-              Active Mission
-            </p>
-          </div>
-          {currentModule ? (
-            <Link
-              to={`/modules/${currentModule.id}`}
-              className="text-h4 truncate block hover:text-primary transition-colors"
-              aria-labelledby="mission-label"
-            >
-              {currentModule.title}
-            </Link>
-          ) : (
-            <h3
-              className="text-h4 truncate text-muted-foreground"
-              aria-labelledby="mission-label"
-            >
-              None assigned
-            </h3>
-          )}
-        </Card>
-
-        {/* Streak */}
-        <Card className="ui-card-md">
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className={`ui-icon-box ${streakDays > 0 ? "bg-warning/10 text-warning" : "bg-muted/60 text-muted-foreground"}`}
-            >
-              <Flame className="w-4 h-4" aria-hidden="true" />
-            </div>
-            <p className="ui-label" id="streak-label">
-              Current Streak
-            </p>
-          </div>
-          <h3 className="ui-stat-value" aria-labelledby="streak-label">
-            {streakDays}
-            <span className="text-body-sm text-muted-foreground font-normal ml-1">
-              day{streakDays !== 1 ? "s" : ""}
-            </span>
-          </h3>
-          {bonusPercent > 0 && (
-            <p className="text-body-sm text-warning font-medium mt-1">
-              +{bonusPercent}% XP bonus
-            </p>
-          )}
-          {streakFreezeCount > 0 && (
-            <p
-              className="flex items-center gap-1 text-body-sm text-sky-400 mt-1"
-              title="Streak freeze tokens — auto-applied if you miss a day"
-            >
-              <Snowflake className="w-3.5 h-3.5" aria-hidden="true" />
-              {streakFreezeCount} freeze{streakFreezeCount !== 1 ? "s" : ""}
-            </p>
-          )}
-        </Card>
-      </section>
-
-      <NextBadgePreview />
-
-      <section aria-labelledby="daily-challenge-heading">
-        <h2 id="daily-challenge-heading" className="text-h2 mb-4">
-          Daily Challenge
-        </h2>
-        <DailyChallenge />
-      </section>
-
-      <section aria-labelledby="intel-refresher-heading">
-        <h2 id="intel-refresher-heading" className="sr-only">
-          Intel Refresher
-        </h2>
-        <IntelRefresher />
-      </section>
-
-      <section
-        aria-labelledby="live-range-heading"
-        className="ui-card ui-card-md"
-      >
-        <h2 id="live-range-heading" className="sr-only">
-          Live practice range
-        </h2>
-        <LiveLabTargets showAll />
-      </section>
-
-      <section aria-labelledby="achievements-heading">
-        <div className="flex items-center justify-between mb-6">
-          <h2 id="achievements-heading" className="text-h2">
-            Achievements
-          </h2>
+      <RuledSection
+        index="02"
+        label="Service record"
+        id="achievements-heading"
+        title="Achievements"
+        aside={
           <Link
             to="/profile"
-            className="text-body-sm text-primary hover:text-primary-hover transition-colors"
+            className="font-mono text-caption uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
             aria-label="View all achievements on profile page"
           >
-            View All
+            View all →
           </Link>
+        }
+      >
+        <div className="space-y-4">
+          <NextBadgePreview />
+          <BadgeList />
         </div>
-        <BadgeList />
-      </section>
+      </RuledSection>
+
+      {isLocalRangeAvailable && (
+        <RuledSection
+          index="03"
+          label="Live range"
+          id="live-range-heading"
+          title="Local practice targets"
+        >
+          <details className="group ui-card">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-body-sm">
+              <span>
+                Run Juice Shop, DVWA and WebGoat on your machine for open-ended
+                practice.
+              </span>
+              <ChevronDown
+                className="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"
+                aria-hidden="true"
+              />
+            </summary>
+            <div className="mt-4">
+              <LiveLabTargets showAll />
+            </div>
+          </details>
+        </RuledSection>
+      )}
     </div>
   );
 };

@@ -27,11 +27,34 @@ interface TerminalProps {
   onCommand?: (command: string, args: string[]) => void;
   readOnly?: boolean;
   fontSize?: number;
-  theme?: "dark" | "matrix" | "amber" | "cyber";
+  theme?: "dark" | "matrix" | "amber" | "cyber" | "signal";
 }
 
 // Terminal color themes
 const themes = {
+  signal: {
+    background: "#0c0d0b",
+    foreground: "#ecebe4",
+    cursor: "#d7f75b",
+    cursorAccent: "#0c0d0b",
+    selectionBackground: "#3b4a0788",
+    black: "#55554c",
+    red: "#ff6a3d",
+    green: "#7ad69a",
+    yellow: "#ffb547",
+    blue: "#8fb8ff",
+    magenta: "#d4a5ff",
+    cyan: "#7fd8d0",
+    white: "#cfcdc2",
+    brightBlack: "#a3a397",
+    brightRed: "#ff8a66",
+    brightGreen: "#9fe6b6",
+    brightYellow: "#d7f75b",
+    brightBlue: "#b3cfff",
+    brightMagenta: "#e2c2ff",
+    brightCyan: "#a6e8e2",
+    brightWhite: "#fbfbf7",
+  },
   dark: {
     background: "#0d1117",
     foreground: "#c9d1d9",
@@ -555,6 +578,7 @@ export const Terminal: React.FC<TerminalProps> = memo(
           theme === "matrix" && "bg-[#0a0a0a]",
           theme === "amber" && "bg-[#1a1200]",
           theme === "cyber" && "bg-[#0c0c1e]",
+          theme === "signal" && "bg-[#0c0d0b]",
           className,
         )}
       >

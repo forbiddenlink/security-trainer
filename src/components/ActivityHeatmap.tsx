@@ -91,11 +91,8 @@ export const ActivityHeatmap: React.FC = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-h4 flex items-center gap-2">
-          <span className="range-dot" aria-hidden="true" />
-          Activity Log
-        </h3>
-        <span className="text-body-sm text-muted-foreground">
+        <h3 className="ui-label">Activity Log</h3>
+        <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground tabular-nums">
           {totalActive} active day{totalActive !== 1 ? "s" : ""} in the last
           year
         </span>
@@ -105,20 +102,25 @@ export const ActivityHeatmap: React.FC = () => {
         <div style={{ minWidth: `${totalWeeks * 13 + 32}px` }}>
           {/* Month labels */}
           <div className="flex mb-1 ml-8">
-            {monthLabels.map(({ label, weekIdx }) => (
-              <div
-                key={label + weekIdx}
-                className="text-[10px] text-muted-foreground"
-                style={{
-                  position: "relative",
-                  left: `${weekIdx * 13}px`,
-                  width: 0,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {label}
-              </div>
-            ))}
+            {monthLabels
+              // Drop a label that would collide with the previous one.
+              .filter(
+                (m, i, arr) => i === 0 || m.weekIdx - arr[i - 1].weekIdx >= 3,
+              )
+              .map(({ label, weekIdx }) => (
+                <div
+                  key={label + weekIdx}
+                  className="text-[10px] text-muted-foreground"
+                  style={{
+                    position: "relative",
+                    left: `${weekIdx * 13}px`,
+                    width: 0,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {label}
+                </div>
+              ))}
           </div>
 
           {/* Grid: rows = day of week (Sun–Sat), cols = weeks */}
@@ -147,6 +149,7 @@ export const ActivityHeatmap: React.FC = () => {
                     date === new Date().toISOString().split("T")[0];
                   return (
                     <div
+                      role="img"
                       key={dIdx}
                       title={date ?? ""}
                       className={[
@@ -154,7 +157,7 @@ export const ActivityHeatmap: React.FC = () => {
                         date === null
                           ? "opacity-0"
                           : active
-                            ? "bg-accent"
+                            ? "bg-primary"
                             : "bg-muted/60",
                         isToday && !active
                           ? "ring-1 ring-primary/60 ring-offset-0"
@@ -180,7 +183,7 @@ export const ActivityHeatmap: React.FC = () => {
             {[false, true].map((on) => (
               <div
                 key={String(on)}
-                className={`w-[10px] h-[10px] rounded-[2px] ${on ? "bg-accent" : "bg-muted/60"}`}
+                className={`w-[10px] h-[10px] rounded-[2px] ${on ? "bg-primary" : "bg-muted/60"}`}
               />
             ))}
             <span className="text-[10px] text-muted-foreground">More</span>

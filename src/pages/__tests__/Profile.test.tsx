@@ -42,11 +42,11 @@ describe("Profile - training focus", () => {
     expect(screen.getByText("Developer / Engineer")).toBeInTheDocument();
 
     // Role selector is hidden until requested
-    expect(screen.queryByText("Select Your Role")).not.toBeInTheDocument();
+    expect(screen.queryByText(/calibrate your track/i)).not.toBeInTheDocument();
 
     // Re-open the onboarding role picker
     await user.click(screen.getByRole("button", { name: /change focus/i }));
 
-    expect(screen.getByText("Select Your Role")).toBeInTheDocument();
+    expect(screen.getByText(/calibrate your track/i)).toBeInTheDocument();
   });
 });
