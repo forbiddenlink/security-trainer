@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.1.0](https://github.com/forbiddenlink/security-trainer/compare/v1.0.4...v1.1.0) (2026-10-09)
+
+
+### Features
+
+* **assets:** align brand assets with signal range instrument aesthetic ([1d02497](https://github.com/forbiddenlink/security-trainer/commit/1d02497d661aaa20a364e83ac96f9416a6e52759))
+* **auth:** offer GitHub sign-in once the provider is configured ([bf58bea](https://github.com/forbiddenlink/security-trainer/commit/bf58beabc2edc419e4bf2d35ecfb7192584e7fd9))
+* **design:** add retry and a live timer to the final exam ([45bd46d](https://github.com/forbiddenlink/security-trainer/commit/45bd46db4be25d91afd8152f9f75e531abdcd96d))
+* **design:** bring overlays, toasts and leftover widgets onto Signal Range ([da7437c](https://github.com/forbiddenlink/security-trainer/commit/da7437c65fd374df608e68c60709afc676920bb3))
+* **design:** give review and leaderboard pages a clear next action ([cccc6f2](https://github.com/forbiddenlink/security-trainer/commit/cccc6f26b7de40ffdbade28a26cccb367e69fe74))
+* **design:** rebuild modules catalog and lesson player on Signal Range ([c2b6e7c](https://github.com/forbiddenlink/security-trainer/commit/c2b6e7c1586ca53f4df84ff3453013f559751e35))
+* **design:** rebuild profile as an agent dossier ([cae96d6](https://github.com/forbiddenlink/security-trainer/commit/cae96d668f8ceae08e359e2e0d063eeb044013b8))
+* **design:** Signal Range foundation and new dashboard ([1d104e9](https://github.com/forbiddenlink/security-trainer/commit/1d104e96e7c7ace5e598ded78e2d7aefcc46a523))
+* **design:** turn learning paths into routes with clear next steps ([abab207](https://github.com/forbiddenlink/security-trainer/commit/abab2078c0070a2a978e59eefe60a953212ae137))
+* **modules:** tag modules with their OWASP Top 10:2025 category ([6ccb38a](https://github.com/forbiddenlink/security-trainer/commit/6ccb38ab166dcd354e81c858a7a23e805ece7881))
+* **progress:** add a weekly XP goal, field ranks and a hide-solved CTF filter ([b945cc4](https://github.com/forbiddenlink/security-trainer/commit/b945cc4a2a6a16f95f33e022f61f6e16350ea47b))
+* Signal Range redesign, CTF and diagram fixes, OWASP tags and progress features ([87c6257](https://github.com/forbiddenlink/security-trainer/commit/87c6257b42d4848603f991fb0f670c5cc8067d97))
+
+
+### Bug Fixes
+
+* **a11y:** make biome:check runnable and clear its accessibility errors ([6c16a0d](https://github.com/forbiddenlink/security-trainer/commit/6c16a0d34c4bb0e79193b77af86755b3973e8345))
+* **ctf:** accept correct flags and rebuild the challenge board ([9c9df05](https://github.com/forbiddenlink/security-trainer/commit/9c9df05d813544b244af505c44be4d8726b94355))
+* **deps:** apply override fix plan ([#99](https://github.com/forbiddenlink/security-trainer/issues/99)) ([f1c7bc8](https://github.com/forbiddenlink/security-trainer/commit/f1c7bc89964f75d21550072bfdd2c2775a7ca36f))
+* **deps:** raise stale override floors ([#97](https://github.com/forbiddenlink/security-trainer/issues/97)) ([d6ad757](https://github.com/forbiddenlink/security-trainer/commit/d6ad757a42abc518d1d2e1c9ad3ee1aed7108b4e))
+* **lesson:** keep a single h1 per lesson page ([a385eac](https://github.com/forbiddenlink/security-trainer/commit/a385eac08da8fa7eb6fba5c6e327a9b7b4cd3f2c))
+* **lint:** keep biome:check at zero errors after the new features ([631f7d7](https://github.com/forbiddenlink/security-trainer/commit/631f7d77115d5dbd03cfea5f3a35e73b489640f5))
+
+
+### Performance Improvements
+
+* self-host fonts and keep diagram, terminal and analytics code off first load ([d73b6ec](https://github.com/forbiddenlink/security-trainer/commit/d73b6ec3e2ff831acd8027ce8a06fa19b647bdbd))
+
 ## [1.0.4](https://github.com/forbiddenlink/security-trainer/compare/v1.0.3...v1.0.4) (2026-09-19)
 
 
