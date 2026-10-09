@@ -54,3 +54,5 @@ out/
 test-results/
 playwright-report/
 .audit-report.md
+
+thoughts/

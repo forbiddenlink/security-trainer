@@ -1,12 +1,31 @@
-import React from "react";
+import React, { type ComponentType } from "react";
 import { Link } from "react-router-dom";
-import { Lock, ArrowRight, Award } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  Cloud,
+  FileCheck,
+  Lock,
+  Server,
+  Shield,
+  Target,
+  Users,
+} from "lucide-react";
 import { clsx } from "clsx";
 import { Progress } from "./ui";
 import { useGameStore } from "../store/gameStore";
 import { MODULES } from "../data/modules";
 import { estimateModuleMinutes, formatMinutes } from "../lib/moduleMeta";
 import type { LearningPath } from "../types";
+
+const PATH_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  Shield,
+  Server,
+  Target,
+  Users,
+  FileCheck,
+  Cloud,
+};
 
 interface PathCardProps {
   path: LearningPath;
@@ -38,6 +57,7 @@ export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
     (sum, m) => sum + estimateModuleMinutes(m),
     0,
   );
+  const PathIcon = (path.icon && PATH_ICONS[path.icon]) || Shield;
 
   return (
     <article
@@ -48,9 +68,17 @@ export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
       )}
     >
       <div className="flex items-start justify-between gap-3 mb-4">
-        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-          Track {String(index + 1).padStart(2, "0")}
-        </p>
+        <div className="flex items-center gap-2">
+          <span
+            className="grid h-7 w-7 place-items-center rounded-[var(--radius-xs)] border border-border bg-muted/40 text-foreground"
+            aria-hidden="true"
+          >
+            <PathIcon className="w-3.5 h-3.5" />
+          </span>
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            Track {String(index + 1).padStart(2, "0")}
+          </p>
+        </div>
         <span className={clsx("ui-chip", difficultyTone[path.difficulty])}>
           {path.difficulty}
         </span>
@@ -103,7 +131,7 @@ export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
         <div>
           <dt>Time</dt>
           <dd className="mt-1 text-body-sm normal-case tracking-normal text-foreground tabular-nums whitespace-nowrap">
-            {totalMinutes > 0 ? formatMinutes(totalMinutes) : "–"}
+            {totalMinutes > 0 ? formatMinutes(totalMinutes) : "--"}
           </dd>
         </div>
         <div>
