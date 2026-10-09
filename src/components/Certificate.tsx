@@ -1,4 +1,5 @@
-import React, { useRef, useCallback } from "react";
+import type React from "react";
+import { useRef, useCallback } from "react";
 import { toPng } from "html-to-image";
 import download from "downloadjs";
 import { Award, CheckCircle } from "lucide-react";
@@ -25,7 +26,7 @@ export const Certificate: React.FC = () => {
       .catch((err) => {
         console.error(err);
       });
-  }, [ref]);
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -54,6 +55,74 @@ export const Certificate: React.FC = () => {
             className="pointer-events-none absolute inset-[22px] border border-[#12130f]/30"
             aria-hidden="true"
           />
+          {/* Security clearance watermark */}
+          <div
+            className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.05]"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 400 400"
+              className="w-[360px] h-[360px] text-[#12130f]"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="180"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="4 4"
+              />
+              <circle
+                cx="200"
+                cy="200"
+                r="140"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <circle
+                cx="200"
+                cy="200"
+                r="100"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeDasharray="2 2"
+              />
+              <circle
+                cx="200"
+                cy="200"
+                r="60"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <line
+                x1="20"
+                y1="200"
+                x2="380"
+                y2="200"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <line
+                x1="200"
+                y1="20"
+                x2="200"
+                y2="380"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <path
+                d="M200 60 A140 140 0 0 1 340 200 H200 Z"
+                fill="#d7f75b"
+                fillOpacity="0.4"
+              />
+            </svg>
+          </div>
           <div className="relative flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-[#55554c]">
             <span className="flex items-center gap-2">
               <RangeMark className="h-5 w-5 text-[#12130f]" />

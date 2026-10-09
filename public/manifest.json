@@ -1,11 +1,11 @@
 {
-  "name": "SecTrainer - Cyber Security Training",
+  "name": "SecTrainer | Cyber Security Training",
   "short_name": "SecTrainer",
   "description": "Level up your security skills with interactive modules on OWASP Top 10, XSS, SQLi, and more.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0b0d10",
-  "theme_color": "#0b0d10",
+  "background_color": "#0c0d0b",
+  "theme_color": "#0c0d0b",
   "orientation": "portrait-primary",
   "icons": [
     {

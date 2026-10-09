@@ -1,6 +1,17 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, type ComponentType } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, Award } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Award,
+  Cloud,
+  FileCheck,
+  Server,
+  Shield,
+  Target,
+  Users,
+} from "lucide-react";
 import { clsx } from "clsx";
 import { EmptyState, Progress } from "../components/ui";
 import { getPathById } from "../data/learningPaths";
@@ -12,6 +23,15 @@ import {
   getNextLesson,
   getRemainingMinutes,
 } from "../lib/moduleMeta";
+
+const PATH_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  Shield,
+  Server,
+  Target,
+  Users,
+  FileCheck,
+  Cloud,
+};
 
 const difficultyTone = {
   Beginner: "text-accent border-accent/40",
@@ -75,6 +95,7 @@ export const PathDetail: React.FC = () => {
     .reduce((s, m) => s + getRemainingMinutes(m, completedLessons), 0);
   const progressPercent =
     progress.total > 0 ? (progress.completed / progress.total) * 100 : 0;
+  const PathIcon = (path.icon && PATH_ICONS[path.icon]) || Shield;
 
   return (
     <div className="space-y-10 max-w-4xl">
@@ -87,10 +108,18 @@ export const PathDetail: React.FC = () => {
       </Link>
 
       <header className="border-b border-border pb-8">
-        <p className="range-readout mb-3">
-          <span className="range-dot" aria-hidden="true" />
-          {path.codename} · {path.difficulty}
-        </p>
+        <div className="flex items-center gap-3 mb-3">
+          <span
+            className="grid h-8 w-8 place-items-center rounded-[var(--radius-xs)] border border-border bg-muted/40 text-foreground"
+            aria-hidden="true"
+          >
+            <PathIcon className="w-4 h-4" />
+          </span>
+          <p className="range-readout !mb-0">
+            <span className="range-dot" aria-hidden="true" />
+            {path.codename} · {path.difficulty}
+          </p>
+        </div>
         <h1 className="text-display max-w-[16ch]">{path.title}</h1>
         <p className="mt-4 text-muted-foreground max-w-[62ch]">
           {path.description}
@@ -118,7 +147,7 @@ export const PathDetail: React.FC = () => {
           {isCompleted ? (
             <p className="flex items-center gap-2 text-accent font-semibold">
               <Award className="w-5 h-5" aria-hidden="true" />
-              Certification Earned - +{path.certificateXp} XP
+              Certification Earned: +{path.certificateXp} XP
             </p>
           ) : nextModule ? (
             <Link

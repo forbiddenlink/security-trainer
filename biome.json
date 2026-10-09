@@ -53,7 +53,8 @@
       "!**/.vercel",
       "!**/coverage",
       "!**/*.min.js",
-      "!**/public"
+      "!**/public",
+      "!**/visual-assets"
     ]
   },
   "css": {

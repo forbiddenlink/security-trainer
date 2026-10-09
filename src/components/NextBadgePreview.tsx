@@ -1,13 +1,35 @@
-import React, { useMemo } from "react";
-import { Lock, ArrowRight } from "lucide-react";
+import React, { useMemo, type ComponentType } from "react";
+import {
+  ArrowRight,
+  Award,
+  Code,
+  Crown,
+  Database,
+  Flag,
+  Lock,
+  Skull,
+  Target,
+  Trophy,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { BADGES } from "../data/badges";
 import { useGameStore } from "../store/gameStore";
 import { Card } from "./ui";
 
+const BADGE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  Award,
+  Database,
+  Code,
+  Flag,
+  Skull,
+  Crown,
+  Target,
+  Trophy,
+};
+
 /**
  * Shows the next unearned badge with progress toward unlocking it.
- * Drives anticipation — a key engagement mechanism from HackTheBox/TryHackMe.
+ * Drives anticipation, a key engagement mechanism from HackTheBox/TryHackMe.
  */
 export const NextBadgePreview: React.FC = () => {
   const badges = useGameStore((s) => s.badges);
@@ -118,7 +140,17 @@ export const NextBadgePreview: React.FC = () => {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <Lock className="w-4 h-4 text-muted-foreground" />
+          {(() => {
+            const BadgeIcon = BADGE_ICONS[badge.icon] ?? Award;
+            return (
+              <div className="relative flex items-center justify-center">
+                <BadgeIcon className="w-5 h-5 text-foreground/70" />
+                <span className="absolute -bottom-1 -right-1 bg-card border border-border rounded-full p-0.5">
+                  <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                </span>
+              </div>
+            );
+          })()}
         </div>
       </div>
 

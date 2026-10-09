@@ -1,12 +1,34 @@
-import React, { memo, useMemo } from "react";
+import type React from "react";
+import { memo, useMemo, type ComponentType } from "react";
 import { useGameStore } from "../store/gameStore";
 import { BADGES } from "../data/badges";
-import { Award, Lock } from "lucide-react";
+import {
+  Award,
+  Code,
+  Crown,
+  Database,
+  Flag,
+  Lock,
+  Skull,
+  Target,
+  Trophy,
+} from "lucide-react";
 import { clsx } from "clsx";
 
+const BADGE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  Award,
+  Database,
+  Code,
+  Flag,
+  Skull,
+  Crown,
+  Target,
+  Trophy,
+};
+
 /**
- * Badge display grid - memoized to prevent unnecessary re-renders
- * Uses Zustand selector to only re-render when badges array changes
+ * Badge display grid - memoized to prevent unnecessary re-renders.
+ * Renders distinct tactical insignias per badge.
  */
 export const BadgeList: React.FC = memo(() => {
   // Use selector to only subscribe to badges changes
@@ -31,6 +53,8 @@ export const BadgeList: React.FC = memo(() => {
     >
       {badgeStatuses.map((badge) => {
         const isUnlocked = badge.isUnlocked;
+        const Icon = BADGE_ICONS[badge.icon] ?? Award;
+
         return (
           <li
             key={badge.id}
@@ -47,14 +71,17 @@ export const BadgeList: React.FC = memo(() => {
                 "grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-sm)]",
                 isUnlocked
                   ? "bg-signal text-signal-ink"
-                  : "border border-dashed border-border text-muted-foreground",
+                  : "border border-dashed border-border text-muted-foreground/60 bg-muted/20",
               )}
               aria-hidden="true"
             >
               {isUnlocked ? (
-                <Award className="w-5 h-5" />
+                <Icon className="w-5 h-5" />
               ) : (
-                <Lock className="w-4 h-4" />
+                <div className="relative flex items-center justify-center">
+                  <Icon className="w-4 h-4 opacity-35" />
+                  <Lock className="w-2.5 h-2.5 absolute -bottom-1 -right-1 text-muted-foreground" />
+                </div>
               )}
             </div>
             <div className="min-w-0">

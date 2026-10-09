@@ -1,11 +1,12 @@
 // Service Worker for SecTrainer PWA.
 // NOTE: bump CACHE_NAME on every deploy that changes cached assets, otherwise
 // returning users can be served stale JS/CSS until a cache-miss network path.
-const CACHE_NAME = 'sectrainer-v2';
+const CACHE_NAME = 'sectrainer-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/offline.html',
+  '/favicon.svg',
   '/favicon.png',
   '/icon.png',
   '/manifest.json'

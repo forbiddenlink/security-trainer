@@ -953,14 +953,151 @@ export const CTFChallenges: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="max-w-xl pt-10"
+              className="max-w-xl pt-6 space-y-8"
             >
-              <p className="ui-label mb-3">No challenge selected</p>
-              <p className="text-h2 font-display font-extrabold [font-stretch:80%] leading-tight">
-                Pick a target from the board. Read the brief, use the terminal,
-                capture the flag.
-              </p>
-              <dl className="mt-10 grid grid-cols-3 border-t border-border pt-6">
+              <div>
+                <p className="ui-label mb-3">Target Range: Standby</p>
+                <p className="text-h2 font-display font-extrabold [font-stretch:80%] leading-tight">
+                  Pick a target from the board. Read the brief, use the
+                  terminal, capture the flag.
+                </p>
+              </div>
+
+              <div className="relative border border-border bg-card p-6 rounded-[var(--radius-md)] overflow-hidden">
+                <svg
+                  viewBox="0 0 400 160"
+                  className="w-full h-auto text-border"
+                  aria-hidden="true"
+                >
+                  <line
+                    x1="100"
+                    y1="0"
+                    x2="100"
+                    y2="160"
+                    stroke="currentColor"
+                    strokeDasharray="3 3"
+                  />
+                  <line
+                    x1="200"
+                    y1="0"
+                    x2="200"
+                    y2="160"
+                    stroke="currentColor"
+                    strokeDasharray="3 3"
+                  />
+                  <line
+                    x1="300"
+                    y1="0"
+                    x2="300"
+                    y2="160"
+                    stroke="currentColor"
+                    strokeDasharray="3 3"
+                  />
+                  <line
+                    x1="0"
+                    y1="80"
+                    x2="400"
+                    y2="80"
+                    stroke="currentColor"
+                    strokeDasharray="3 3"
+                  />
+
+                  <circle
+                    cx="200"
+                    cy="80"
+                    r="60"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <circle
+                    cx="200"
+                    cy="80"
+                    r="35"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  />
+                  <circle
+                    cx="200"
+                    cy="80"
+                    r="15"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  />
+
+                  <line
+                    x1="200"
+                    y1="10"
+                    x2="200"
+                    y2="150"
+                    stroke="var(--color-foreground)"
+                    strokeOpacity="0.4"
+                  />
+                  <line
+                    x1="130"
+                    y1="80"
+                    x2="270"
+                    y2="80"
+                    stroke="var(--color-foreground)"
+                    strokeOpacity="0.4"
+                  />
+
+                  <path
+                    d="M200 45 A35 35 0 0 1 235 80 H200 Z"
+                    fill="var(--color-signal)"
+                    fillOpacity="0.8"
+                  />
+                  <circle
+                    cx="200"
+                    cy="80"
+                    r="3"
+                    fill="var(--color-foreground)"
+                  />
+
+                  <text
+                    x="16"
+                    y="24"
+                    className="font-mono text-[9px]"
+                    fill="var(--color-muted-foreground)"
+                    letterSpacing="1.5"
+                  >
+                    {"RANGE STATUS // STANDBY"}
+                  </text>
+                  <text
+                    x="384"
+                    y="24"
+                    textAnchor="end"
+                    className="font-mono text-[9px]"
+                    fill="var(--color-signal)"
+                    letterSpacing="1.5"
+                  >
+                    {"GRID 0x29 ACTIVE"}
+                  </text>
+                  <text
+                    x="16"
+                    y="146"
+                    className="font-mono text-[9px]"
+                    fill="var(--color-muted-foreground)"
+                    letterSpacing="1.5"
+                  >
+                    {"SYS: ARMED"}
+                  </text>
+                  <text
+                    x="384"
+                    y="146"
+                    textAnchor="end"
+                    className="font-mono text-[9px]"
+                    fill="var(--color-muted-foreground)"
+                    letterSpacing="1.5"
+                  >
+                    {"TARGET: UNASSIGNED"}
+                  </text>
+                </svg>
+              </div>
+
+              <dl className="grid grid-cols-3 border-t border-border pt-6">
                 {[
                   ["Challenges", totalChallenges],
                   ["Solved", solvedCount],
