@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/forbiddenlink/security-trainer/compare/v1.1.0...v1.1.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **api:** fail closed when the rate limiter times out on socratic-hint ([#109](https://github.com/forbiddenlink/security-trainer/issues/109)) ([1b0fe74](https://github.com/forbiddenlink/security-trainer/commit/1b0fe74cab3f8a9ceff15ac2e5146c191e6352ec))
+* **deps:** override source-map-js to &gt;=1.2.2 to clear high alert ([#107](https://github.com/forbiddenlink/security-trainer/issues/107)) ([8f54ab4](https://github.com/forbiddenlink/security-trainer/commit/8f54ab42e20acb63b45ae0756edc0d1151031376))
+
 ## [1.1.0](https://github.com/forbiddenlink/security-trainer/compare/v1.0.4...v1.1.0) (2026-10-09)
 
 
