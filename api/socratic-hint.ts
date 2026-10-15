@@ -50,6 +50,9 @@ function getRatelimit(): Ratelimit | null {
     redis: r,
     limiter: Ratelimit.slidingWindow(20, "60 s"),
     prefix: "rl:socratic-hint",
+    // Default is 5s and a timeout resolves { success: true, reason: "timeout" } instead of
+    // throwing. Keep it short and fail closed below: this endpoint spends on a paid LLM.
+    timeout: 1500,
   });
   return ratelimit;
 }
@@ -133,7 +136,13 @@ export default async function handler(req: ReqReq, res: ResLike) {
   const limiter = getRatelimit();
   if (limiter) {
     try {
-      const { success } = await limiter.limit(clientIpFromHeaders(req.headers));
+      const { success, reason } = await limiter.limit(
+        clientIpFromHeaders(req.headers),
+      );
+      if (reason === "timeout") {
+        res.setHeader("Retry-After", "5");
+        return res.status(503).json({ error: "AI unavailable" });
+      }
       if (!success) {
         res.setHeader("Retry-After", "60");
         return res.status(429).json({ error: "Too many requests" });
