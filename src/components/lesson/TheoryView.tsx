@@ -100,6 +100,22 @@ export const TheoryView: React.FC<TheoryViewProps> = memo(({ content }) => {
     pre: PreBlock,
     // The lesson bar owns the page h1; markdown "# Title" becomes a section h2.
     h1: ({ children }) => <h2>{children}</h2>,
+    // A video shortcode on its own line is parsed as inline HTML inside a
+    // <p>, but VideoEmbed renders a <figure>/<div>. Unwrap those paragraphs
+    // so the DOM stays valid and React does not warn about hydration.
+    p: ({ node, children, ...props }) => {
+      const kids = node?.children ?? [];
+      const hasEmbed = kids.some(
+        (c) => c.type === "element" && c.tagName === "video-embed",
+      );
+      const onlyEmbeds = kids.every(
+        (c) =>
+          (c.type === "element" && c.tagName === "video-embed") ||
+          (c.type === "text" && c.value.trim() === ""),
+      );
+      if (hasEmbed && onlyEmbeds) return <>{children}</>;
+      return <p {...props}>{children}</p>;
+    },
     // Handle custom video-embed element
     // @ts-expect-error - custom element not in standard types
     "video-embed": ({
