@@ -189,7 +189,7 @@ importers:
         specifier: 8.71.2
         version: 8.71.2(eslint@10.12.0(jiti@2.7.0))(typescript@6.0.3)
       vite:
-        specifier: 8.3.3
+        specifier: '>=7.3.2 <9'
         version: 8.3.3(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)
       vitest:
         specifier: 4.1.12
