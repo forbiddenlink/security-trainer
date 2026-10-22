@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/forbiddenlink/security-trainer/compare/v1.1.1...v1.1.2) (2026-10-22)
+
+
+### Bug Fixes
+
+* **deps:** bump vite to 8.3.3 (GHSA-587h-7wmj-h5pm) ([#115](https://github.com/forbiddenlink/security-trainer/issues/115)) ([34272cf](https://github.com/forbiddenlink/security-trainer/commit/34272cf3a4570f199530253134197270c34905b4))
+
 ## [1.1.1](https://github.com/forbiddenlink/security-trainer/compare/v1.1.0...v1.1.1) (2026-10-15)
 
 
