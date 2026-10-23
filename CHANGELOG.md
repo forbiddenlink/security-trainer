@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/forbiddenlink/security-trainer/compare/v1.1.2...v1.1.3) (2026-10-23)
+
+
+### Bug Fixes
+
+* **deps:** raise dompurify override floor to 3.4.17 ([#117](https://github.com/forbiddenlink/security-trainer/issues/117)) ([186b33c](https://github.com/forbiddenlink/security-trainer/commit/186b33c59a82426f3ceb55978c9e8a12a2bf6bb7))
+
 ## [1.1.2](https://github.com/forbiddenlink/security-trainer/compare/v1.1.1...v1.1.2) (2026-10-22)
 
 
