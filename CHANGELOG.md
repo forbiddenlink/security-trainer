@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/forbiddenlink/security-trainer/compare/v1.1.3...v1.1.4) (2026-10-28)
+
+
+### Bug Fixes
+
+* **deps:** raise undici override floor to 7.30.1 ([#122](https://github.com/forbiddenlink/security-trainer/issues/122)) ([276cf8f](https://github.com/forbiddenlink/security-trainer/commit/276cf8f06aba92eb00f3f90587d14f9c10d751f7))
+
 ## [1.1.3](https://github.com/forbiddenlink/security-trainer/compare/v1.1.2...v1.1.3) (2026-10-23)
 
 
