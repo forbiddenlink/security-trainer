@@ -33,7 +33,7 @@ describe("Dashboard", () => {
         screen.getByRole("heading", { level: 1, name: /break it here/i }),
       ).toBeInTheDocument();
       const start = screen.getByRole("link", { name: /start mission 01/i });
-      expect(start).toHaveAttribute("href", "/modules/owasp-intro/owasp-1");
+      expect(start).toHaveAttribute("href", "/modules/owasp-intro/owasp-lab");
     });
 
     it("targets the first module of the role's recommended path", () => {

@@ -45,13 +45,14 @@ vi.mock("../../components/CodeEditor", () => ({
 // Mock react-router-dom with dynamic params
 const mockNavigate = vi.fn();
 let mockModuleId = "owasp-intro";
+let mockLessonId: string | undefined;
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
-    useParams: () => ({ moduleId: mockModuleId }),
+    useParams: () => ({ moduleId: mockModuleId, lessonId: mockLessonId }),
   };
 });
 
@@ -60,6 +61,7 @@ describe("LessonView", () => {
     resetGameStore();
     mockNavigate.mockClear();
     mockModuleId = "owasp-intro";
+    mockLessonId = undefined;
   });
 
   describe("module not found", () => {
@@ -73,6 +75,11 @@ describe("LessonView", () => {
   });
 
   describe("theory lesson", () => {
+    // owasp-intro opens on its lab; the reading is lesson 2 of 3.
+    beforeEach(() => {
+      mockLessonId = "owasp-1";
+    });
+
     it("renders the module title and lesson title", () => {
       renderWithRouter(<LessonView />);
 
@@ -91,7 +98,7 @@ describe("LessonView", () => {
     it("displays step progress", () => {
       renderWithRouter(<LessonView />);
 
-      expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
+      expect(screen.getByText("Step 2 of 3")).toBeInTheDocument();
     });
 
     it("renders theory content", () => {
@@ -103,6 +110,7 @@ describe("LessonView", () => {
     });
 
     it("has a disabled Back button on first lesson", () => {
+      mockLessonId = undefined;
       renderWithRouter(<LessonView />);
 
       const backButton = screen.getByRole("button", {
@@ -122,6 +130,10 @@ describe("LessonView", () => {
   });
 
   describe("quiz lesson navigation", () => {
+    beforeEach(() => {
+      mockLessonId = "owasp-1";
+    });
+
     it("advances to quiz lesson when clicking Next", async () => {
       const user = userEvent.setup();
       renderWithRouter(<LessonView />);
@@ -140,6 +152,7 @@ describe("LessonView", () => {
   describe("quiz lesson", () => {
     beforeEach(async () => {
       mockModuleId = "owasp-intro";
+      mockLessonId = "owasp-1";
     });
 
     it("displays quiz question", async () => {
@@ -264,9 +277,9 @@ describe("LessonView", () => {
         screen.getByRole("button", { name: /go to next lesson step/i }),
       );
 
-      // Next button should be disabled before submitting (goes to lab on lesson 2 of 3)
+      // The quiz is the last lesson, so the forward button completes the mission.
       const nextButton = screen.getByRole("button", {
-        name: /go to next lesson step/i,
+        name: /complete this mission and return to modules/i,
       });
       expect(nextButton).toBeDisabled();
     });
@@ -286,9 +299,9 @@ describe("LessonView", () => {
         screen.getByRole("button", { name: /submit your selected answer/i }),
       );
 
-      // Next button should now be enabled (goes to lab since there are 3 lessons now)
+      // Forward button should now be enabled
       const nextButton = screen.getByRole("button", {
-        name: /go to next lesson step/i,
+        name: /complete this mission and return to modules/i,
       });
       expect(nextButton).toBeEnabled();
     });
@@ -398,44 +411,22 @@ describe("LessonView", () => {
   });
 
   describe("module completion", () => {
-    it("completes module and adds XP on last lesson completion", async () => {
-      const user = userEvent.setup();
-      vi.useFakeTimers({ shouldAdvanceTime: true });
-      renderWithRouter(<LessonView />);
+    // owasp-intro ends on its knowledge check, so start there.
+    beforeEach(() => {
+      mockLessonId = "owasp-quiz-1";
+    });
 
-      // Go to quiz (lesson 2)
-      await user.click(
-        screen.getByRole("button", { name: /go to next lesson step/i }),
-      );
-
-      // Answer quiz (using role="radio")
+    const answerQuiz = async (user: ReturnType<typeof userEvent.setup>) => {
       const options = screen.getAllByRole("radio");
       await user.click(options[0]);
       await user.click(
         screen.getByRole("button", { name: /submit your selected answer/i }),
       );
+    };
 
-      // Go to lab (lesson 3)
-      await user.click(
-        screen.getByRole("button", { name: /go to next lesson step/i }),
-      );
-
-      // Complete the lab - the verifier checks for INJECTION, XSS, IDOR keywords
-      const editor = screen.getByTestId("code-editor");
-      await user.clear(editor);
-      await user.type(
-        editor,
-        "// INJECTION: SQL\n// XSS: innerHTML\n// IDOR: No auth check",
-      );
-
-      // Submit lab
-      await user.click(
-        screen.getByRole("button", {
-          name: /deploy patch and verify your code fix/i,
-        }),
-      );
-
-      // Wait for success state then complete
+    const completeMission = async (
+      user: ReturnType<typeof userEvent.setup>,
+    ) => {
       await waitFor(() => {
         expect(
           screen.getByRole("button", {
@@ -443,15 +434,21 @@ describe("LessonView", () => {
           }),
         ).not.toBeDisabled();
       });
-
-      // Complete module
       await user.click(
         screen.getByRole("button", {
           name: /complete this mission and return to modules/i,
         }),
       );
+    };
 
-      // Check store was updated
+    it("completes module and adds XP on last lesson completion", async () => {
+      const user = userEvent.setup();
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      renderWithRouter(<LessonView />);
+
+      await answerQuiz(user);
+      await completeMission(user);
+
       await waitFor(() => {
         const state = useGameStore.getState();
         expect(state.completedModules).toContain("owasp-intro");
@@ -464,43 +461,8 @@ describe("LessonView", () => {
       const user = userEvent.setup();
       renderWithRouter(<LessonView />);
 
-      // theory -> quiz
-      await user.click(
-        screen.getByRole("button", { name: /go to next lesson step/i }),
-      );
-      const options = screen.getAllByRole("radio");
-      await user.click(options[0]);
-      await user.click(
-        screen.getByRole("button", { name: /submit your selected answer/i }),
-      );
-      // quiz -> lab
-      await user.click(
-        screen.getByRole("button", { name: /go to next lesson step/i }),
-      );
-      // solve the lab
-      const editor = screen.getByTestId("code-editor");
-      await user.clear(editor);
-      await user.type(
-        editor,
-        "// INJECTION: SQL\n// XSS: innerHTML\n// IDOR: No auth check",
-      );
-      await user.click(
-        screen.getByRole("button", {
-          name: /deploy patch and verify your code fix/i,
-        }),
-      );
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", {
-            name: /complete this mission and return to modules/i,
-          }),
-        ).not.toBeDisabled();
-      });
-      await user.click(
-        screen.getByRole("button", {
-          name: /complete this mission and return to modules/i,
-        }),
-      );
+      await answerQuiz(user);
+      await completeMission(user);
 
       // Completion panel appears instead of a blind redirect
       expect(await screen.findByText("Mission Complete")).toBeInTheDocument();
@@ -516,29 +478,12 @@ describe("LessonView", () => {
       const user = userEvent.setup();
       renderWithRouter(<LessonView />);
 
-      // theory -> quiz
-      await user.click(
-        screen.getByRole("button", { name: /go to next lesson step/i }),
-      );
-
-      // answer the quiz
-      const options = screen.getAllByRole("radio");
-      await user.click(options[0]);
-      await user.click(
-        screen.getByRole("button", { name: /submit your selected answer/i }),
-      );
-
-      // quiz -> lab
-      await user.click(
-        screen.getByRole("button", { name: /go to next lesson step/i }),
-      );
-
-      // Seed the final lab lesson as overdue for review so the review modal
+      // Seed the final lesson as overdue for review so the review modal
       // interrupts navigation on the last lesson.
       useGameStore.setState({
         lessonReviews: {
-          "owasp-lab": {
-            lessonId: "owasp-lab",
+          "owasp-quiz-1": {
+            lessonId: "owasp-quiz-1",
             lastReviewDate: "2000-01-01",
             nextReviewDate: "2000-01-01",
             interval: 1,
@@ -548,32 +493,8 @@ describe("LessonView", () => {
         },
       });
 
-      // solve the lab
-      const editor = screen.getByTestId("code-editor");
-      await user.clear(editor);
-      await user.type(
-        editor,
-        "// INJECTION: SQL\n// XSS: innerHTML\n// IDOR: No auth check",
-      );
-      await user.click(
-        screen.getByRole("button", {
-          name: /deploy patch and verify your code fix/i,
-        }),
-      );
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", {
-            name: /complete this mission and return to modules/i,
-          }),
-        ).not.toBeDisabled();
-      });
-
-      // Complete the mission (last lesson, due for review)
-      await user.click(
-        screen.getByRole("button", {
-          name: /complete this mission and return to modules/i,
-        }),
-      );
+      await answerQuiz(user);
+      await completeMission(user);
 
       // Module completion XP (owasp-intro xpReward = 100) must still be awarded
       await waitFor(() => {

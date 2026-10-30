@@ -10,6 +10,57 @@ export const owaspIntro: Module = {
   locked: false,
   lessons: [
     {
+      id: "owasp-lab",
+      title: "Identify the Vulnerabilities",
+      type: "lab",
+      content:
+        "The code below contains three different security vulnerabilities. Your task is to identify each one by adding the correct OWASP category as a comment. Replace the TODO comments with the vulnerability type.",
+      lab: {
+        initialCode: `// Vulnerable Code Examples
+// Identify each vulnerability by replacing TODO with the correct type
+
+function login(username, password) {
+  // TODO: What vulnerability is this?
+  const query = "SELECT * FROM users WHERE name='" + username + "'";
+  return db.execute(query);
+}
+
+function displayComment(userInput) {
+  // TODO: What vulnerability is this?
+  document.getElementById('output').innerHTML = userInput;
+}
+
+function getDocument(docId) {
+  // TODO: What vulnerability is this?
+  return db.documents.findById(docId);
+  // Note: No check if user owns the document
+}
+`,
+        solutionCode: `// Vulnerable Code Examples
+// Identify each vulnerability by replacing TODO with the correct type
+
+function login(username, password) {
+  // INJECTION: SQL Injection via string concatenation
+  const query = "SELECT * FROM users WHERE name='" + username + "'";
+  return db.execute(query);
+}
+
+function displayComment(userInput) {
+  // XSS: Cross-Site Scripting via innerHTML
+  document.getElementById('output').innerHTML = userInput;
+}
+
+function getDocument(docId) {
+  // IDOR: Insecure Direct Object Reference
+  return db.documents.findById(docId);
+  // Note: No check if user owns the document
+}
+`,
+        instructions:
+          "Replace each TODO comment with the correct OWASP vulnerability category: INJECTION, XSS, or IDOR. Include a brief description of why it's vulnerable.",
+      },
+    },
+    {
       id: "owasp-1",
       title: "What is OWASP?",
       type: "theory",
@@ -80,57 +131,6 @@ mindmap
         correctAnswer: 0,
         explanation:
           "OWASP stands for the Open Web Application Security Project, a global non-profit dedicated to software security.",
-      },
-    },
-    {
-      id: "owasp-lab",
-      title: "Identify the Vulnerabilities",
-      type: "lab",
-      content:
-        "The code below contains three different security vulnerabilities. Your task is to identify each one by adding the correct OWASP category as a comment. Replace the TODO comments with the vulnerability type.",
-      lab: {
-        initialCode: `// Vulnerable Code Examples
-// Identify each vulnerability by replacing TODO with the correct type
-
-function login(username, password) {
-  // TODO: What vulnerability is this?
-  const query = "SELECT * FROM users WHERE name='" + username + "'";
-  return db.execute(query);
-}
-
-function displayComment(userInput) {
-  // TODO: What vulnerability is this?
-  document.getElementById('output').innerHTML = userInput;
-}
-
-function getDocument(docId) {
-  // TODO: What vulnerability is this?
-  return db.documents.findById(docId);
-  // Note: No check if user owns the document
-}
-`,
-        solutionCode: `// Vulnerable Code Examples
-// Identify each vulnerability by replacing TODO with the correct type
-
-function login(username, password) {
-  // INJECTION: SQL Injection via string concatenation
-  const query = "SELECT * FROM users WHERE name='" + username + "'";
-  return db.execute(query);
-}
-
-function displayComment(userInput) {
-  // XSS: Cross-Site Scripting via innerHTML
-  document.getElementById('output').innerHTML = userInput;
-}
-
-function getDocument(docId) {
-  // IDOR: Insecure Direct Object Reference
-  return db.documents.findById(docId);
-  // Note: No check if user owns the document
-}
-`,
-        instructions:
-          "Replace each TODO comment with the correct OWASP vulnerability category: INJECTION, XSS, or IDOR. Include a brief description of why it's vulnerable.",
       },
     },
   ],
