@@ -159,18 +159,24 @@ export const PathCard: React.FC<PathCardProps> = ({ path, index }) => {
             Complete {remainingToUnlock} more modules to unlock
           </div>
         ) : isCompleted ? (
-          <Link
-            to={`/paths/${path.id}`}
-            className="flex items-center justify-between gap-2 h-11 px-3 border border-accent/60 rounded-[var(--radius-sm)] text-accent font-semibold"
-          >
-            <span className="flex items-center gap-2">
-              <Award className="w-4 h-4" aria-hidden="true" />
-              Certified
-            </span>
-            <span className="font-mono text-[11px] uppercase tracking-[0.12em]">
-              +{path.certificateXp} XP
-            </span>
-          </Link>
+          <>
+            <Link
+              to={`/paths/${path.id}`}
+              className="flex items-center justify-between gap-2 h-11 px-3 border border-accent/60 rounded-[var(--radius-sm)] text-accent font-semibold"
+            >
+              <span className="flex items-center gap-2">
+                <Award className="w-4 h-4" aria-hidden="true" />
+                Certified
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.12em]">
+                +{path.certificateXp} XP
+              </span>
+            </Link>
+            <p className="mt-2 text-body-sm text-muted-foreground">
+              A record of your own progress, not an independently verified
+              credential.
+            </p>
+          </>
         ) : (
           <Link
             to={`/paths/${path.id}`}
