@@ -147,6 +147,10 @@ export const Certificate: React.FC = () => {
               patching web security vulnerabilities, achieving{" "}
               <strong>Level {level}</strong> Clearance.
             </p>
+            <p className="mt-4 max-w-[46ch] text-[12px] leading-relaxed text-[#55554c]">
+              This certificate is a record of your own progress in Signal Range.
+              It is not an independently verified credential.
+            </p>
           </div>
 
           <div className="relative flex items-end justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-[#55554c]">
@@ -161,7 +165,7 @@ export const Certificate: React.FC = () => {
                 className="h-6 w-6 text-[#2f7a4a]"
                 aria-hidden="true"
               />
-              <p>Verified Secure</p>
+              <p>Completed</p>
             </div>
             <div className="text-right">
               <p className="w-40 border-t border-[#12130f] pt-2 text-[13px] normal-case tracking-normal text-[#12130f]">
