@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.5](https://github.com/forbiddenlink/security-trainer/compare/v1.1.4...v1.1.5) (2026-10-31)
+
+
+### Bug Fixes
+
+* **copy:** disclaim self-issued certificates, reword 'Verified Secure' ([#128](https://github.com/forbiddenlink/security-trainer/issues/128)) ([fa2da98](https://github.com/forbiddenlink/security-trainer/commit/fa2da9864f45e9cb308c509dfe1dfd21d8e8b1ed))
+* **modules:** open mission 01 on its hands-on lab ([#126](https://github.com/forbiddenlink/security-trainer/issues/126)) ([6d11468](https://github.com/forbiddenlink/security-trainer/commit/6d114689a6a8f7cd31a60a190266eb4c3b9fe77a))
+
 ## [1.1.4](https://github.com/forbiddenlink/security-trainer/compare/v1.1.3...v1.1.4) (2026-10-28)
 
 
