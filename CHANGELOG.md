@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/forbiddenlink/security-trainer/compare/v1.1.5...v1.1.6) (2026-11-03)
+
+
+### Bug Fixes
+
+* **vercel:** rewrite unknown paths to index.html so SPA deep links load ([#132](https://github.com/forbiddenlink/security-trainer/issues/132)) ([6fcee1e](https://github.com/forbiddenlink/security-trainer/commit/6fcee1eb028bc33c239543c45933fa1d6e6ef24e))
+
 ## [1.1.5](https://github.com/forbiddenlink/security-trainer/compare/v1.1.4...v1.1.5) (2026-10-31)
 
 
