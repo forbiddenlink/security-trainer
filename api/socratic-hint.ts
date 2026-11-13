@@ -72,8 +72,8 @@ function headerValue(
  */
 export function clientIpFromHeaders(headers: ReqReq["headers"]): string {
   const trusted =
-    headerValue(headers, "x-real-ip") ??
-    headerValue(headers, "x-vercel-forwarded-for");
+    headerValue(headers, "x-vercel-forwarded-for") ??
+    headerValue(headers, "x-real-ip");
   if (trusted?.trim()) return trusted.trim();
 
   const fwd = headerValue(headers, "x-forwarded-for");
@@ -88,18 +88,18 @@ export function clientIpFromHeaders(headers: ReqReq["headers"]): string {
   return "unknown";
 }
 
-/** Increment today's global counter (TTL 24h). Fail-open (returns true) on Redis error. */
-async function withinDailyBudget(): Promise<boolean> {
+/** Increment today's global counter (TTL 24h). Fails closed ("unavailable" -> 503) on Redis error. */
+async function withinDailyBudget(): Promise<boolean | "unavailable"> {
   const r = getRedis();
   if (!r) return true; // no Redis configured (local dev) → no global cap
   try {
-    const key = `budget:socratic-hint:${new Date().toISOString().slice(0, 10)}`;
+    const key = `security-trainer:budget:socratic-hint:${new Date().toISOString().slice(0, 10)}`;
     const count = await r.incr(key);
     if (count === 1) await r.expire(key, 86400);
     return count <= DAILY_BUDGET;
   } catch (err) {
-    console.error("[socratic-hint] budget check failed, allowing:", err);
-    return true;
+    console.error("[socratic-hint] budget check failed, denying:", err);
+    return "unavailable";
   }
 }
 
@@ -132,7 +132,7 @@ export default async function handler(req: ReqReq, res: ResLike) {
   }
   const input = parsed.value;
 
-  // --- Abuse controls (best-effort; degrade open on infra failure) ---
+  // --- Abuse controls (fail closed on infra failure) ---
   const limiter = getRatelimit();
   if (limiter) {
     try {
@@ -148,7 +148,10 @@ export default async function handler(req: ReqReq, res: ResLike) {
         return res.status(429).json({ error: "Too many requests" });
       }
     } catch (err) {
-      console.error("[socratic-hint] rate limiter failed, allowing:", err);
+      // Fail closed: this endpoint spends on a paid LLM.
+      console.error("[socratic-hint] rate limiter failed, denying:", err);
+      res.setHeader("Retry-After", "5");
+      return res.status(503).json({ error: "AI unavailable" });
     }
   } else if (
     process.env.VERCEL &&
@@ -161,7 +164,12 @@ export default async function handler(req: ReqReq, res: ResLike) {
     return res.status(503).json({ error: "AI unavailable" });
   }
 
-  if (!(await withinDailyBudget())) {
+  const budget = await withinDailyBudget();
+  if (budget === "unavailable") {
+    res.setHeader("Retry-After", "5");
+    return res.status(503).json({ error: "AI unavailable" });
+  }
+  if (!budget) {
     res.setHeader("Retry-After", "3600");
     return res.status(429).json({ error: "Daily AI limit reached" });
   }
@@ -180,6 +188,7 @@ export default async function handler(req: ReqReq, res: ResLike) {
         body: JSON.stringify({
           model: "llama-3.1-8b-instant",
           temperature: 0.4,
+          max_tokens: 600,
           response_format: { type: "json_object" },
           messages: [
             {

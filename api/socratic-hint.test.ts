@@ -2,6 +2,23 @@ import { describe, it, expect } from "vitest";
 import { clientIpFromHeaders } from "./socratic-hint";
 
 describe("clientIpFromHeaders", () => {
+  it("prefers x-vercel-forwarded-for over x-real-ip", () => {
+    expect(
+      clientIpFromHeaders({
+        "x-vercel-forwarded-for": "203.0.113.7",
+        "x-real-ip": "198.51.100.1",
+      }),
+    ).toBe("203.0.113.7");
+  });
+
+  it("a spoofed x-forwarded-for does not change the key", () => {
+    const base = { "x-vercel-forwarded-for": "203.0.113.7" };
+    const a = clientIpFromHeaders({ ...base, "x-forwarded-for": "6.6.6.6" });
+    const b = clientIpFromHeaders({ ...base, "x-forwarded-for": "7.7.7.7" });
+    expect(a).toBe("203.0.113.7");
+    expect(b).toBe("203.0.113.7");
+  });
+
   it("prefers the trusted x-real-ip header", () => {
     expect(
       clientIpFromHeaders({
