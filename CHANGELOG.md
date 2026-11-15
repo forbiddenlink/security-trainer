@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.8](https://github.com/forbiddenlink/security-trainer/compare/v1.1.7...v1.1.8) (2026-11-15)
+
+
+### Bug Fixes
+
+* **seo:** real 404 for unknown paths, canonical tag, Security Trainer title ([#140](https://github.com/forbiddenlink/security-trainer/issues/140)) ([8896973](https://github.com/forbiddenlink/security-trainer/commit/8896973386ec838d8f7f15e840e43d0b7ea073f4))
+
 ## [1.1.7](https://github.com/forbiddenlink/security-trainer/compare/v1.1.6...v1.1.7) (2026-11-13)
 
 
