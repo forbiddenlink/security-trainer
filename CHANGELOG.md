@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.7](https://github.com/forbiddenlink/security-trainer/compare/v1.1.6...v1.1.7) (2026-11-13)
+
+
+### Bug Fixes
+
+* **ai:** fail closed on socratic-hint Redis errors, cap max_tokens, trust Vercel IP header ([#138](https://github.com/forbiddenlink/security-trainer/issues/138)) ([bb582bf](https://github.com/forbiddenlink/security-trainer/commit/bb582bf5eefead7495c5506fc66dffcea66577e7))
+
 ## [1.1.6](https://github.com/forbiddenlink/security-trainer/compare/v1.1.5...v1.1.6) (2026-11-03)
 
 
