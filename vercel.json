@@ -1,6 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/modules", "destination": "/index.html" },
+    { "source": "/modules/:moduleId", "destination": "/index.html" },
+    { "source": "/modules/:moduleId/:lessonId", "destination": "/index.html" },
+    { "source": "/profile", "destination": "/index.html" },
+    { "source": "/challenge", "destination": "/index.html" },
+    { "source": "/leaderboard", "destination": "/index.html" },
+    { "source": "/paths", "destination": "/index.html" },
+    { "source": "/paths/:pathId", "destination": "/index.html" },
+    { "source": "/reviews", "destination": "/index.html" },
+    { "source": "/ctf", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
