@@ -1,9 +1,10 @@
 import { useEffect, lazy, Suspense } from "react";
 import { MotionConfig } from "framer-motion";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainLayout } from "./layouts/MainLayout";
 import { useThemeStore } from "./store/themeStore";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { CanonicalLink } from "./components/CanonicalLink";
 
 // Lazy load pages for code splitting
 const Dashboard = lazy(() =>
@@ -39,6 +40,9 @@ const CTFChallenges = lazy(() =>
 const Privacy = lazy(() =>
   import("./pages/Privacy").then((m) => ({ default: m.Privacy })),
 );
+const NotFound = lazy(() =>
+  import("./pages/NotFound").then((m) => ({ default: m.NotFound })),
+);
 const AuthModal = lazy(() =>
   import("./components/AuthModal").then((m) => ({ default: m.AuthModal })),
 );
@@ -69,6 +73,7 @@ function App() {
   return (
     <MotionConfig reducedMotion="user">
       <BrowserRouter>
+        <CanonicalLink />
         <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
             <Routes>
@@ -88,8 +93,8 @@ function App() {
                 <Route path="/reviews" element={<Reviews />} />
                 <Route path="/ctf" element={<CTFChallenges />} />
                 <Route path="/privacy" element={<Privacy />} />
-                {/* Fallback route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* Unknown URL: render a real not-found page (the host returns 404) */}
+                <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
           </Suspense>
