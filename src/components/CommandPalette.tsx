@@ -47,6 +47,13 @@ const PAGES: PaletteItem[] = [
     keywords: "flags capture",
   },
   {
+    id: "p-cascade",
+    kind: "page",
+    title: "Cascading failure",
+    href: "/cascading-failure",
+    keywords: "incident on call simulation postmortem",
+  },
+  {
     id: "p-rev",
     kind: "page",
     title: "Intel review",
