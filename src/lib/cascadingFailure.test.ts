@@ -156,4 +156,55 @@ describe("cascadingFailure engine", () => {
     ].join("\n");
     expect(all).toMatch(/Turn \d+/);
   });
+
+  it("long nights wear the on-call down, and a second engineer prevents it", () => {
+    const run = (ids: string[]) => {
+      let s = createGame();
+      for (const id of ids) s = takeAction(s, id);
+      return s;
+    };
+    const tired = run([
+      "inspect-queries",
+      "ask-finance",
+      "ask-support",
+      "scale-db",
+      "add-cache",
+      "restart-services",
+    ]);
+    const rested = run([
+      "inspect-queries",
+      "ask-finance",
+      "ask-support",
+      "page-teammate",
+      "scale-db",
+      "add-cache",
+    ]);
+    expect(tired.log.flatMap((l) => l.notes).join(" ")).toMatch(/fumes/);
+    expect(rested.log.flatMap((l) => l.notes).join(" ")).not.toMatch(/fumes/);
+  });
+
+  it("support reports surfaced failures instead of denying them", () => {
+    let s = createGame();
+    for (const id of [
+      "mute-alerts",
+      "inspect-queries",
+      "ask-finance",
+      "page-teammate",
+    ]) {
+      s = takeAction(s, id);
+    }
+    expect(s.appeared.some((a) => a.consequence === "c-missed-webhook")).toBe(
+      true,
+    );
+    s = takeAction(s, "ask-support");
+    const last = getTurnOutput(s).status;
+    expect(last).not.toMatch(/no payment failures/i);
+    expect(last).toMatch(/payment/i);
+    expect(getPostmortem(s).smart_moves.join(" ")).not.toMatch(/still small/i);
+  });
+
+  it("support keeps the calm answer while nothing has surfaced", () => {
+    const s = takeAction(createGame(), "ask-support");
+    expect(getTurnOutput(s).status).toMatch(/no payment failures/i);
+  });
 });

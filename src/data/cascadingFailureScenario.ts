@@ -47,6 +47,8 @@ export interface ActionDef {
   schedule?: ScheduleDef[];
   /** Postmortem credit when this move bought time. */
   smart?: string;
+  /** Replaces result and credit once any listed consequence has surfaced. */
+  variant?: { ifAppeared: string[]; result: string; smart?: string };
 }
 
 export const CASCADE_TITLE = "Brightcart checkout, on call";
@@ -203,6 +205,19 @@ export const CASCADE_ACTIONS: ActionDef[] = [
       "Support says a few people mention slow checkout. No payment failures reported yet. Nothing else stands out.",
     health: 0,
     smart: "A cheap question confirmed customer impact was still small.",
+    variant: {
+      ifAppeared: [
+        "c-missed-webhook",
+        "c-stale-prices",
+        "c-conversion-drop",
+        "c-retry-pile",
+        "c-connection-spike",
+      ],
+      result:
+        "Support says the queue is growing. Customers report payment problems and orders that look wrong, and the team is working through them by hand.",
+      smart:
+        "Asking support showed how much customer impact had built up, so you could weigh it in your next move.",
+    },
   },
   {
     id: "scale-db",

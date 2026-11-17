@@ -153,7 +153,12 @@ export function takeAction(prev: GameState, actionId: string): GameState {
   addUnique(s.flags, action.setFlags);
   s.used.push(action.id);
   s.usedOnTurn[action.id] = turn;
-  notes.unshift(action.result);
+  const variant =
+    action.variant &&
+    s.appeared.some((a) => action.variant!.ifAppeared.includes(a.consequence))
+      ? action.variant
+      : null;
+  notes.unshift(variant ? variant.result : action.result);
 
   // 3. Queue new delayed consequences.
   for (const sch of action.schedule ?? []) {
@@ -166,7 +171,8 @@ export function takeAction(prev: GameState, actionId: string): GameState {
     });
   }
 
-  // 4. Tired on-call makes mistakes.
+  // 4. Long nights wear you down; tired on-call makes mistakes.
+  if (turn >= 3) s.fatigue += 1;
   if (s.fatigue >= 4) {
     s.health -= 3;
     notes.push(
@@ -176,8 +182,9 @@ export function takeAction(prev: GameState, actionId: string): GameState {
 
   s.turn = turn;
   if (s.health >= healthBefore) s.stability += 1;
-  if (action.smart && s.health >= healthBefore) {
-    s.creditedMoves.push({ turn, text: action.smart });
+  const credit = variant ? variant.smart : action.smart;
+  if (credit && s.health >= healthBefore) {
+    s.creditedMoves.push({ turn, text: credit });
   }
   s.log.push({ turn, actionId, notes });
 
