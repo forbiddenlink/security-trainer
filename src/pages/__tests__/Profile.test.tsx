@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import {
   renderWithRouter,
   resetGameStore,
@@ -7,6 +7,9 @@ import {
 } from "../../test/testUtils";
 import { Profile } from "../Profile";
 import { useGameStore } from "../../store/gameStore";
+import { useAuthStore } from "../../store/authStore";
+import { useScamStore } from "../../store/scamStore";
+import { scenariosForLevel } from "../../lib/scamSurvival";
 
 // Mock framer-motion to a passthrough
 vi.mock("framer-motion", () => ({
@@ -48,5 +51,28 @@ describe("Profile - training focus", () => {
     await user.click(screen.getByRole("button", { name: /change focus/i }));
 
     expect(screen.getByText(/calibrate your track/i)).toBeInTheDocument();
+  });
+});
+
+describe("Profile - account deletion", () => {
+  it("clears saved Scam Survival progress after a successful delete", async () => {
+    const user = userEvent.setup();
+    resetGameStore();
+    const sc = scenariosForLevel(1)[0];
+    const safe = sc.choices.find((c) => c.outcome === "safe")!;
+    useScamStore.getState().record(sc.id, safe.id);
+    expect(useScamStore.getState().progress.completed.length).toBe(1);
+    useAuthStore.setState({
+      user: { id: "u1" } as never,
+      deleteAccount: vi.fn().mockResolvedValue({ error: null }),
+    });
+    renderWithRouter(<Profile />);
+    await user.click(screen.getByRole("button", { name: /^delete account/i }));
+    await user.click(
+      screen.getByRole("button", { name: /yes, delete my account/i }),
+    );
+    await waitFor(() =>
+      expect(useScamStore.getState().progress.completed).toEqual([]),
+    );
   });
 });

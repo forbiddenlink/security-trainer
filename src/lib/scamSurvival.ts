@@ -123,8 +123,9 @@ export function applyChoice(
   };
 
   const alreadyDone = prev.completed.includes(scenarioId);
-  // Practice and repeats show feedback but change nothing.
-  if (opts.practice || alreadyDone) return { progress: prev, result };
+  // Practice, repeats and locked levels show feedback but change nothing.
+  if (opts.practice || alreadyDone || !isLevelUnlocked(prev, scenario.level))
+    return { progress: prev, result };
 
   const progress: ScamProgress = {
     completed: [...prev.completed],

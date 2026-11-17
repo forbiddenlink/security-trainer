@@ -58,6 +58,14 @@ export const ScamSurvival: React.FC = () => {
   const [round, setRound] = useState<Round | null>(null);
 
   const guest = !user || optOut;
+
+  // A different progress source has different locks: go back to the picker.
+  const [lastGuest, setLastGuest] = useState(guest);
+  if (lastGuest !== guest) {
+    setLastGuest(guest);
+    setLevel(null);
+    setRound(null);
+  }
   const progress = guest ? guestProgress : saved;
 
   const startLevel = (lv: number, practice = false) => {

@@ -163,4 +163,11 @@ describe("scam level logic", () => {
     applyChoice(p, s.id, safeId(s));
     expect(JSON.stringify(p)).toBe(snap);
   });
+
+  it("does not count answers on a locked level", () => {
+    const s = scenariosForLevel(5)[0];
+    const r = applyChoice(emptyProgress(), s.id, safeId(s));
+    expect(r.result.counted).toBe(false);
+    expect(r.progress).toEqual(emptyProgress());
+  });
 });

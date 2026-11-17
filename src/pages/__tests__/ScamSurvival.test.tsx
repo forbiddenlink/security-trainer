@@ -83,4 +83,16 @@ describe("ScamSurvival page", () => {
       "/modules/phishing-awareness/phishing-recognizing",
     );
   });
+
+  it("returns to the level picker when the progress mode changes", () => {
+    useAuthStore.setState({ user: { id: "u1" } as never });
+    renderWithRouter(<ScamSurvival />);
+    fireEvent.click(screen.getByRole("button", { name: /level 1/i }));
+    expect(
+      screen.getByRole("region", { name: /message/i }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText(/guest mode/i));
+    expect(screen.queryByRole("region", { name: /message/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /level 2/i })).toBeDisabled();
+  });
 });
