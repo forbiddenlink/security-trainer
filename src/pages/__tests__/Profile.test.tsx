@@ -62,15 +62,18 @@ describe("Profile - account deletion", () => {
     const safe = sc.choices.find((c) => c.outcome === "safe")!;
     useScamStore.getState().record(sc.id, safe.id);
     expect(useScamStore.getState().progress.completed.length).toBe(1);
+    const del = vi.fn().mockResolvedValue({ error: null });
     useAuthStore.setState({
       user: { id: "u1" } as never,
-      deleteAccount: vi.fn().mockResolvedValue({ error: null }),
+      loading: false,
+      deleteAccount: del,
     });
     renderWithRouter(<Profile />);
     await user.click(screen.getByRole("button", { name: /^delete account/i }));
     await user.click(
       screen.getByRole("button", { name: /yes, delete my account/i }),
     );
+    await waitFor(() => expect(del).toHaveBeenCalled());
     await waitFor(() =>
       expect(useScamStore.getState().progress.completed).toEqual([]),
     );
