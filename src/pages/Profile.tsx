@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
+import { useScamStore } from "../store/scamStore";
 import { BadgeList } from "../components/BadgeList";
 import { MODULES } from "../data/modules";
 import { Pencil, AlertTriangle, Loader2, Snowflake } from "lucide-react";
@@ -40,6 +41,7 @@ export const Profile: React.FC = () => {
     const { error } = await deleteAccount();
     if (!error) {
       useGameStore.getState().resetProgress();
+      useScamStore.getState().resetAll();
       navigate("/");
     }
   };

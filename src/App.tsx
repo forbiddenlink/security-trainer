@@ -37,6 +37,9 @@ const Reviews = lazy(() =>
 const CTFChallenges = lazy(() =>
   import("./pages/CTFChallenges").then((m) => ({ default: m.CTFChallenges })),
 );
+const ScamSurvival = lazy(() =>
+  import("./pages/ScamSurvival").then((m) => ({ default: m.ScamSurvival })),
+);
 const CascadingFailure = lazy(() =>
   import("./pages/CascadingFailure").then((m) => ({
     default: m.CascadingFailure,
@@ -97,6 +100,7 @@ function App() {
                 <Route path="/paths/:pathId" element={<PathDetail />} />
                 <Route path="/reviews" element={<Reviews />} />
                 <Route path="/ctf" element={<CTFChallenges />} />
+                <Route path="/scam-survival" element={<ScamSurvival />} />
                 <Route
                   path="/cascading-failure"
                   element={<CascadingFailure />}

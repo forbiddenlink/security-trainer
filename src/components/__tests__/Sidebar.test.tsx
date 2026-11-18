@@ -50,11 +50,11 @@ describe("Sidebar", () => {
       expect(leaderboardLink).toHaveAttribute("href", "/leaderboard");
     });
 
-    it("renders all nine navigation items", () => {
+    it("renders all ten navigation items", () => {
       renderWithRouter(<Sidebar />);
 
       const nav = screen.getByRole("navigation", { name: "Primary" });
-      expect(within(nav).getAllByRole("link")).toHaveLength(9);
+      expect(within(nav).getAllByRole("link")).toHaveLength(10);
     });
 
     it("has a link to Intel Review", () => {

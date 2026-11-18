@@ -47,6 +47,13 @@ const PAGES: PaletteItem[] = [
     keywords: "flags capture",
   },
   {
+    id: "p-scam",
+    kind: "page",
+    title: "Scam survival",
+    href: "/scam-survival",
+    keywords: "scams phishing awareness habits",
+  },
+  {
     id: "p-cascade",
     kind: "page",
     title: "Cascading failure",

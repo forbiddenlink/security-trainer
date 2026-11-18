@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Flag,
   RefreshCw,
+  MessageSquareWarning,
   Activity,
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -30,6 +31,11 @@ const NAV_GROUPS = [
     label: "Practice",
     items: [
       { label: "CTF Challenges", path: "/ctf", icon: Flag },
+      {
+        label: "Scam Survival",
+        path: "/scam-survival",
+        icon: MessageSquareWarning,
+      },
       {
         label: "Cascading Failure",
         path: "/cascading-failure",
