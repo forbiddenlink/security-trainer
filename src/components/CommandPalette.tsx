@@ -54,6 +54,13 @@ const PAGES: PaletteItem[] = [
     keywords: "scams phishing awareness habits",
   },
   {
+    id: "p-cascade",
+    kind: "page",
+    title: "Cascading failure",
+    href: "/cascading-failure",
+    keywords: "incident on call simulation postmortem",
+  },
+  {
     id: "p-rev",
     kind: "page",
     title: "Intel review",

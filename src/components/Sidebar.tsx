@@ -10,6 +10,7 @@ import {
   Flag,
   RefreshCw,
   MessageSquareWarning,
+  Activity,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useGameStore } from "../store/gameStore";
@@ -34,6 +35,11 @@ const NAV_GROUPS = [
         label: "Scam Survival",
         path: "/scam-survival",
         icon: MessageSquareWarning,
+      },
+      {
+        label: "Cascading Failure",
+        path: "/cascading-failure",
+        icon: Activity,
       },
       { label: "Intel Review", path: "/reviews", icon: RefreshCw },
       { label: "Final Exam", path: "/challenge", icon: ShieldAlert },

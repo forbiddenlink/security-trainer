@@ -40,6 +40,11 @@ const CTFChallenges = lazy(() =>
 const ScamSurvival = lazy(() =>
   import("./pages/ScamSurvival").then((m) => ({ default: m.ScamSurvival })),
 );
+const CascadingFailure = lazy(() =>
+  import("./pages/CascadingFailure").then((m) => ({
+    default: m.CascadingFailure,
+  })),
+);
 const Privacy = lazy(() =>
   import("./pages/Privacy").then((m) => ({ default: m.Privacy })),
 );
@@ -96,6 +101,10 @@ function App() {
                 <Route path="/reviews" element={<Reviews />} />
                 <Route path="/ctf" element={<CTFChallenges />} />
                 <Route path="/scam-survival" element={<ScamSurvival />} />
+                <Route
+                  path="/cascading-failure"
+                  element={<CascadingFailure />}
+                />
                 <Route path="/privacy" element={<Privacy />} />
                 {/* Unknown URL: render a real not-found page (the host returns 404) */}
                 <Route path="*" element={<NotFound />} />
