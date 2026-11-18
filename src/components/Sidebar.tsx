@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Flag,
   RefreshCw,
+  Activity,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useGameStore } from "../store/gameStore";
@@ -29,6 +30,11 @@ const NAV_GROUPS = [
     label: "Practice",
     items: [
       { label: "CTF Challenges", path: "/ctf", icon: Flag },
+      {
+        label: "Cascading Failure",
+        path: "/cascading-failure",
+        icon: Activity,
+      },
       { label: "Intel Review", path: "/reviews", icon: RefreshCw },
       { label: "Final Exam", path: "/challenge", icon: ShieldAlert },
     ],

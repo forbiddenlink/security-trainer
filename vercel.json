@@ -12,6 +12,7 @@
     { "source": "/paths/:pathId", "destination": "/index.html" },
     { "source": "/reviews", "destination": "/index.html" },
     { "source": "/ctf", "destination": "/index.html" },
+    { "source": "/cascading-failure", "destination": "/index.html" },
     { "source": "/privacy", "destination": "/index.html" }
   ],
   "headers": [
