@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/forbiddenlink/security-trainer/compare/v1.1.8...v1.2.0) (2026-11-18)
+
+
+### Features
+
+* add cascading failure incident game ([#148](https://github.com/forbiddenlink/security-trainer/issues/148)) ([1d1e7da](https://github.com/forbiddenlink/security-trainer/commit/1d1e7da598a6e5a887b8cc61e6e70349c3b3f156))
+* add scam survival trainer ([#149](https://github.com/forbiddenlink/security-trainer/issues/149)) ([1560cb8](https://github.com/forbiddenlink/security-trainer/commit/1560cb8f603a1c4d2c8f9f38cd2a3a1b572616ac))
+
 ## [1.1.8](https://github.com/forbiddenlink/security-trainer/compare/v1.1.7...v1.1.8) (2026-11-15)
 
 
