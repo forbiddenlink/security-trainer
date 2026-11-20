@@ -333,6 +333,8 @@ export const useGameStore = create<GameStore>()(
             achievementQueue: [...achievementQueue, notification],
           });
 
+          if (module) get().addXp(module.xpReward, module.id);
+
           // Award "first module complete" badge
           if (completedModules.length === 0) {
             get().unlockBadge("badge-completion");
@@ -367,18 +369,13 @@ export const useGameStore = create<GameStore>()(
             completeDailyChallenge();
           }
 
-          // Check if all lessons in module are complete
-          const module = MODULES.find((m) => m.id === moduleId);
-          if (module) {
-            const updatedCompletedLessons = [...completedLessons, lessonId];
-            const allLessonsComplete = module.lessons.every((lesson) =>
-              updatedCompletedLessons.includes(lesson.id),
-            );
-            if (allLessonsComplete) {
-              get().completeModule(moduleId);
-            }
-          }
           debouncedSyncToCloud();
+        }
+
+        const module = MODULES.find((item) => item.id === moduleId);
+        const progress = get().completedLessons;
+        if (module?.lessons.every((lesson) => progress.includes(lesson.id))) {
+          get().completeModule(moduleId);
         }
       },
 

@@ -40,13 +40,18 @@ async function openApp(page: import("@playwright/test").Page, path = "/") {
 
 test.describe("Security Trainer smoke tests", () => {
   test("onboarding and dashboard", async ({ page }) => {
-    await openApp(page, "/");
-    // Seeded agent has no progress, so the dashboard shows the first-mission hero.
+    await page.goto("/");
+    const role = page.getByRole("button", { name: "Manager", exact: true });
+    await role.click();
+    await page.reload();
+    await expect(role).toHaveAttribute("aria-pressed", "true");
     await expect(
       page.getByRole("heading", { level: 1, name: /Break it here/i }),
     ).toBeVisible();
     await page.getByRole("link", { name: /Start mission/i }).click();
-    await expect(page.getByLabel(/Lesson progress/i)).toBeAttached();
+    await expect(page.getByLabel(/Lesson progress/i)).toBeAttached({
+      timeout: 15_000,
+    });
   });
 
   test("modules list and lesson navigation", async ({ page }) => {
@@ -79,6 +84,15 @@ test.describe("Security Trainer smoke tests", () => {
     await page.getByLabel("Go to next lesson").click();
     await expect(
       page.getByRole("heading", { level: 1, name: "Knowledge Check" }),
+    ).toBeVisible();
+    await expect(page).toHaveURL(/\/owasp-quiz-1$/);
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Knowledge Check" }),
+    ).toBeVisible();
+    await page.goBack();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "What is OWASP?" }),
     ).toBeVisible();
   });
 

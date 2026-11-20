@@ -32,6 +32,8 @@ export interface ScamScenario {
   habit_tags: HabitTag[];
   /** One light line, shown only when humour is on. */
   quip?: string;
+  /** Recovery guidance shown after the decision, never in the message itself. */
+  recovery?: "password" | "transfer" | "gift-card";
 }
 
 export interface ScamLevel {
@@ -182,6 +184,7 @@ export const SCAM_SCENARIOS: ScamScenario[] = [
   },
   {
     id: "l1-locked-account",
+    recovery: "password",
     template: "account-locked",
     level: 1,
     scenario_type: "email",
@@ -272,6 +275,7 @@ export const SCAM_SCENARIOS: ScamScenario[] = [
   // Level 2: verification
   {
     id: "l2-new-bank-details",
+    recovery: "transfer",
     template: "invoice-change",
     level: 2,
     scenario_type: "email",
@@ -374,6 +378,7 @@ export const SCAM_SCENARIOS: ScamScenario[] = [
   },
   {
     id: "l2-password-expiry",
+    recovery: "password",
     template: "it-password-expiry",
     level: 2,
     scenario_type: "email",
@@ -420,6 +425,7 @@ export const SCAM_SCENARIOS: ScamScenario[] = [
   // Level 3: social engineering
   {
     id: "l3-boss-gift-cards",
+    recovery: "gift-card",
     template: "authority-gift-cards",
     level: 3,
     scenario_type: "text",
@@ -789,6 +795,7 @@ export const SCAM_SCENARIOS: ScamScenario[] = [
   },
   {
     id: "l5-fake-shared-doc",
+    recovery: "password",
     template: "shared-file-login",
     level: 5,
     scenario_type: "email",

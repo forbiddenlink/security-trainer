@@ -34,6 +34,9 @@ describe("ScamSurvival page", () => {
   it("shows a scenario as static text with no links or images", () => {
     const { container } = renderWithRouter(<ScamSurvival />);
     fireEvent.click(screen.getByRole("button", { name: /level 1/i }));
+    expect(
+      screen.getByRole("progressbar", { name: /scenario 1 of/i }),
+    ).toHaveValue(1);
     expect(screen.getByText(first.messages[0].from)).toBeInTheDocument();
     const region = screen.getByRole("region", { name: /message/i });
     expect(region.querySelector("a")).toBeNull();
@@ -62,6 +65,8 @@ describe("ScamSurvival page", () => {
     fireEvent.click(screen.getByRole("button", { name: /level 1/i }));
     fireEvent.click(screen.getByRole("button", { name: risky.label }));
     expect(screen.getByText(/everyone slips/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText("See a safe response"));
+    expect(screen.getByText(safe.feedback)).toBeVisible();
     expect(screen.getByRole("button", { name: /try again/i })).toBeEnabled();
   });
 

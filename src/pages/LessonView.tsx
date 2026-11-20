@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { MODULES } from "../data/modules";
 import { useGameStore } from "../store/gameStore";
@@ -34,12 +34,27 @@ export const LessonView: React.FC = () => {
     moduleId: string;
     lessonId?: string;
   }>();
+  return (
+    <LessonSession
+      key={JSON.stringify([moduleId, lessonId])}
+      moduleId={moduleId}
+      lessonId={lessonId}
+    />
+  );
+};
+
+function LessonSession({
+  moduleId,
+  lessonId,
+}: {
+  moduleId?: string;
+  lessonId?: string;
+}) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const {
-    completeModule,
     completeLesson,
-    addXp,
+    calculateXpWithMultipliers,
     isLessonDueForReview,
     completedModules,
     completedLessons,
@@ -51,34 +66,20 @@ export const LessonView: React.FC = () => {
   const module = MODULES.find((m) => m.id === moduleId);
 
   // Find initial lesson index from URL param, or default to 0
-  const initialLessonIndex =
-    lessonId && module
-      ? Math.max(
-          0,
-          module.lessons.findIndex((l) => l.id === lessonId),
-        )
-      : 0;
-  const [currentLessonIndex, setCurrentLessonIndex] =
-    useState(initialLessonIndex);
+  const currentLessonIndex =
+    lessonId && module ? module.lessons.findIndex((l) => l.id === lessonId) : 0;
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [labCompleted, setLabCompleted] = useState(false);
   const [showLessonMenu, setShowLessonMenu] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewLessonId, setReviewLessonId] = useState<string | null>(null);
   const [reviewLessonTitle, setReviewLessonTitle] = useState<string>("");
-  const [showComplete, setShowComplete] = useState(false);
+  const [completionXp, setCompletionXp] = useState<number | null>(null);
 
   const currentLesson = module?.lessons[currentLessonIndex];
   const isFirstLesson = currentLessonIndex === 0;
   const isLastLesson =
     module && currentLessonIndex === module.lessons.length - 1;
-
-  // Reset completion state when lesson changes
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional reset on lesson navigation, not a cascade
-    setQuizCompleted(false);
-    setLabCompleted(false);
-  }, [currentLessonIndex]);
 
   if (!module || !currentLesson) {
     return (
@@ -109,8 +110,12 @@ export const LessonView: React.FC = () => {
   };
 
   const jumpToLesson = (index: number) => {
-    setCurrentLessonIndex(index);
     setShowLessonMenu(false);
+    if (index === currentLessonIndex) return;
+    navigate({
+      pathname: `/modules/${module.id}/${module.lessons[index].id}`,
+      search: searchParams.toString(),
+    });
   };
 
   const fireConfetti = () => {
@@ -128,6 +133,14 @@ export const LessonView: React.FC = () => {
       });
   };
 
+  const missingIndex = module.lessons.findIndex(
+    (lesson) =>
+      lesson.id !== currentLesson.id && !completedLessons.includes(lesson.id),
+  );
+  const finishesModule =
+    !completedModules.includes(module.id) && missingIndex === -1;
+  const returnsToModules = isLastLesson && completedModules.includes(module.id);
+
   const handleNext = () => {
     // Check if this lesson is due for review before completing
     const isDueForReview =
@@ -135,16 +148,6 @@ export const LessonView: React.FC = () => {
 
     // Mark current lesson as complete (this initializes review tracking for new lessons)
     completeLesson(currentLesson.id, module.id);
-
-    // Award module-completion rewards on the last lesson BEFORE any review-modal
-    // interrupt, so finishing a module always grants its XP and celebration even
-    // when the final lesson also happens to be due for review.
-    if (isLastLesson) {
-      completeModule(module.id);
-      // Pass moduleId to apply difficulty multiplier
-      addXp(module.xpReward, module.id);
-      fireConfetti();
-    }
 
     // Show review modal if this lesson was due for review
     if (isDueForReview) {
@@ -154,10 +157,15 @@ export const LessonView: React.FC = () => {
       return; // Don't navigate yet, wait for review modal
     }
 
-    if (isLastLesson) {
-      setShowComplete(true);
+    if (finishesModule) {
+      setCompletionXp(calculateXpWithMultipliers(module.xpReward, module.id));
+      fireConfetti();
+    } else if (returnsToModules) {
+      navigate("/modules");
+    } else if (isLastLesson) {
+      jumpToLesson(missingIndex);
     } else {
-      setCurrentLessonIndex((prev) => prev + 1);
+      jumpToLesson(currentLessonIndex + 1);
     }
   };
 
@@ -175,7 +183,7 @@ export const LessonView: React.FC = () => {
 
   const handlePrev = () => {
     if (!isFirstLesson) {
-      setCurrentLessonIndex((prev) => prev - 1);
+      jumpToLesson(currentLessonIndex - 1);
     }
   };
 
@@ -446,21 +454,27 @@ export const LessonView: React.FC = () => {
             (currentLesson.type === "quiz" && !quizCompleted) ||
             (currentLesson.type === "lab" && !labCompleted)
           }
-          variant={isLastLesson ? "signal" : "primary"}
+          variant={finishesModule ? "signal" : "primary"}
           className="px-5"
           aria-label={
-            isLastLesson
+            finishesModule
               ? "Complete this mission and return to modules"
-              : "Go to next lesson step"
+              : returnsToModules
+                ? "Back to Modules"
+                : "Go to next lesson step"
           }
         >
-          {isLastLesson ? "Complete Mission" : "Next Step"}{" "}
+          {finishesModule
+            ? "Complete Mission"
+            : returnsToModules
+              ? "Back to Modules"
+              : "Next Step"}{" "}
           <ChevronRight className="w-4 h-4" aria-hidden="true" />
         </Button>
       </nav>
 
       {/* Mission complete panel with next-mission recommendation */}
-      {showComplete && (
+      {completionXp !== null && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur px-4"
           role="dialog"
@@ -475,7 +489,7 @@ export const LessonView: React.FC = () => {
             <p className="text-muted-foreground">
               You cleared{" "}
               <span className="text-foreground">{module.title}</span> and banked
-              +{module.xpReward} XP.
+              +{completionXp} XP.
             </p>
             <div className="flex flex-col gap-2 pt-1">
               {nextModule ? (
@@ -513,4 +527,4 @@ export const LessonView: React.FC = () => {
       />
     </div>
   );
-};
+}

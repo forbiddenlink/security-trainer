@@ -1,8 +1,16 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useGameStore } from "./gameStore";
+import { MODULES } from "../data/modules";
 import { getChallengeById } from "../data/ctfChallenges";
 
 describe("gameStore", () => {
+  it("can identify every lesson in persisted progress without its module ID", () => {
+    const ids = MODULES.flatMap((module) =>
+      module.lessons.map((lesson) => lesson.id),
+    );
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   beforeEach(() => {
     // Reset store to initial state before each test
     useGameStore.getState().resetProgress();

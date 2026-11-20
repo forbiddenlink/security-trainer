@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { Route, Routes } from "react-router-dom";
+import { screen, waitFor, within } from "@testing-library/react";
 import {
   renderWithRouter,
   resetGameStore,
@@ -42,24 +43,23 @@ vi.mock("../../components/CodeEditor", () => ({
   ),
 }));
 
-// Mock react-router-dom with dynamic params
-const mockNavigate = vi.fn();
 let mockModuleId = "owasp-intro";
 let mockLessonId: string | undefined;
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-    useParams: () => ({ moduleId: mockModuleId, lessonId: mockLessonId }),
-  };
-});
+function renderLesson() {
+  const url = `/modules/${mockModuleId}${mockLessonId ? `/${mockLessonId}` : ""}`;
+  window.history.replaceState({}, "", url);
+  return renderWithRouter(
+    <Routes>
+      <Route path="/modules/:moduleId/:lessonId?" element={<LessonView />} />
+      <Route path="/modules" element={<div>Modules</div>} />
+    </Routes>,
+  );
+}
 
 describe("LessonView", () => {
   beforeEach(() => {
     resetGameStore();
-    mockNavigate.mockClear();
     mockModuleId = "owasp-intro";
     mockLessonId = undefined;
   });
@@ -68,7 +68,7 @@ describe("LessonView", () => {
     it("shows error when module does not exist", () => {
       mockModuleId = "non-existent-module";
 
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       expect(screen.getByText("Mission not found")).toBeInTheDocument();
     });
@@ -81,7 +81,7 @@ describe("LessonView", () => {
     });
 
     it("renders the module title and lesson title", () => {
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       expect(screen.getByText("Introduction to OWASP")).toBeInTheDocument();
       // Lesson title appears in header and as markdown h1, so use getAllByText
@@ -90,19 +90,19 @@ describe("LessonView", () => {
     });
 
     it("shows lesson type badge", () => {
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       expect(screen.getByText("theory")).toBeInTheDocument();
     });
 
     it("displays step progress", () => {
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       expect(screen.getByText("Step 2 of 3")).toBeInTheDocument();
     });
 
     it("renders theory content", () => {
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       expect(
         screen.getByText(/Open Web Application Security Project/i),
@@ -111,7 +111,7 @@ describe("LessonView", () => {
 
     it("has a disabled Back button on first lesson", () => {
       mockLessonId = undefined;
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       const backButton = screen.getByRole("button", {
         name: /go to previous lesson/i,
@@ -120,7 +120,7 @@ describe("LessonView", () => {
     });
 
     it("has enabled Next Step button on theory lesson", () => {
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       const nextButton = screen.getByRole("button", {
         name: /go to next lesson step/i,
@@ -136,7 +136,7 @@ describe("LessonView", () => {
 
     it("advances to quiz lesson when clicking Next", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       const nextButton = screen.getByRole("button", {
         name: /go to next lesson step/i,
@@ -157,7 +157,7 @@ describe("LessonView", () => {
 
     it("displays quiz question", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
@@ -170,7 +170,7 @@ describe("LessonView", () => {
 
     it("renders all quiz options", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
@@ -192,7 +192,7 @@ describe("LessonView", () => {
 
     it("has a disabled Submit button before selecting an option", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
@@ -206,7 +206,7 @@ describe("LessonView", () => {
 
     it("enables Submit button after selecting an option", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
@@ -224,7 +224,7 @@ describe("LessonView", () => {
 
     it("shows feedback after submitting correct answer", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
@@ -250,7 +250,7 @@ describe("LessonView", () => {
 
     it("shows feedback after submitting wrong answer", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
@@ -271,22 +271,21 @@ describe("LessonView", () => {
 
     it("disables Next button until quiz is submitted", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
       );
 
-      // The quiz is the last lesson, so the forward button completes the mission.
       const nextButton = screen.getByRole("button", {
-        name: /complete this mission and return to modules/i,
+        name: /go to next lesson step/i,
       });
       expect(nextButton).toBeDisabled();
     });
 
     it("enables Next button after quiz is submitted", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await user.click(
         screen.getByRole("button", { name: /go to next lesson step/i }),
@@ -301,7 +300,7 @@ describe("LessonView", () => {
 
       // Forward button should now be enabled
       const nextButton = screen.getByRole("button", {
-        name: /complete this mission and return to modules/i,
+        name: /go to next lesson step/i,
       });
       expect(nextButton).toBeEnabled();
     });
@@ -335,7 +334,7 @@ describe("LessonView", () => {
 
     it("shows lab view with code editor", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await navigateToLab(user);
 
@@ -348,7 +347,7 @@ describe("LessonView", () => {
 
     it("exposes the editor/terminal toggle as an accessible tablist", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await navigateToLab(user);
 
@@ -367,7 +366,7 @@ describe("LessonView", () => {
 
     it("shows Deploy Patch button", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await navigateToLab(user);
 
@@ -380,7 +379,7 @@ describe("LessonView", () => {
 
     it("shows error when submitting vulnerable code", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await navigateToLab(user);
 
@@ -399,7 +398,7 @@ describe("LessonView", () => {
 
     it("disables Next button until lab is verified successfully", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await navigateToLab(user);
 
@@ -414,6 +413,7 @@ describe("LessonView", () => {
     // owasp-intro ends on its knowledge check, so start there.
     beforeEach(() => {
       mockLessonId = "owasp-quiz-1";
+      useGameStore.setState({ completedLessons: ["owasp-lab", "owasp-1"] });
     });
 
     const answerQuiz = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -441,10 +441,39 @@ describe("LessonView", () => {
       );
     };
 
+    it("sends a learner who skipped ahead back to the unfinished step", async () => {
+      useGameStore.setState({ completedLessons: ["owasp-lab"] });
+      const user = userEvent.setup();
+      renderLesson();
+      await answerQuiz(user);
+      await user.click(
+        screen.getByRole("button", { name: /go to next lesson step/i }),
+      );
+      expect(useGameStore.getState().xp).toBe(0);
+      expect(useGameStore.getState().completedModules).toEqual([]);
+      expect(screen.getByText("Step 2 of 3")).toBeInTheDocument();
+      await completeMission(user);
+      expect(useGameStore.getState().xp).toBe(100);
+    });
+
+    it("preserves XP when a learner repeats a completed mission", async () => {
+      useGameStore.setState({
+        xp: 100,
+        completedModules: ["owasp-intro"],
+        completedLessons: ["owasp-lab", "owasp-1", "owasp-quiz-1"],
+      });
+      const user = userEvent.setup();
+      renderLesson();
+      await answerQuiz(user);
+      await user.click(screen.getByRole("button", { name: "Back to Modules" }));
+      expect(useGameStore.getState().xp).toBe(100);
+      expect(window.location.pathname).toBe("/modules");
+    });
+
     it("completes module and adds XP on last lesson completion", async () => {
       const user = userEvent.setup();
       vi.useFakeTimers({ shouldAdvanceTime: true });
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await answerQuiz(user);
       await completeMission(user);
@@ -459,7 +488,7 @@ describe("LessonView", () => {
 
     it("shows a Mission Complete panel with a next-mission recommendation", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       await answerQuiz(user);
       await completeMission(user);
@@ -470,13 +499,15 @@ describe("LessonView", () => {
         screen.getByRole("button", { name: /start next mission/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: /back to modules/i }),
+        within(
+          screen.getByRole("dialog", { name: "Mission complete" }),
+        ).getByRole("button", { name: /back to modules/i }),
       ).toBeInTheDocument();
     });
 
     it("awards module completion XP even when the last lesson is due for review", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       // Seed the final lesson as overdue for review so the review modal
       // interrupts navigation on the last lesson.
@@ -507,7 +538,7 @@ describe("LessonView", () => {
   describe("navigation", () => {
     it("navigates back when clicking Back button", async () => {
       const user = userEvent.setup();
-      renderWithRouter(<LessonView />);
+      renderLesson();
 
       // Go to second lesson
       await user.click(

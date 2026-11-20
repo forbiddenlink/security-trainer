@@ -32,6 +32,9 @@ async function seedAgent(page: import("@playwright/test").Page) {
 async function openApp(page: import("@playwright/test").Page, path: string) {
   await seedAgent(page);
   await page.goto(path);
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible({
+    timeout: 15_000,
+  });
 }
 
 test.describe("Security Trainer expanded flows", () => {
