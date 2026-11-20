@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.0](https://github.com/forbiddenlink/security-trainer/compare/v1.2.0...v1.3.0) (2026-11-20)
+
+
+### Features
+
+* help learners recover accounts, resume lessons and practice safe responses ([#153](https://github.com/forbiddenlink/security-trainer/issues/153)) ([5be34c2](https://github.com/forbiddenlink/security-trainer/commit/5be34c278c7db96b3e235a45995f27117e2fd731))
+
+
+### Bug Fixes
+
+* **deps:** exclude minimatch releases affected by glob amplification ([#152](https://github.com/forbiddenlink/security-trainer/issues/152)) ([1fe2ae3](https://github.com/forbiddenlink/security-trainer/commit/1fe2ae345ee1444c37b9aa13fe12bd56381b460b))
+* **deps:** keep installed Vite aligned with the declared patch ([c790e23](https://github.com/forbiddenlink/security-trainer/commit/c790e230bc756ded7b0da6c2abd1d11a257181e8))
+* give account emails working branded actions ([#155](https://github.com/forbiddenlink/security-trainer/issues/155)) ([f780b69](https://github.com/forbiddenlink/security-trainer/commit/f780b69b32f7d749279a735fceca6c30bc3841fc))
+* keep learner accounts and saved profiles consistent ([#154](https://github.com/forbiddenlink/security-trainer/issues/154)) ([cb7c1c9](https://github.com/forbiddenlink/security-trainer/commit/cb7c1c9bdbaa9140f2203ba096635bca8ad87626))
+* preserve learner progress and verify navigation in CI ([7bf8230](https://github.com/forbiddenlink/security-trainer/commit/7bf8230ddc1270dfc5a3acb859e24809fcfe4267))
+
 ## [1.2.0](https://github.com/forbiddenlink/security-trainer/compare/v1.1.8...v1.2.0) (2026-11-18)
 
 
