@@ -6,3 +6,11 @@ additional_redirect_urls = ["https://security-trainer.vercel.app/reset-password"
 
 [auth.email]
 enable_confirmations = true
+
+[auth.email.template.confirmation]
+subject = "Confirm your Security Trainer account"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Security Trainer password"
+content_path = "./supabase/templates/recovery.html"
