@@ -8,6 +8,6 @@ overrides:
   "react-router@8": ">=8.3.0 <9"
   "rollup": ">=4.59.0 <5"
   "undici": ">=7.30.1 <8.0.0"
-  "vite": ">=7.3.2 <9"
+  "vite": "$vite"
   "browserslist": ">=4.28.7 <5"
   "source-map-js": ">=1.2.2 <2"
