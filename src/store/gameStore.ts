@@ -1,3 +1,4 @@
+import type { Profile } from "../types/database";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type {
@@ -78,10 +79,10 @@ let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 let syncRetryCount = 0;
 
 // Sync progress to cloud (debounced) with retry logic
-const syncToCloud = async () => {
+const syncToCloud = async (userId: string) => {
   const { user, syncProgressToCloud } = useAuthStore.getState();
 
-  if (!user) return;
+  if (user?.id !== userId) return;
 
   const state = useGameStore.getState();
 
@@ -115,7 +116,7 @@ const syncToCloud = async () => {
       console.log(
         `Retrying sync in ${delay}ms (attempt ${syncRetryCount}/${MAX_SYNC_RETRIES})`,
       );
-      setTimeout(syncToCloud, delay);
+      setTimeout(() => syncToCloud(userId), delay);
       useGameStore.setState({ syncStatus: "retrying" });
     } else {
       // Max retries reached
@@ -132,7 +133,10 @@ const debouncedSyncToCloud = () => {
   if (syncTimeout) {
     clearTimeout(syncTimeout);
   }
-  syncTimeout = setTimeout(syncToCloud, SYNC_DEBOUNCE_MS);
+  const { user, profile } = useAuthStore.getState();
+  const userId = user?.id;
+  if (userId && profile?.id === userId)
+    syncTimeout = setTimeout(() => syncToCloud(userId), SYNC_DEBOUNCE_MS);
 };
 
 type SyncStatus = "idle" | "syncing" | "synced" | "retrying" | "error";
@@ -852,3 +856,33 @@ export const useGameStore = create<GameStore>()(
     },
   ),
 );
+
+export function hasLocalLearningProgress(
+  state: Pick<
+    UserState,
+    "xp" | "level" | "badges" | "completedLessons" | "completedModules"
+  >,
+): boolean {
+  return (
+    state.xp > 0 ||
+    state.level > 1 ||
+    state.completedLessons.length > 0 ||
+    state.completedModules.length > 0 ||
+    state.badges.some((badge) => badge !== "recruit")
+  );
+}
+
+export function restoreCloudProgress(profile: Profile): void {
+  useGameStore.setState({
+    xp: profile.xp,
+    level: profile.level,
+    badges: profile.badges,
+    completedModules: profile.completed_modules,
+    completedLessons: profile.completed_lessons,
+    streakDays: profile.streak_days,
+    lastLoginDate: profile.last_login_date,
+    dailyChallengeId: profile.daily_challenge_id,
+    dailyChallengeDate: profile.daily_challenge_date,
+    dailyChallengeCompleted: profile.daily_challenge_completed,
+  });
+}

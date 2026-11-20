@@ -159,6 +159,36 @@ describe("AuthModal", () => {
       });
     });
 
+    it("restores a returning learner on an empty browser without uploading", async () => {
+      setupStores();
+      mockSignIn.mockResolvedValue({ error: null });
+      useGameStore.setState({ badges: ["recruit"] });
+      mockLoadProgressFromCloud.mockResolvedValueOnce({
+        xp: 0,
+        level: 2,
+        badges: [],
+        completed_modules: [],
+        completed_lessons: ["first"],
+        streak_days: 2,
+        last_login_date: null,
+        daily_challenge_id: null,
+        daily_challenge_date: null,
+        daily_challenge_completed: false,
+      });
+      const user = userEvent.setup();
+      render(<AuthModal />);
+      await user.type(screen.getByLabelText("Email"), "test@example.com");
+      await user.type(screen.getByLabelText("Password"), "password123");
+      await user.click(screen.getByRole("button", { name: "Sign In" }));
+      await waitFor(() => expect(mockCloseAuthModal).toHaveBeenCalled());
+      expect(useGameStore.getState()).toMatchObject({
+        xp: 0,
+        level: 2,
+        completedLessons: ["first"],
+      });
+      expect(mockSyncProgressToCloud).not.toHaveBeenCalled();
+    });
+
     it("submits signup form with display name", async () => {
       setupStores({ authModalMode: "signup" });
       const user = userEvent.setup();

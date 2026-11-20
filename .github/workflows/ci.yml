@@ -38,11 +38,17 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
-      - name: Type check
-        run: pnpm exec tsc --noEmit
+      - name: Biome
+        run: pnpm run biome:check
 
       - name: Test
-        run: pnpm test -- --run
+        run: pnpm run test:run
 
-      - name: Build
+      - name: Type check and build
         run: pnpm run build
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Browser tests
+        run: pnpm test:e2e

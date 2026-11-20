@@ -12,7 +12,11 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
-import { useGameStore } from "../store/gameStore";
+import {
+  hasLocalLearningProgress,
+  restoreCloudProgress,
+  useGameStore,
+} from "../store/gameStore";
 import { isSupabaseConfigured } from "../lib/supabase";
 import { useFocusTrap } from "../utils/useFocusTrap";
 import { Button, Input } from "./ui";
@@ -50,8 +54,7 @@ export const AuthModal: React.FC = () => {
 
   const errorRef = useRef<HTMLDivElement>(null);
 
-  const hasLocalProgress =
-    gameStore.xp > 0 || gameStore.completedLessons.length > 0;
+  const hasLocalProgress = hasLocalLearningProgress(gameStore);
 
   // Move focus to the error banner when a new error appears (a11y).
   useEffect(() => {
@@ -70,17 +73,32 @@ export const AuthModal: React.FC = () => {
     }
 
     if (!result.error) {
-      // Check if we need to merge progress
-      if (hasLocalProgress && authModalMode === "login") {
-        const cloudProfile = await loadProgressFromCloud();
-        if (cloudProfile && cloudProfile.xp > 0) {
+      if (authModalMode === "login") {
+        const profile = await loadProgressFromCloud();
+        if (!profile) {
+          useAuthStore.setState({
+            error: "Could not load saved progress. Please try again.",
+          });
+          return;
+        }
+        if (!hasLocalProgress) {
+          restoreCloudProgress(profile);
+          handleClose();
+          return;
+        }
+        if (
+          profile.xp > 0 ||
+          profile.level > 1 ||
+          profile.completed_lessons.length > 0 ||
+          profile.badges.length > 0
+        ) {
           setShowMergeOption(true);
           return;
         }
       }
 
       // Sync local progress to cloud
-      await syncLocalProgressToCloud();
+      if (!(await syncLocalProgressToCloud())) return;
       handleClose();
     }
   };
@@ -106,18 +124,26 @@ export const AuthModal: React.FC = () => {
 
   const syncLocalProgressToCloud = async () => {
     const { syncProgressToCloud } = useAuthStore.getState();
-    await syncProgressToCloud({
-      xp: gameStore.xp,
-      level: gameStore.level,
-      badges: gameStore.badges,
-      completedModules: gameStore.completedModules,
-      completedLessons: gameStore.completedLessons,
-      streakDays: gameStore.streakDays,
-      lastLoginDate: gameStore.lastLoginDate,
-      dailyChallengeId: gameStore.dailyChallengeId,
-      dailyChallengeDate: gameStore.dailyChallengeDate,
-      dailyChallengeCompleted: gameStore.dailyChallengeCompleted,
-    });
+    try {
+      await syncProgressToCloud({
+        xp: gameStore.xp,
+        level: gameStore.level,
+        badges: gameStore.badges,
+        completedModules: gameStore.completedModules,
+        completedLessons: gameStore.completedLessons,
+        streakDays: gameStore.streakDays,
+        lastLoginDate: gameStore.lastLoginDate,
+        dailyChallengeId: gameStore.dailyChallengeId,
+        dailyChallengeDate: gameStore.dailyChallengeDate,
+        dailyChallengeCompleted: gameStore.dailyChallengeCompleted,
+      });
+      return true;
+    } catch {
+      useAuthStore.setState({
+        error: "Could not save progress. Please try again.",
+      });
+      return false;
+    }
   };
 
   const handleMergeChoice = async (keepCloud: boolean) => {
@@ -127,22 +153,11 @@ export const AuthModal: React.FC = () => {
       if (cloudProfile) {
         // Reset local and apply cloud progress
         gameStore.resetProgress();
-        useGameStore.setState({
-          xp: cloudProfile.xp,
-          level: cloudProfile.level,
-          badges: cloudProfile.badges,
-          completedModules: cloudProfile.completed_modules,
-          completedLessons: cloudProfile.completed_lessons,
-          streakDays: cloudProfile.streak_days,
-          lastLoginDate: cloudProfile.last_login_date,
-          dailyChallengeId: cloudProfile.daily_challenge_id,
-          dailyChallengeDate: cloudProfile.daily_challenge_date,
-          dailyChallengeCompleted: cloudProfile.daily_challenge_completed,
-        });
+        restoreCloudProgress(cloudProfile);
       }
     } else {
       // Keep local and sync to cloud
-      await syncLocalProgressToCloud();
+      if (!(await syncLocalProgressToCloud())) return;
     }
     setShowMergeOption(false);
     handleClose();
@@ -247,6 +262,7 @@ export const AuthModal: React.FC = () => {
             <div className="p-6">
               {showMergeOption ? (
                 <div className="space-y-4">
+                  {errorBanner}
                   <div
                     role="alert"
                     className="p-3 border border-border border-l-[3px] border-l-warning rounded-[var(--radius-sm)] text-sm text-foreground"

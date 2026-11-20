@@ -7,19 +7,9 @@ import { AchievementToast } from "../components/AchievementToast";
 import { CommandPalette } from "../components/CommandPalette";
 import { RangeMark } from "../components/RangeMark";
 
-const BASE_TITLE = "SecTrainer";
-// Map the first path segment to a descriptive document title.
-const ROUTE_TITLES: Record<string, string> = {
-  "": "Mission Control",
-  modules: "Modules",
-  profile: "Profile",
-  challenge: "Daily Challenge",
-  leaderboard: "Leaderboard",
-  paths: "Learning Paths",
-  reviews: "Reviews",
-  ctf: "CTF Challenges",
-  privacy: "Privacy & Terms",
-};
+import { ROUTE_TITLES } from "../lib/site";
+
+const BASE_TITLE = "Security Trainer";
 
 export const MainLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -53,15 +43,16 @@ export const MainLayout: React.FC = () => {
 
       {/* Sidebar - hidden on mobile by default, shown when sidebarOpen */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        id="primary-sidebar"
+        className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out lg:visible lg:relative lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "invisible -translate-x-full"
         }`}
       >
         <Sidebar onNavigate={closeSidebar} />
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col relative">
-        <Header onMenuClick={toggleSidebar} />
+        <Header menuOpen={sidebarOpen} onMenuClick={toggleSidebar} />
         <main
           id="main-content"
           tabIndex={-1}

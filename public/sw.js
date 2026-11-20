@@ -1,7 +1,7 @@
 // Service Worker for SecTrainer PWA.
 // NOTE: bump CACHE_NAME on every deploy that changes cached assets, otherwise
 // returning users can be served stale JS/CSS until a cache-miss network path.
-const CACHE_NAME = 'sectrainer-v3';
+const CACHE_NAME = 'sectrainer-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -29,7 +29,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
+          .filter((name) => name.startsWith('sectrainer-') && name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       );
     })
@@ -43,32 +43,27 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
-  // Skip API requests and chrome-extension requests
-  if (event.request.url.includes('/api/') ||
-      event.request.url.startsWith('chrome-extension://')) {
-    return;
-  }
+  if (url.pathname.startsWith('/api/')) return;
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone the response before caching
-        const responseClone = response.clone();
-
         // Cache successful responses
         if (response.status === 200) {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+          const copy = response.clone();
+          event.waitUntil(caches.open(CACHE_NAME).then((cache) =>
+            cache.put(event.request, copy)
+          ).catch(() => {}));
         }
 
         return response;
       })
       .catch(() => {
         // Network failed, try cache
-        return caches.match(event.request).then((cachedResponse) => {
+        return caches.match(event.request, { cacheName: CACHE_NAME }).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
@@ -76,8 +71,8 @@ self.addEventListener('fetch', (event) => {
           // For navigation requests, serve the app shell if cached, else the
           // dedicated offline page (instead of a bare 503 text response).
           if (event.request.mode === 'navigate') {
-            return caches.match('/index.html').then(
-              (shell) => shell || caches.match('/offline.html'),
+            return caches.match('/index.html', { cacheName: CACHE_NAME }).then(
+              (shell) => shell || caches.match('/offline.html', { cacheName: CACHE_NAME }),
             );
           }
 

@@ -61,6 +61,15 @@ test.describe("Security Trainer smoke tests", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
+        name: "Identify the Vulnerabilities",
+      }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Go to step 2: What is OWASP?" })
+      .click();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
         name: "What is OWASP?",
         exact: true,
       }),
@@ -71,6 +80,22 @@ test.describe("Security Trainer smoke tests", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "Knowledge Check" }),
     ).toBeVisible();
+  });
+
+  test("mobile navigation exposes only the open menu and names the destination", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await seedAgent(page);
+    await page.goto("/");
+    const nav = page.getByRole("navigation", { name: "Primary" });
+    const menu = page.getByRole("button", { name: "Open navigation menu" });
+    await expect(menu).toHaveAttribute("aria-expanded", "false");
+    await expect(nav).toBeHidden();
+    await menu.click();
+    await nav.getByRole("link", { name: "Scam Survival" }).click();
+    await expect(page).toHaveTitle("Scam Survival · Security Trainer");
+    await expect(nav).toBeHidden();
   });
 
   test("learning paths page", async ({ page }) => {

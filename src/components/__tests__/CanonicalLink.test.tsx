@@ -4,7 +4,9 @@ import { MemoryRouter } from "react-router-dom";
 import { CanonicalLink } from "../CanonicalLink";
 
 afterEach(() => {
-  document.head.querySelectorAll('link[rel="canonical"]').forEach((n) => n.remove());
+  document.head.querySelectorAll('link[rel="canonical"]').forEach((n) => {
+    n.remove();
+  });
 });
 
 const canonical = () =>
@@ -18,7 +20,9 @@ describe("CanonicalLink", () => {
       </MemoryRouter>,
     );
     expect(canonical()).toHaveLength(1);
-    expect(canonical()[0].href).toBe("https://security-trainer.vercel.app/modules");
+    expect(canonical()[0].href).toBe(
+      "https://security-trainer.vercel.app/modules",
+    );
   });
 
   it("reuses the existing tag instead of adding a second one", () => {
@@ -32,6 +36,8 @@ describe("CanonicalLink", () => {
       </MemoryRouter>,
     );
     expect(canonical()).toHaveLength(1);
-    expect(canonical()[0].href).toBe("https://security-trainer.vercel.app/paths/web");
+    expect(canonical()[0].href).toBe(
+      "https://security-trainer.vercel.app/paths/web",
+    );
   });
 });

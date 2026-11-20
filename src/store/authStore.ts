@@ -105,11 +105,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // Listen for auth changes
       const {
         data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
+      } = supabase.auth.onAuthStateChange((event, session) => {
         set({ user: session?.user || null });
 
         if (event === "SIGNED_IN" && session?.user) {
-          await get().loadProgressFromCloud();
+          // Release the auth callback before querying with the same client.
+          setTimeout(() => {
+            if (get().user?.id === session.user.id)
+              void get().loadProgressFromCloud();
+          }, 0);
         } else if (event === "SIGNED_OUT") {
           set({ profile: null, userRank: null });
         }
@@ -330,11 +334,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       .single();
 
     if (error) {
-      console.error("Sync to cloud error:", error);
-      return;
+      throw new Error(error.message);
     }
 
-    set({ profile: data });
+    if (get().user?.id === user.id) set({ profile: data });
   },
 
   loadProgressFromCloud: async () => {
@@ -352,6 +355,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return null;
     }
 
+    if (get().user?.id !== user.id) return null;
     if (data) {
       set({ profile: data });
       return data;
@@ -378,6 +382,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return null;
     }
 
+    if (get().user?.id !== user.id) return null;
     set({ profile: newProfile });
     return newProfile;
   },

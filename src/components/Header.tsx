@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState, memo, useCallback } from "react";
-import { useGameStore } from "../store/gameStore";
+import {
+  hasLocalLearningProgress,
+  restoreCloudProgress,
+  useGameStore,
+} from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
 import { LogIn, LogOut, ChevronDown, Menu, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,34 +17,25 @@ import { useLocation } from "react-router-dom";
 import { MODULES } from "../data/modules";
 import { getPathById } from "../data/learningPaths";
 import { openCommandPalette } from "../lib/paletteEvents";
+import { ROUTE_TITLES } from "../lib/site";
 
 const isMac =
   typeof navigator !== "undefined" &&
   /Mac|iPhone|iPad/.test(navigator.platform);
 
-const ROUTE_TITLES: Record<string, string> = {
-  "": "Mission Control",
-  modules: "Modules",
-  profile: "Profile",
-  challenge: "Final Exam",
-  leaderboard: "Leaderboard",
-  paths: "Learning Paths",
-  reviews: "Intel Review",
-  ctf: "CTF Challenges",
-  privacy: "Privacy & Terms",
-};
-
 interface HeaderProps {
+  menuOpen?: boolean;
   onMenuClick?: () => void;
 }
 
 /**
  * Main header with user stats, level progress, and auth controls
  */
-export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
+export const Header: React.FC<HeaderProps> = memo((props) => {
+  const { onMenuClick, menuOpen = false } = props;
   const { pathname } = useLocation();
   const [, section = "", detailId] = pathname.split("/");
-  const routeTitle = ROUTE_TITLES[section] ?? "SecTrainer";
+  const routeTitle = ROUTE_TITLES[section] ?? "Security Trainer";
   const detailTitle =
     section === "modules" && detailId
       ? MODULES.find((m) => m.id === detailId)?.title
@@ -72,6 +67,14 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
     const init = async () => {
       if (isSupabaseConfigured()) {
         await initialize();
+        const { user, profile } = useAuthStore.getState();
+        if (
+          user &&
+          profile?.id === user.id &&
+          !hasLocalLearningProgress(useGameStore.getState())
+        ) {
+          restoreCloudProgress(profile);
+        }
       }
       // Check streak and daily challenge after auth is ready
       checkStreak();
@@ -110,7 +113,11 @@ export const Header: React.FC<HeaderProps> = memo(({ onMenuClick }) => {
           type="button"
           onClick={onMenuClick}
           className="lg:hidden grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] border border-border text-foreground hover:border-foreground"
-          aria-label="Open navigation menu"
+          aria-label={
+            menuOpen ? "Close navigation menu" : "Open navigation menu"
+          }
+          aria-controls="primary-sidebar"
+          aria-expanded={menuOpen}
         >
           <Menu className="w-5 h-5" aria-hidden="true" />
         </button>
