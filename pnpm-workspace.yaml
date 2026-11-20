@@ -3,7 +3,7 @@ overrides:
   "dompurify": ">=3.4.17 <4"
   "flatted": ">=3.4.2 <4"
   "lodash-es": ">=4.18.0 <5"
-  "minimatch": ">=9.0.7 <11"
+  "minimatch": ">=11.0.1 <12"
   "picomatch": ">=4.0.4 <5"
   "react-router@8": ">=8.3.0 <9"
   "rollup": ">=4.59.0 <5"
