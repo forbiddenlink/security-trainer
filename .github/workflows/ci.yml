@@ -47,8 +47,8 @@ jobs:
       - name: Type check and build
         run: pnpm run build
 
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install test browsers
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Browser tests
         run: pnpm test:e2e

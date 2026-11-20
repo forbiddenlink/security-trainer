@@ -46,13 +46,13 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (url.pathname.startsWith('/api/')) return;
+  if (url.pathname.startsWith('/api/') || url.pathname === '/reset-password' || url.searchParams.has('code')) return;
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
         // Cache successful responses
-        if (response.status === 200) {
+        if (response.status === 200 && !response.headers.get('Cache-Control')?.includes('no-store')) {
           const copy = response.clone();
           event.waitUntil(caches.open(CACHE_NAME).then((cache) =>
             cache.put(event.request, copy)

@@ -13,11 +13,14 @@ import "./index.css";
 import App from "./App.tsx";
 import { initPostHog } from "./lib/posthog";
 
-// Initialize analytics
-initPostHog();
+import { isRecoveryLocation, observeRecovery } from "./lib/passwordRecovery";
+import { PasswordRecovery } from "./pages/PasswordRecovery";
+
+const entryUrl = new URL(window.location.href);
+const recovering = isRecoveryLocation(entryUrl);
+if (recovering) observeRecovery(entryUrl);
+else initPostHog();
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+  <StrictMode>{recovering ? <PasswordRecovery /> : <App />}</StrictMode>,
 );

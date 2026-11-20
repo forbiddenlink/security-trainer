@@ -36,6 +36,21 @@ const HABIT_LABEL: Record<HabitTag, string> = {
   balanced: "Stay balanced",
 };
 
+const RECOVERY_GUIDANCE = {
+  password: [
+    "Already shared a password?",
+    "Open the real service directly. Change that password anywhere you reused it and enable two-factor authentication.",
+  ],
+  transfer: [
+    "Already sent a bank transfer?",
+    "Contact your bank immediately through its official app or number. Report the transfer and ask whether it can be reversed.",
+  ],
+  "gift-card": [
+    "Already shared a gift card code?",
+    "Contact the card issuer immediately. Keep the card and receipt, report the scam and ask for a refund.",
+  ],
+} as const;
+
 interface Round {
   scenario: ScamScenario;
   practice: boolean;
@@ -136,6 +151,10 @@ export const ScamSurvival: React.FC = () => {
   );
 
   const levelDone = level !== null && !round;
+  const levelScenarios = level === null ? [] : scenariosForLevel(level);
+  const position = round
+    ? levelScenarios.findIndex((s) => s.id === round.scenario.id) + 1
+    : 0;
 
   return (
     <div
@@ -304,6 +323,17 @@ export const ScamSurvival: React.FC = () => {
 
           {round && (
             <>
+              <div className="space-y-1">
+                <label htmlFor="scenario-position" className="ui-label">
+                  Scenario {position} of {levelScenarios.length}
+                </label>
+                <progress
+                  id="scenario-position"
+                  className="block w-full h-2 accent-primary"
+                  value={position}
+                  max={levelScenarios.length}
+                />
+              </div>
               {round.practice && (
                 <p className="font-mono text-caption">
                   Practice: nothing here counts toward your level.
@@ -363,6 +393,22 @@ export const ScamSurvival: React.FC = () => {
                       </ul>
                     </div>
                   )}
+                  {round.result.choice.outcome !== "safe" && (
+                    <details className="ui-card p-3">
+                      <summary className="cursor-pointer font-medium">
+                        See a safe response
+                      </summary>
+                      <ul className="mt-2 list-disc pl-5">
+                        {round.scenario.choices
+                          .filter((choice) => choice.outcome === "safe")
+                          .map((choice) => (
+                            <li key={choice.id}>
+                              {choice.label} <span>{choice.feedback}</span>
+                            </li>
+                          ))}
+                      </ul>
+                    </details>
+                  )}
                   {round.result.choice.outcome === "safe" ? (
                     <p>
                       Good habit: {HABIT_PRAISE[round.scenario.habit_tags[0]]}
@@ -376,6 +422,22 @@ export const ScamSurvival: React.FC = () => {
                   )}
                   {humour && round.scenario.quip && (
                     <p className="italic">{round.scenario.quip}</p>
+                  )}
+                  {round.scenario.recovery && (
+                    <details className="ui-card p-3">
+                      <summary className="cursor-pointer font-medium">
+                        {RECOVERY_GUIDANCE[round.scenario.recovery][0]}
+                      </summary>
+                      <p className="mt-2">
+                        {RECOVERY_GUIDANCE[round.scenario.recovery][1]}
+                      </p>
+                      <a
+                        className="underline underline-offset-4"
+                        href="https://consumer.ftc.gov/articles/what-do-if-you-were-scammed"
+                      >
+                        FTC recovery guidance
+                      </a>
+                    </details>
                   )}
                   {round.result.newBadges.map((n) => (
                     <p key={n} className="font-medium">

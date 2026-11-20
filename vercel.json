@@ -5,6 +5,7 @@
     { "source": "/modules", "destination": "/index.html" },
     { "source": "/modules/:moduleId", "destination": "/index.html" },
     { "source": "/modules/:moduleId/:lessonId", "destination": "/index.html" },
+    { "source": "/reset-password", "destination": "/index.html" },
     { "source": "/profile", "destination": "/index.html" },
     { "source": "/challenge", "destination": "/index.html" },
     { "source": "/leaderboard", "destination": "/index.html" },
@@ -44,6 +45,13 @@
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.posthog.com https://us.i.posthog.com; frame-src https://www.youtube-nocookie.com; frame-ancestors 'none';"
         }
+      ]
+    },
+    {
+      "source": "/reset-password",
+      "headers": [
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "Cache-Control", "value": "no-store" }
       ]
     }
   ]
