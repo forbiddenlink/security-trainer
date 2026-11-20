@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AuthModal } from "../AuthModal";
@@ -86,6 +86,8 @@ describe("AuthModal", () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => vi.unstubAllEnvs());
+
   describe("Rendering", () => {
     it("renders nothing when modal is closed", () => {
       setupStores({ isAuthModalOpen: false });
@@ -115,12 +117,10 @@ describe("AuthModal", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders Google sign-in button", () => {
+    it("hides Google sign-in while the provider is disabled", () => {
       setupStores();
       render(<AuthModal />);
-      expect(
-        screen.getByRole("button", { name: /google/i }),
-      ).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /google/i })).toBeNull();
     });
   });
 
@@ -192,7 +192,7 @@ describe("AuthModal", () => {
     it("submits signup form with display name", async () => {
       setupStores({ authModalMode: "signup" });
       const user = userEvent.setup();
-      mockSignUp.mockResolvedValue({ error: null });
+      mockSignUp.mockResolvedValue({ error: null, needsConfirmation: true });
 
       render(<AuthModal />);
 
@@ -202,6 +202,10 @@ describe("AuthModal", () => {
       await user.click(screen.getByRole("button", { name: "Create Account" }));
 
       await waitFor(() => {
+        expect(screen.getByRole("status")).toHaveTextContent(
+          "confirmation link",
+        );
+        expect(mockSyncProgressToCloud).not.toHaveBeenCalled();
         expect(mockSignUp).toHaveBeenCalledWith(
           "test@example.com",
           "password123",
@@ -211,6 +215,7 @@ describe("AuthModal", () => {
     });
 
     it("calls Google sign-in when Google button is clicked", async () => {
+      vi.stubEnv("VITE_AUTH_GOOGLE", "true");
       setupStores();
       const user = userEvent.setup();
       render(<AuthModal />);
@@ -323,6 +328,7 @@ describe("AuthModal", () => {
     });
 
     it("disables form buttons during loading", () => {
+      vi.stubEnv("VITE_AUTH_GOOGLE", "true");
       setupStores({ loading: true });
       render(<AuthModal />);
 

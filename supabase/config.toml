@@ -1,0 +1,8 @@
+project_id = "security-trainer"
+
+[auth]
+site_url = "https://security-trainer.vercel.app"
+additional_redirect_urls = ["https://security-trainer.vercel.app/reset-password", "https://security-trainer.vercel.app/profile"]
+
+[auth.email]
+enable_confirmations = true

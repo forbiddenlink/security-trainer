@@ -26,7 +26,7 @@ interface AuthActions {
     email: string,
     password: string,
     displayName?: string,
-  ) => Promise<{ error: AuthError | null }>;
+  ) => Promise<{ error: AuthError | null; needsConfirmation?: boolean }>;
   signIn: (
     email: string,
     password: string,
@@ -149,18 +149,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return { error };
     }
 
-    if (data.user) {
-      // Create profile record
-      const profileData: ProfileInsert = {
-        id: data.user.id,
-        email: data.user.email ?? null,
-        display_name: displayName || email?.split("@")[0] || "Agent",
-      };
-      await supabase.from("profiles").insert(profileData);
-    }
-
     set({ loading: false });
-    return { error: null };
+    return { error: null, needsConfirmation: !data.session };
   },
 
   signIn: async (email, password) => {
@@ -249,14 +239,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (!supabase || !user) return { error: null };
 
     set({ loading: true });
-    // Delete the user's own profile row (allowed by the RLS DELETE policy).
-    // NOTE: fully removing the auth user requires a privileged server route
-    // (auth.admin.deleteUser) — not possible from the client anon key. This
-    // clears their stored data and signs them out.
-    const { error } = await supabase
-      .from("profiles")
-      .delete()
-      .eq("id", user.id);
+    const { error } = await supabase.rpc("delete_own_account");
     if (error) {
       set({ loading: false, error: error.message });
       return { error: new Error(error.message) };
@@ -365,10 +348,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     const profileData: ProfileInsert = {
       id: user.id,
       email: user.email ?? null,
-      display_name:
-        user.user_metadata?.display_name ||
-        user.email?.split("@")[0] ||
-        "Agent",
+      display_name: user.user_metadata?.display_name || "Agent",
     };
 
     const { data: newProfile, error: insertError } = await supabase

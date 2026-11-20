@@ -78,7 +78,7 @@ export interface Database {
       };
     };
     Functions: {
-      [_ in never]: never;
+      delete_own_account: { Args: Record<string, never>; Returns: undefined };
     };
     Enums: {
       [_ in never]: never;
