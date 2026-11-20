@@ -57,14 +57,14 @@ create index if not exists profiles_xp_idx on public.profiles (xp desc);
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
-security definer set search_path = public
+security definer set search_path = ''
 as $$
 begin
     insert into public.profiles (id, email, display_name)
     values (
         new.id,
         new.email,
-        coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1))
+        coalesce(nullif(trim(new.raw_user_meta_data->>'display_name'), ''), 'Agent')
     );
     return new;
 end;
@@ -76,9 +76,20 @@ create trigger on_auth_user_created
     after insert on auth.users
     for each row execute procedure public.handle_new_user();
 
--- Grant necessary permissions (least privilege).
--- anon may read ONLY the leaderboard view; the base table is reachable only by
--- authenticated users, still row-scoped by the policies above.
-grant usage on schema public to anon, authenticated;
+
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+
+create or replace function public.delete_own_account()
+returns void language sql security definer set search_path = ''
+as $$
+    delete from auth.users where id = (select auth.uid());
+$$;
+
+revoke all on function public.delete_own_account() from public, anon, authenticated;
+grant execute on function public.delete_own_account() to authenticated;
+
+-- Supabase projects may provide broad default privileges on new public tables.
+revoke all on public.profiles from public, anon, authenticated;
 grant select, insert, update, delete on public.profiles to authenticated;
+revoke all on public.leaderboard from public, anon, authenticated;
 grant select on public.leaderboard to anon, authenticated;
