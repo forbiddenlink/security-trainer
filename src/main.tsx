@@ -1,3 +1,4 @@
+import './instrumentation';
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 // Self-hosted fonts: no render-blocking third-party stylesheet.
