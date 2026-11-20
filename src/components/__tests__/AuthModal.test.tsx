@@ -328,6 +328,7 @@ describe("AuthModal", () => {
     });
 
     it("disables form buttons during loading", () => {
+      vi.stubEnv("VITE_AUTH_GOOGLE", "true");
       setupStores({ loading: true });
       render(<AuthModal />);
 
