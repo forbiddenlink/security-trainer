@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.1](https://github.com/forbiddenlink/security-trainer/compare/v1.3.0...v1.3.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* **analytics:** skip posthog.init when the key is blank or a placeholder ([#163](https://github.com/forbiddenlink/security-trainer/issues/163)) ([875def6](https://github.com/forbiddenlink/security-trainer/commit/875def620b0730e98f2de31832e240f77045adb0))
+* **api:** import socraticPrompt with a .js specifier so the hint function loads ([#160](https://github.com/forbiddenlink/security-trainer/issues/160)) ([fbe98ee](https://github.com/forbiddenlink/security-trainer/commit/fbe98eeb3d5003a702d19d6ac1ccc89e4f2b6439))
+* **header:** keep the Sign in label on one line ([#162](https://github.com/forbiddenlink/security-trainer/issues/162)) ([26664a5](https://github.com/forbiddenlink/security-trainer/commit/26664a560e0fe0f511d43a96769672623ec236e1))
+
 ## [1.3.0](https://github.com/forbiddenlink/security-trainer/compare/v1.2.0...v1.3.0) (2026-11-23)
 
 
