@@ -285,7 +285,7 @@ export const Header: React.FC<HeaderProps> = memo((props) => {
             <Button
               onClick={() => openAuthModal("login")}
               variant="outline"
-              className="h-10"
+              className="h-10 whitespace-nowrap shrink-0"
             >
               <LogIn className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">Sign in</span>
