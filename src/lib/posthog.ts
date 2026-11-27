@@ -21,11 +21,23 @@ function privacySignalOptsOut(): boolean {
   );
 }
 
+/**
+ * Returns a usable PostHog project key, or null when the env value is unset,
+ * blank, or a leftover placeholder string. Passing any of those to
+ * posthog.init makes the SDK log "initialized without a token".
+ */
+export function resolvePostHogKey(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const key = raw.trim();
+  if (!key || key === "undefined" || key === "null") return null;
+  return key;
+}
+
 export function initPostHog(): void {
   if (initialized || typeof window === "undefined") return;
   if (privacySignalOptsOut()) return;
 
-  const key = import.meta.env.VITE_POSTHOG_KEY;
+  const key = resolvePostHogKey(import.meta.env.VITE_POSTHOG_KEY);
   const host = import.meta.env.VITE_POSTHOG_HOST || "https://us.i.posthog.com";
 
   if (key) {
