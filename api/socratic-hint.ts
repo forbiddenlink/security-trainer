@@ -19,7 +19,7 @@ import { Redis } from "@upstash/redis";
 import {
   buildSocraticPrompt,
   parseSocraticBody,
-} from "../src/lib/socraticPrompt";
+} from "../src/lib/socraticPrompt.js";
 
 type ReqReq = {
   method?: string;
