@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/forbiddenlink/security-trainer/compare/v1.3.1...v1.3.2) (2026-11-27)
+
+
+### Bug Fixes
+
+* **csp:** allow PostHog asset host in script-src ([#164](https://github.com/forbiddenlink/security-trainer/issues/164)) ([0ab4a53](https://github.com/forbiddenlink/security-trainer/commit/0ab4a53b2108d0ad7aeb4bb74f8f5f5cced9e4fe))
+
 ## [1.3.1](https://github.com/forbiddenlink/security-trainer/compare/v1.3.0...v1.3.1) (2026-11-27)
 
 
